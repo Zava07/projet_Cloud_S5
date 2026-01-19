@@ -35,6 +35,8 @@ import '@ionic/vue/css/palettes/dark.system.css';
 
 /* Theme variables */
 import './theme/variables.css';
+// Leaflet styles
+import 'leaflet/dist/leaflet.css';
 
 // Import auth service to check auth state on startup
 import { useAuth } from './services/useAuth';
