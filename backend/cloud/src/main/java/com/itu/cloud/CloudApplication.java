@@ -8,7 +8,7 @@ public class CloudApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(CloudApplication.class, args);
-		System.out.println("Cloud Appssslication Started Successfullyyy!");
+		System.out.println("Cloud Appssslication Started Successfully!");
 	}
 
 }
