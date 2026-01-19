@@ -1,0 +1,37 @@
+Slide 4:
+
+Jusqu’ici, tu prends des photos et tu les sauves dans le Filesystem, mais 
+elles disparaissent après fermeture de l’application.
+
+Il faut maintenant sauvegarder un pointeur (chemin) vers chaque photo
+ dans un stockage persistant pour pouvoir les recharger au lancement de l’app.
+
+On utilise pour cela Capacitor Preferences API, un stockage clé-valeur simple.
+
+✅ Ce code permet maintenant :
+    Prendre et afficher des photos dans la galerie.
+    Les photos restent visibles même après fermeture/rechargement de l’application.
+    Fonctionne sur web et mobile (iOS/Android).
+
+Slide 5:
+✅ Leçons à retenir
+
+    -> Générer la version web buildée: ionic build
+    -> Ajouter les plateformes natives : ionic cap add ios ,ionic cap add android
+    -> Copier les fichiers web dans les projets natifs: ionic cap sync ou ionic cap copy
+    -> Ouvrir le projet natif : ionic cap open android
+
+    Capacitor + Ionic permettent de déployer ton app web sur mobile facilement.
+    Permissions sont obligatoires pour accéder à la caméra et à la galerie sur mobile.
+    Chaque build web doit être synchronisé avec les projets natifs (copy et sync).
+    Xcode et Android Studio sont indispensables pour tester sur iOS et Android.
+    Toujours tester sur appareil réel, car certains plugins ne fonctionnent pas
+     correctement sur émulateur ou navigateur.
+
+Slide 6:
+✅ Leçons à retenir
+    Capacitor + Ionic permettent de déployer ton app web sur mobile facilement.
+    Permissions sont obligatoires pour accéder à la caméra et à la galerie sur mobile.
+    Chaque build web doit être synchronisé avec les projets natifs (copy et sync).
+    Xcode et Android Studio sont indispensables pour tester sur iOS et Android.
+    Toujours tester sur appareil réel, car certains plugins ne fonctionnent pas correctement sur émulateur ou navigateur.
