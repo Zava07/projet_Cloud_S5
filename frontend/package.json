@@ -3,8 +3,16 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "mkdir -p build && cp -r public/* build/",
-    "start": "node -e \"require('http').createServer((req,res)=>{res.writeHead(200, {'Content-Type': 'text/html'}); res.end(require('fs').readFileSync('public/index.html'))}).listen(3000)\""
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
-  "dependencies": {}
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0",
+    "@vitejs/plugin-react": "^4.0.0"
+  }
 }
