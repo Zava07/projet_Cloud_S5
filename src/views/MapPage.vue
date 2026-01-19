@@ -12,28 +12,8 @@
     </ion-header>
 
     <ion-content :fullscreen="true">
-      <!-- Placeholder pour la carte Leaflet - sera implémenté avec le serveur de cartes -->
-      <div class="map-placeholder">
-        <ion-icon :icon="mapOutline" class="map-icon" />
-        <p>Carte Leaflet d'Antananarivo</p>
-        <p class="map-info">
-          Latitude: {{ center.lat }}, Longitude: {{ center.lng }}
-        </p>
-        
-        <!-- Marqueurs des problèmes -->
-        <div class="markers-list">
-          <div 
-            v-for="problem in problems" 
-            :key="problem.id"
-            class="marker-item"
-            :class="`marker-${problem.status}`"
-            @click="selectProblem(problem)"
-          >
-            <ion-icon :icon="locationSharp" />
-            <span>{{ problem.title }}</span>
-          </div>
-        </div>
-      </div>
+      <!-- Carte Leaflet intégrée -->
+      <MapView :tile-url="tileUrl" />
 
       <!-- Bouton pour signaler (utilisateurs connectés) -->
       <ion-fab 
@@ -218,11 +198,16 @@ import {
 } from 'ionicons/icons';
 import { useAuth } from '@/services/useAuth';
 import { useProblems } from '@/services/useProblems';
+import MapView from '@/components/map/MapView.vue';
+import { TILE_URL } from '@/config';
 import { Problem, ProblemStatus } from '@/types';
 
 const router = useRouter();
 const { isAuthenticated, currentUser, logout } = useAuth();
 const { problems, addProblem } = useProblems();
+
+// URL des tuiles du serveur de cartes (configurable via .env)
+const tileUrl = TILE_URL || (import.meta.env.VITE_TILE_URL as string) || 'http://localhost:8080/tiles/{z}/{x}/{y}.png';
 
 // Centre de la carte sur Antananarivo
 const center = { lat: -18.9145, lng: 47.5281 };
