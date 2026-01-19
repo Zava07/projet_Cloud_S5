@@ -20,6 +20,7 @@ const props = defineProps<Props>();
 const mapEl = ref<HTMLDivElement | null>(null);
 let map: L.Map | null = null;
 let markersLayer: L.LayerGroup | null = null;
+let resizeObs: ResizeObserver | null = null;
 
 const { problems } = useProblems();
 
@@ -45,14 +46,29 @@ const statusColor = (status: ProblemStatus) => {
 onMounted(() => {
   if (!mapEl.value) return;
 
+  // Limit map area and tile loading to reduce initial requests / lag
+  const bounds = L.latLngBounds([
+    [-19.2, 46.8], // SW roughly
+    [-18.5, 48.2], // NE roughly
+  ]);
+
   map = L.map(mapEl.value, {
     center: [center.lat, center.lng],
     zoom,
+    minZoom: 11,
+    maxZoom: 18,
+    maxBounds: bounds,
+    maxBoundsViscosity: 0.75,
+    zoomControl: true,
+    preferCanvas: true,
   });
 
   const tileLayer = L.tileLayer(defaultTile, {
     maxZoom: 19,
     attribution: '&copy; OpenStreetMap contributors',
+    noWrap: true, // don't repeat tiles horizontally (avoids loading global wrap)
+    keepBuffer: 1, // reduce number of offscreen tiles to keep
+    updateWhenIdle: true, // delay updates while panning to reduce requests
   }).addTo(map);
 
   // Debug helpers (temporary): expose map and tile info on window for inspection
@@ -69,6 +85,27 @@ onMounted(() => {
 
   markersLayer = L.layerGroup().addTo(map);
   renderMarkers();
+
+  // Ensure the map is properly sized when the container becomes visible.
+  // Some frameworks (Ionic tabs, hidden containers) render the component while
+  // it's not visible — Leaflet needs an explicit invalidateSize() to redraw.
+  // We use a short timeout, a ResizeObserver on the container and a window
+  // resize listener as fallback.
+  setTimeout(() => map?.invalidateSize(), 200);
+
+  if (mapEl.value && 'ResizeObserver' in window) {
+    resizeObs = new ResizeObserver(() => {
+      map?.invalidateSize();
+    });
+    resizeObs.observe(mapEl.value);
+  }
+
+  const onWinResize = () => map?.invalidateSize();
+  window.addEventListener('resize', onWinResize);
+
+  // store the listener to remove later
+  // @ts-ignore
+  (map as any)._onWinResize = onWinResize;
 });
 
 onBeforeUnmount(() => {
@@ -76,6 +113,16 @@ onBeforeUnmount(() => {
     map.remove();
     map = null;
   }
+  if (resizeObs && mapEl.value) {
+    resizeObs.unobserve(mapEl.value);
+    resizeObs.disconnect();
+    resizeObs = null;
+  }
+
+  // remove window listener if previously added
+  // @ts-ignore
+  const onWinResize = map && (map as any)._onWinResize;
+  if (onWinResize) window.removeEventListener('resize', onWinResize);
 });
 
 watch(problems, () => {
