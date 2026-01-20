@@ -1,17 +1,20 @@
 // Types pour l'application de gestion des travaux routiers
 
+// Types Firebase - collection "users"
 export interface User {
-  id: number;
-  firebaseUid?: string;
+  id?: number; // Local ID (optional for compatibility)
+  uid: string; // Firebase UID (primary identifier)
   email: string;
-  displayName?: string; // computed from first_name + last_name
-  firstName?: string;
-  lastName?: string;
-  role: 'visiteur' | 'utilisateur' | 'manager';
+  firstName: string;
+  lastName: string;
+  displayName?: string; // computed from firstName + lastName
+  role: 'utilisateur' | 'manager';
+  createdAt: Date;
+  updatedAt: Date;
+  // Legacy fields for backward compatibility
+  firebaseUid?: string; // Alias for uid
   loginAttempts?: number;
   isBlocked?: boolean;
-  createdAt: Date;
-  updatedAt?: Date;
 }
 
 export interface Session {
@@ -30,35 +33,39 @@ export interface Entreprise {
   createdAt: Date;
 }
 
-// Status enum aligned with DB schema (3 statuts)
+// Status enum aligned with Firebase schema (3 statuts)
 export enum ProblemStatus {
   NEW = 'nouveau',
   IN_PROGRESS = 'en_cours',
   COMPLETED = 'termine'
 }
 
-// Alias for backward compatibility - now identical to ProblemStatus
+// Alias for backward compatibility
 export type ReportStatus = 'nouveau' | 'en_cours' | 'termine';
 
+// Types Firebase - collection "reports"
 export interface Problem {
-  id: number;
-  firebaseId?: string;
-  userId: number; // reportedBy
-  title?: string; // UI helper, not in DB
-  description?: string;
+  id: string; // Firestore document ID
+  userId: string; // Firebase UID of user who created the report
+  userName: string; // User's full name
+  userEmail: string; // User's email
   latitude: number;
   longitude: number;
-  address?: string; // UI helper, not in DB
-  status: ProblemStatus; // Now using enum for consistency
-  surface?: number; // en m²
-  budget?: number; // en Ar (Ariary)
-  entrepriseId?: number;
-  reportedBy: number; // alias for userId
-  reportedByName?: string; // UI helper, not in DB
-  reportedAt: Date; // alias for createdAt
-  updatedAt: Date;
-  syncedAt?: Date;
-  photos?: string[]; // UI helper, not in DB
+  description: string;
+  status: ProblemStatus;
+  surface: number | null;
+  budget: number | null;
+  entreprise: string | null; // Company name assigned to handle the report
+  createdAt: Date; // Firestore Timestamp
+  updatedAt: Date; // Firestore Timestamp
+  // UI helper fields (optional)
+  title?: string; // Derived from description
+  address?: string; // Reverse geocoded from lat/lng
+  reportedBy?: string; // Alias for userId
+  reportedByName?: string; // Alias for userName
+  reportedAt?: Date; // Alias for createdAt
+  photos?: string[]; // URLs of photos in Firebase Storage
+  entrepriseId?: number; // Legacy field for backward compatibility
 }
 
 export interface ProblemFilter {
@@ -71,7 +78,7 @@ export interface ProblemFilter {
 }
 
 export interface MapMarker {
-  id: number;
+  id: string;
   position: [number, number]; // [lat, lng]
   title?: string;
   status: ProblemStatus;

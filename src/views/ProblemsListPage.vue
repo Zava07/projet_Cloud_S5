@@ -39,7 +39,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import {
   IonPage,
@@ -57,7 +57,7 @@ import FilterModal from '@/components/problem/FilterModal.vue';
 import StatisticsCard from '@/components/problem/StatisticsCard.vue';
 
 const router = useRouter();
-const { filterProblems, getStatistics, getUniqueCompanies, setSelectedProblem } = useProblems();
+const { loadProblems, filterProblems, getStatistics, getUniqueCompanies, setSelectedProblem } = useProblems();
 
 const activeFilter = ref<ProblemFilter>({});
 
@@ -75,6 +75,15 @@ const viewProblemDetails = (problem: Problem) => {
   setSelectedProblem(problem);
   router.push(`/problem/${problem.id}`);
 };
+
+// Charger les signalements au montage du composant
+onMounted(async () => {
+  try {
+    await loadProblems();
+  } catch (error) {
+    console.error('Erreur lors du chargement des signalements:', error);
+  }
+});
 </script>
 
 <style scoped>

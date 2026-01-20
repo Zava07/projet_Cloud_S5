@@ -75,7 +75,8 @@ defineEmits<{
   click: [problem: Problem];
 }>();
 
-const formatDate = (date: Date): string => {
+const formatDate = (date: Date | undefined): string => {
+  if (!date) return 'Date inconnue';
   return new Date(date).toLocaleDateString('fr-FR', {
     day: '2-digit',
     month: 'short',

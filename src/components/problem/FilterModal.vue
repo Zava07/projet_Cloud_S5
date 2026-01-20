@@ -115,7 +115,7 @@ import { ProblemFilter, ProblemStatus } from '@/types';
 
 interface Props {
   modelValue: ProblemFilter;
-  companies: number[];
+  companies: string[];
 }
 
 const props = defineProps<Props>();

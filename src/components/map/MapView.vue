@@ -16,6 +16,12 @@ interface Props {
   zoom?: number;
 }
 
+// Définir l'émission d'événements
+const emit = defineEmits<{
+  (e: 'mapClick', payload: { lat: number; lng: number }): void;
+  (e: 'markerClick', problemId: string): void;
+}>();
+
 const props = defineProps<Props>();
 const mapEl = ref<HTMLDivElement | null>(null);
 let map: L.Map | null = null;
@@ -84,6 +90,14 @@ onMounted(() => {
   markersLayer = L.layerGroup().addTo(map);
   renderMarkers();
 
+  // Ajouter un événement de clic sur la carte pour créer un nouveau signalement
+  map.on('click', (e: L.LeafletMouseEvent) => {
+    emit('mapClick', {
+      lat: e.latlng.lat,
+      lng: e.latlng.lng,
+    });
+  });
+
   // Ensure the map is properly sized when the container becomes visible.
   // Some frameworks (Ionic tabs, hidden containers) render the component while
   // it's not visible — Leaflet needs an explicit invalidateSize() to redraw.
@@ -140,11 +154,36 @@ function renderMarkers() {
       fillOpacity: 0.9,
     });
 
-    circle.bindPopup(`<strong>${p.title}</strong><br/>${p.address}`);
-    circle.on('click', () => {
-      // center map on click
-      map?.panTo([p.latitude, p.longitude]);
+    // Créer un popup avec les détails du problème
+    const statusLabel = {
+      [ProblemStatus.NEW]: 'Nouveau',
+      [ProblemStatus.IN_PROGRESS]: 'En cours',
+      [ProblemStatus.COMPLETED]: 'Terminé',
+    }[p.status];
+
+    const popupContent = `
+      <div style="min-width: 200px;">
+        <strong style="font-size: 14px;">${p.title || p.description.substring(0, 50)}</strong><br/>
+        <span style="color: #666; font-size: 12px;">${p.address || 'Adresse non disponible'}</span><br/>
+        <span style="background: ${statusColor(p.status)}; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; margin-top: 4px; display: inline-block;">
+          ${statusLabel}
+        </span><br/>
+        <small style="color: #999;">Signalé le: ${new Date(p.createdAt).toLocaleDateString('fr-FR')}</small>
+      </div>
+    `;
+
+    circle.bindPopup(popupContent);
+    
+    // Afficher le popup au survol
+    circle.on('mouseover', () => {
+      circle.openPopup();
     });
+    
+    // Émettre un événement au clic pour afficher les détails complets
+    circle.on('click', () => {
+      emit('markerClick', p.id);
+    });
+    
     markersLayer?.addLayer(circle);
   });
 }

@@ -12,10 +12,22 @@
     </ion-header>
 
     <ion-content :fullscreen="true">
-      <!-- Carte Leaflet intégrée -->
-      <MapView :tile-url="tileUrl" />
+      <!-- Message d'aide pour les utilisateurs connectés -->
+      <div v-if="isAuthenticated" class="map-help-message">
+        <ion-chip color="primary">
+          <ion-icon :icon="locationOutline" />
+          <ion-label>Cliquez sur la carte pour signaler un problème</ion-label>
+        </ion-chip>
+      </div>
 
-      <!-- Bouton pour signaler (utilisateurs connectés) -->
+      <!-- Carte Leaflet intégrée -->
+      <MapView 
+        :tile-url="tileUrl" 
+        @map-click="handleMapClick"
+        @marker-click="handleMarkerClick"
+      />
+
+      <!-- Bouton pour signaler (utilisateurs connectés) - optionnel maintenant -->
       <ion-fab 
         v-if="isAuthenticated" 
         vertical="bottom" 
@@ -40,6 +52,19 @@
 
         <ion-content class="ion-padding">
           <form @submit.prevent="submitReport">
+            <!-- Affichage des coordonnées GPS capturées -->
+            <ion-card color="light" class="coordinates-card">
+              <ion-card-content>
+                <div class="coordinates-info">
+                  <ion-icon :icon="locationOutline" color="primary" />
+                  <div>
+                    <strong>Coordonnées GPS</strong><br/>
+                    <small>Lat: {{ reportForm.latitude.toFixed(6) }}, Lng: {{ reportForm.longitude.toFixed(6) }}</small>
+                  </div>
+                </div>
+              </ion-card-content>
+            </ion-card>
+
             <ion-item>
               <ion-label position="floating">Titre du problème *</ion-label>
               <ion-input v-model="reportForm.title" required />
@@ -163,6 +188,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { onMounted } from 'vue';
 import {
   IonPage,
   IonHeader,
@@ -182,6 +208,8 @@ import {
   IonSpinner,
   IonList,
   IonChip,
+  IonCard,
+  IonCardContent,
   toastController,
 } from '@ionic/vue';
 import {
@@ -202,7 +230,16 @@ import { Problem, ProblemStatus } from '@/types';
 
 const router = useRouter();
 const { isAuthenticated, currentUser, logout } = useAuth();
-const { addProblem } = useProblems();
+const { addProblem, loadProblems, getProblemById } = useProblems();
+
+// Charger les problèmes au montage
+onMounted(async () => {
+  try {
+    await loadProblems();
+  } catch (error) {
+    console.error('Erreur lors du chargement des problèmes:', error);
+  }
+});
 
 // URL des tuiles du serveur de cartes (configurable via .env)
 const tileUrl = TILE_URL || (import.meta.env.VITE_TILE_URL as string) || 'http://localhost:8080/tiles/{z}/{x}/{y}.png';
@@ -222,6 +259,28 @@ const reportForm = ref({
   latitude: center.lat,
   longitude: center.lng,
 });
+
+// Gérer le clic sur la carte pour créer un signalement
+const handleMapClick = (coords: { lat: number; lng: number }) => {
+  // Si l'utilisateur n'est pas connecté, rediriger vers la page de connexion
+  if (!isAuthenticated.value) {
+    router.push('/login');
+    return;
+  }
+
+  // Pré-remplir les coordonnées et ouvrir le modal
+  reportForm.value.latitude = coords.lat;
+  reportForm.value.longitude = coords.lng;
+  openReportModal();
+};
+
+// Gérer le clic sur un marqueur pour afficher les détails
+const handleMarkerClick = (problemId: string) => {
+  const problem = getProblemById(problemId);
+  if (problem) {
+    selectedProblem.value = problem;
+  }
+};
 
 const openReportModal = () => {
   isReportModalOpen.value = true;
@@ -246,11 +305,13 @@ const submitReport = async () => {
   submitting.value = true;
   try {
     await addProblem({
-      ...reportForm.value,
-      userId: currentUser.value.id,
-      status: ProblemStatus.NEW,
-      reportedBy: currentUser.value.id,
-      reportedByName: currentUser.value.displayName || '',
+      userId: currentUser.value.uid,
+      userName: currentUser.value.displayName || `${currentUser.value.firstName} ${currentUser.value.lastName}`,
+      userEmail: currentUser.value.email,
+      latitude: reportForm.value.latitude,
+      longitude: reportForm.value.longitude,
+      description: reportForm.value.description,
+      surface: reportForm.value.surface,
     });
 
     const toast = await toastController.create({
@@ -283,7 +344,8 @@ const handleLogout = async () => {
   router.push('/login');
 };
 
-const formatDate = (date: Date): string => {
+const formatDate = (date: Date | undefined): string => {
+  if (!date) return 'Date inconnue';
   return new Date(date).toLocaleDateString('fr-FR', {
     day: '2-digit',
     month: 'long',
@@ -395,5 +457,47 @@ const getStatusLabel = (status: ProblemStatus): string => {
 
 .submit-button {
   margin-top: 24px;
+}
+
+.coordinates-card {
+  margin-bottom: 16px;
+}
+
+.coordinates-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.coordinates-info ion-icon {
+  font-size: 24px;
+}
+
+.coordinates-info small {
+  color: var(--ion-color-medium);
+}
+
+.map-help-message {
+  position: absolute;
+  top: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.map-help-message ion-chip {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 </style>
