@@ -36,8 +36,6 @@ const statusColor = (status: ProblemStatus) => {
       return '#3880ff';
     case ProblemStatus.COMPLETED:
       return '#2dd36f';
-    case ProblemStatus.BLOCKED:
-      return '#eb445a';
     default:
       return '#666';
   }

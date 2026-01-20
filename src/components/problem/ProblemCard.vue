@@ -32,9 +32,9 @@
           <span>{{ formatCurrency(problem.budget) }}</span>
         </div>
         
-        <div v-if="problem.company" class="info-item">
+        <div v-if="problem.entrepriseId" class="info-item">
           <ion-icon :icon="businessOutline" />
-          <span>{{ problem.company }}</span>
+          <span>Entreprise #{{ problem.entrepriseId }}</span>
         </div>
       </div>
 
@@ -96,7 +96,6 @@ const getStatusColor = (status: ProblemStatus): string => {
     [ProblemStatus.NEW]: 'warning',
     [ProblemStatus.IN_PROGRESS]: 'primary',
     [ProblemStatus.COMPLETED]: 'success',
-    [ProblemStatus.BLOCKED]: 'danger',
   };
   return colors[status];
 };
@@ -106,7 +105,6 @@ const getStatusLabel = (status: ProblemStatus): string => {
     [ProblemStatus.NEW]: 'Nouveau',
     [ProblemStatus.IN_PROGRESS]: 'En cours',
     [ProblemStatus.COMPLETED]: 'Terminé',
-    [ProblemStatus.BLOCKED]: 'Bloqué',
   };
   return labels[status];
 };
@@ -134,10 +132,6 @@ const getStatusLabel = (status: ProblemStatus): string => {
 
 .problem-card.status-termine {
   border-left-color: var(--ion-color-success);
-}
-
-.problem-card.status-bloque {
-  border-left-color: var(--ion-color-danger);
 }
 
 .description {

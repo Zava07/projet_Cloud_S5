@@ -71,7 +71,6 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
 import { IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonIcon } from '@ionic/vue';
 import { 
   alertCircleOutline, 
@@ -109,7 +108,6 @@ const getStatusLabel = (status: ProblemStatus): string => {
     [ProblemStatus.NEW]: 'Nouveau',
     [ProblemStatus.IN_PROGRESS]: 'En cours',
     [ProblemStatus.COMPLETED]: 'Terminé',
-    [ProblemStatus.BLOCKED]: 'Bloqué',
   };
   return labels[status];
 };
@@ -228,9 +226,5 @@ const getPercentage = (count: number): number => {
 
 .status-bar-fill.status-termine {
   background: var(--ion-color-success);
-}
-
-.status-bar-fill.status-bloque {
-  background: var(--ion-color-danger);
 }
 </style>

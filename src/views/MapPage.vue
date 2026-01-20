@@ -137,11 +137,11 @@
               </ion-label>
             </ion-item>
 
-            <ion-item v-if="selectedProblem.company">
+            <ion-item v-if="selectedProblem.entrepriseId">
               <ion-icon :icon="businessOutline" slot="start" />
               <ion-label>
                 <h3>Entreprise</h3>
-                <p>{{ selectedProblem.company }}</p>
+                <p>Entreprise #{{ selectedProblem.entrepriseId }}</p>
               </ion-label>
             </ion-item>
 
@@ -161,7 +161,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import {
   IonPage,
@@ -185,8 +185,6 @@ import {
   toastController,
 } from '@ionic/vue';
 import {
-  mapOutline,
-  locationSharp,
   addOutline,
   logOutOutline,
   locationOutline,
@@ -204,7 +202,7 @@ import { Problem, ProblemStatus } from '@/types';
 
 const router = useRouter();
 const { isAuthenticated, currentUser, logout } = useAuth();
-const { problems, addProblem } = useProblems();
+const { addProblem } = useProblems();
 
 // URL des tuiles du serveur de cartes (configurable via .env)
 const tileUrl = TILE_URL || (import.meta.env.VITE_TILE_URL as string) || 'http://localhost:8080/tiles/{z}/{x}/{y}.png';
@@ -249,9 +247,10 @@ const submitReport = async () => {
   try {
     await addProblem({
       ...reportForm.value,
+      userId: currentUser.value.id,
       status: ProblemStatus.NEW,
       reportedBy: currentUser.value.id,
-      reportedByName: currentUser.value.displayName,
+      reportedByName: currentUser.value.displayName || '',
     });
 
     const toast = await toastController.create({
@@ -271,10 +270,6 @@ const submitReport = async () => {
   } finally {
     submitting.value = false;
   }
-};
-
-const selectProblem = (problem: Problem) => {
-  selectedProblem.value = problem;
 };
 
 const handleLogout = async () => {
@@ -309,7 +304,6 @@ const getStatusColor = (status: ProblemStatus): string => {
     [ProblemStatus.NEW]: 'warning',
     [ProblemStatus.IN_PROGRESS]: 'primary',
     [ProblemStatus.COMPLETED]: 'success',
-    [ProblemStatus.BLOCKED]: 'danger',
   };
   return colors[status];
 };
@@ -319,7 +313,6 @@ const getStatusLabel = (status: ProblemStatus): string => {
     [ProblemStatus.NEW]: 'Nouveau',
     [ProblemStatus.IN_PROGRESS]: 'En cours',
     [ProblemStatus.COMPLETED]: 'Terminé',
-    [ProblemStatus.BLOCKED]: 'Bloqué',
   };
   return labels[status];
 };
@@ -398,10 +391,6 @@ const getStatusLabel = (status: ProblemStatus): string => {
 
 .marker-termine {
   border-left-color: var(--ion-color-success);
-}
-
-.marker-bloque {
-  border-left-color: var(--ion-color-danger);
 }
 
 .submit-button {
