@@ -17,6 +17,8 @@ import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -65,11 +67,11 @@ public class User {
     @OneToMany(mappedBy = "syncedBy", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<SyncLog> syncLogs = new ArrayList<>();
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "user_entreprise",
+        @ManyToMany(fetch = FetchType.LAZY)
+        @JoinTable(name = "user_entreprise",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "entreprise_id"))
-    private List<Entreprise> entreprises = new ArrayList<>();
+        private Set<Entreprise> entreprises = new HashSet<>();
 
     public User() {
     }
@@ -186,11 +188,11 @@ public class User {
         this.syncLogs = syncLogs;
     }
 
-    public List<Entreprise> getEntreprises() {
+    public Set<Entreprise> getEntreprises() {
         return entreprises;
     }
 
-    public void setEntreprises(List<Entreprise> entreprises) {
+    public void setEntreprises(Set<Entreprise> entreprises) {
         this.entreprises = entreprises;
     }
 

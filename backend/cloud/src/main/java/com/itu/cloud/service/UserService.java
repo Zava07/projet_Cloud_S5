@@ -27,7 +27,23 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
+    public List<User> findAllWithRelations(boolean includeEntreprises, boolean includeReports) {
+        if (includeEntreprises || includeReports) {
+            return userRepository.findAllWithRelations();
+        }
+        return userRepository.findAll();
+    }
+
+    @Transactional(readOnly = true)
     public Optional<User> findById(Long id) {
+        return userRepository.findById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<User> findByIdWithRelations(Long id, boolean includeEntreprises, boolean includeReports) {
+        if (includeEntreprises || includeReports) {
+            return userRepository.findByIdWithRelations(id);
+        }
         return userRepository.findById(id);
     }
 
