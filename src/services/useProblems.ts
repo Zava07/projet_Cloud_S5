@@ -25,7 +25,7 @@ export function useProblems() {
       if (filter.dateTo && problem.reportedAt > filter.dateTo) return false;
 
       // Filtrer par entreprise
-      if (filter.company && problem.company !== filter.company) return false;
+      if (filter.entrepriseId && problem.entrepriseId !== filter.entrepriseId) return false;
 
       // Filtrer par budget
       if (filter.minBudget && (!problem.budget || problem.budget < filter.minBudget)) return false;
@@ -41,7 +41,7 @@ export function useProblems() {
       setTimeout(() => {
         const newProblem: Problem = {
           ...problem,
-          id: `problem_${Date.now()}`,
+          id: Date.now(),
           reportedAt: new Date(),
           updatedAt: new Date(),
         };
@@ -52,7 +52,7 @@ export function useProblems() {
   };
 
   // Mettre à jour un problème (Manager seulement)
-  const updateProblem = async (id: string, updates: Partial<Problem>): Promise<void> => {
+  const updateProblem = async (id: number, updates: Partial<Problem>): Promise<void> => {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         const index = problems.value.findIndex(p => p.id === id);
@@ -71,7 +71,7 @@ export function useProblems() {
   };
 
   // Obtenir un problème par ID
-  const getProblemById = (id: string): Problem | undefined => {
+  const getProblemById = (id: number): Problem | undefined => {
     return problems.value.find(p => p.id === id);
   };
 
@@ -80,14 +80,13 @@ export function useProblems() {
     const data = filteredProblems || problems.value;
     
     const totalProblems = data.length;
-    const totalSurface = data.reduce((sum, p) => sum + p.surface, 0);
+    const totalSurface = data.reduce((sum, p) => sum + (p.surface || 0), 0);
     const totalBudget = data.reduce((sum, p) => sum + (p.budget || 0), 0);
     
     const byStatus: Record<ProblemStatus, number> = {
       [ProblemStatus.NEW]: 0,
       [ProblemStatus.IN_PROGRESS]: 0,
       [ProblemStatus.COMPLETED]: 0,
-      [ProblemStatus.BLOCKED]: 0,
     };
 
     data.forEach(p => {
@@ -107,12 +106,12 @@ export function useProblems() {
     };
   };
 
-  // Obtenir les entreprises uniques
+  // Obtenir les entreprises uniques (IDs)
   const getUniqueCompanies = computed(() => {
-    const companies = problems.value
-      .map(p => p.company)
-      .filter((c): c is string => c !== undefined);
-    return Array.from(new Set(companies));
+    const entrepriseIds = problems.value
+      .map(p => p.entrepriseId)
+      .filter((id): id is number => id !== undefined);
+    return Array.from(new Set(entrepriseIds));
   });
 
   return {

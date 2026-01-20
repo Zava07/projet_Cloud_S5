@@ -76,11 +76,11 @@
               </ion-label>
             </ion-item>
 
-            <ion-item v-if="problem.company">
+            <ion-item v-if="problem.entrepriseId">
               <ion-icon :icon="businessOutline" slot="start" color="primary" />
               <ion-label>
                 <h3>Entreprise responsable</h3>
-                <p>{{ problem.company }}</p>
+                <p>Entreprise #{{ problem.entrepriseId }}</p>
               </ion-label>
             </ion-item>
           </ion-list>
@@ -103,7 +103,6 @@
               <ion-select-option :value="ProblemStatus.NEW">Nouveau</ion-select-option>
               <ion-select-option :value="ProblemStatus.IN_PROGRESS">En cours</ion-select-option>
               <ion-select-option :value="ProblemStatus.COMPLETED">Terminé</ion-select-option>
-              <ion-select-option :value="ProblemStatus.BLOCKED">Bloqué</ion-select-option>
             </ion-select>
           </ion-item>
 
@@ -117,10 +116,11 @@
           </ion-item>
 
           <ion-item>
-            <ion-label position="floating">Entreprise</ion-label>
+            <ion-label position="floating">ID Entreprise</ion-label>
             <ion-input 
-              :value="problem.company"
-              @ionChange="updateCompany($event.detail.value)"
+              type="number"
+              :value="problem.entrepriseId"
+              @ionChange="updateEntreprise($event.detail.value)"
             />
           </ion-item>
         </ion-card-content>
@@ -186,7 +186,7 @@ const { getProblemById, updateProblem } = useProblems();
 const problem = ref<Problem | null>(null);
 
 onMounted(() => {
-  const problemId = route.params.id as string;
+  const problemId = Number(route.params.id);
   const foundProblem = getProblemById(problemId);
   if (foundProblem) {
     problem.value = foundProblem;
@@ -216,7 +216,6 @@ const getStatusColor = (status: ProblemStatus): string => {
     [ProblemStatus.NEW]: 'warning',
     [ProblemStatus.IN_PROGRESS]: 'primary',
     [ProblemStatus.COMPLETED]: 'success',
-    [ProblemStatus.BLOCKED]: 'danger',
   };
   return colors[status];
 };
@@ -226,7 +225,6 @@ const getStatusLabel = (status: ProblemStatus): string => {
     [ProblemStatus.NEW]: 'Nouveau',
     [ProblemStatus.IN_PROGRESS]: 'En cours',
     [ProblemStatus.COMPLETED]: 'Terminé',
-    [ProblemStatus.BLOCKED]: 'Bloqué',
   };
   return labels[status];
 };
@@ -279,14 +277,14 @@ const updateBudget = async (value: string | number | null | undefined) => {
   }
 };
 
-const updateCompany = async (value: string | number | null | undefined) => {
+const updateEntreprise = async (value: string | number | null | undefined) => {
   if (!problem.value || !value) return;
   
-  const company = value.toString();
+  const entrepriseId = typeof value === 'number' ? value : Number(value);
   
   try {
-    await updateProblem(problem.value.id, { company });
-    problem.value.company = company;
+    await updateProblem(problem.value.id, { entrepriseId });
+    problem.value.entrepriseId = entrepriseId;
     
     const toast = await toastController.create({
       message: 'Entreprise mise à jour',

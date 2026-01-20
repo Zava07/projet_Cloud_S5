@@ -3,21 +3,21 @@ import { User } from '@/types';
 // Utilisateurs de test
 export const mockUsers: User[] = [
   {
-    id: 'user1',
+    id: 1,
     email: 'jean.rakoto@example.mg',
     displayName: 'Jean Rakoto',
-    role: 'user',
+    role: 'utilisateur',
     createdAt: new Date('2025-12-01'),
   },
   {
-    id: 'user2',
+    id: 2,
     email: 'marie.andriani@example.mg',
     displayName: 'Marie Andrianirina',
-    role: 'user',
+    role: 'utilisateur',
     createdAt: new Date('2025-11-15'),
   },
   {
-    id: 'manager1',
+    id: 1,
     email: 'manager@mairie-tana.mg',
     displayName: 'Responsable Travaux',
     role: 'manager',

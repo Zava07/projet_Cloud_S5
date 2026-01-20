@@ -9,7 +9,7 @@ const isManager = computed(() => currentUser.value?.role === 'manager');
 
 export function useAuth() {
   // Simuler la connexion Firebase
-  const login = async (email: string, password: string): Promise<void> => {
+  const login = async (email: string, _password: string): Promise<void> => {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         // Simuler la vérification des credentials
@@ -28,7 +28,7 @@ export function useAuth() {
   };
 
   // Inscription d'un nouvel utilisateur
-  const register = async (email: string, password: string, displayName: string): Promise<void> => {
+  const register = async (email: string, _password: string, displayName: string): Promise<void> => {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         // Vérifier si l'email existe déjà
@@ -38,10 +38,10 @@ export function useAuth() {
         }
 
         const newUser: User = {
-          id: `user${Date.now()}`, // atao user + date androany
+          id: Date.now(), // Generate numeric ID
           email,
           displayName,
-          role: 'user',
+          role: 'utilisateur',
           createdAt: new Date(),
         };
 

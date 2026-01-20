@@ -35,13 +35,13 @@
         <div class="filter-section" v-if="companies.length > 0">
           <h3>Entreprise</h3>
           <ion-select 
-            v-model="localFilter.company" 
+            v-model="localFilter.entrepriseId" 
             placeholder="Toutes les entreprises"
             interface="popover"
           >
             <ion-select-option :value="undefined">Toutes</ion-select-option>
-            <ion-select-option v-for="company in companies" :key="company" :value="company">
-              {{ company }}
+            <ion-select-option v-for="entrepriseId in companies" :key="entrepriseId" :value="entrepriseId">
+              Entreprise #{{ entrepriseId }}
             </ion-select-option>
           </ion-select>
         </div>
@@ -115,7 +115,7 @@ import { ProblemFilter, ProblemStatus } from '@/types';
 
 interface Props {
   modelValue: ProblemFilter;
-  companies: string[];
+  companies: number[];
 }
 
 const props = defineProps<Props>();
@@ -130,13 +130,12 @@ const statusOptions = [
   { value: ProblemStatus.NEW, label: 'Nouveau' },
   { value: ProblemStatus.IN_PROGRESS, label: 'En cours' },
   { value: ProblemStatus.COMPLETED, label: 'Terminé' },
-  { value: ProblemStatus.BLOCKED, label: 'Bloqué' },
 ];
 
 const activeFilterCount = computed(() => {
   let count = 0;
   if (props.modelValue.status && props.modelValue.status.length > 0) count++;
-  if (props.modelValue.company) count++;
+  if (props.modelValue.entrepriseId) count++;
   if (props.modelValue.dateFrom) count++;
   if (props.modelValue.dateTo) count++;
   return count;
@@ -174,7 +173,7 @@ const updateDateTo = (value: string) => {
 const resetFilter = () => {
   localFilter.value = {
     status: [],
-    company: undefined,
+    entrepriseId: undefined,
     dateFrom: undefined,
     dateTo: undefined,
   };
