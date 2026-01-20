@@ -46,6 +46,7 @@ public class EntityToDtoMapper {
         dto.setLastName(u.getLastName());
         dto.setBlocked(u.getBlocked());
         dto.setCreatedAt(u.getCreatedAt());
+        dto.setUpdatedAt(u.getUpdatedAt());
 
         if (includeEntreprises && u.getEntreprises() != null) {
             List<EntrepriseSummaryDTO> list = new ArrayList<>();
