@@ -16,7 +16,11 @@ COPY src ./src
 RUN if [ -x ./mvnw ]; then ./mvnw -B -DskipTests package; else mvn -B -DskipTests package; fi
 
 # Stage 2 - runtime
-FROM eclipse-temurin:17-jre
+
+# Use the JDK here to allow running Maven or compiling tests during container-run/dev.
+# For smaller production images, switch back to the JRE or use a multi-stage workflow.
+FROM eclipse-temurin:17-jdk
+
 WORKDIR /app
 ARG JAR_FILE=target/*.jar
 COPY --from=build /app/target/*.jar app.jar

@@ -1,0 +1,71 @@
+// ========================================
+// STRUCTURE FIREBASE FIRESTORE
+// ========================================
+
+// ==========================================
+// COLLECTION: users
+// ==========================================
+// Document ID = Firebase Auth UID
+{
+  "uid": "firebase_generated_uid",
+  "email": "user@example.com",
+  "firstName": "John",
+  "lastName": "Doe",
+  "role": "utilisateur",
+  "createdAt": Timestamp,
+  "updatedAt": Timestamp
+}
+
+
+// ==========================================
+// COLLECTION: reports
+// ==========================================
+// Document ID = auto-généré
+{
+  "id": "auto_generated_id",
+  "userId": "firebase_uid",
+  "userName": "John Doe",
+  "userEmail": "john@example.com",
+  "latitude": -18.8792,
+  "longitude": 47.5079,
+  "description": "Nid de poule important",
+  "status": "nouveau",
+  "surface": 50.5,
+  "budget": 1500000,
+  "entreprise": "SBTP",
+  "createdAt": Timestamp,
+  "updatedAt": Timestamp
+}
+
+
+// ========================================
+// FIREBASE SECURITY RULES - FIRESTORE
+// ========================================
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    function isManager() {
+      return request.auth != null && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'manager';
+    }
+    
+    match /users/{userId} {
+      allow read: if request.auth != null && 
+                     (request.auth.uid == userId || isManager());
+      allow create: if request.auth != null && request.auth.uid == userId;
+      allow update: if request.auth != null && request.auth.uid == userId;
+      allow delete: if false;
+    }
+    
+    match /reports/{reportId} {
+      allow read: if true;
+      allow create: if request.auth != null &&
+                       request.resource.data.userId == request.auth.uid;
+      allow update: if request.auth != null && 
+                       (resource.data.userId == request.auth.uid || isManager());
+      allow delete: if isManager();
+    }
+  }
+}

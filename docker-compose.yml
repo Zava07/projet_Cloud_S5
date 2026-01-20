@@ -20,6 +20,8 @@ services:
     build:
       context: ./backend/cloud
       dockerfile: ../Dockerfile
+      target: build
+
     # run the Maven wrapper in the container and mount source so DevTools can reload
     working_dir: /app
     entrypoint: []
