@@ -186,14 +186,15 @@ const { getProblemById, updateProblem } = useProblems();
 const problem = ref<Problem | null>(null);
 
 onMounted(() => {
-  const problemId = Number(route.params.id);
+  const problemId = route.params.id as string;
   const foundProblem = getProblemById(problemId);
   if (foundProblem) {
     problem.value = foundProblem;
   }
 });
 
-const formatDate = (date: Date): string => {
+const formatDate = (date: Date | undefined): string => {
+  if (!date) return 'Date inconnue';
   return new Date(date).toLocaleDateString('fr-FR', {
     day: '2-digit',
     month: 'long',

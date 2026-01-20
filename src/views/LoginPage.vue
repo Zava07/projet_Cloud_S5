@@ -59,12 +59,22 @@
         <!-- Formulaire d'inscription -->
         <form v-if="authMode === 'register'" @submit.prevent="handleRegister" class="auth-form">
           <ion-item>
-            <ion-label position="floating">Nom complet</ion-label>
+            <ion-label position="floating">Prénom</ion-label>
             <ion-input 
-              v-model="registerForm.displayName" 
+              v-model="registerForm.firstName" 
               type="text" 
               required
-              autocomplete="name"
+              autocomplete="given-name"
+            />
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="floating">Nom</ion-label>
+            <ion-input 
+              v-model="registerForm.lastName" 
+              type="text" 
+              required
+              autocomplete="family-name"
             />
           </ion-item>
 
@@ -144,7 +154,8 @@ const loginForm = ref({
 });
 
 const registerForm = ref({
-  displayName: '',
+  firstName: '',
+  lastName: '',
   email: '',
   password: '',
 });
@@ -178,7 +189,8 @@ const handleRegister = async () => {
     await register(
       registerForm.value.email,
       registerForm.value.password,
-      registerForm.value.displayName
+      registerForm.value.firstName,
+      registerForm.value.lastName
     );
     const toast = await toastController.create({
       message: 'Inscription réussie !',
