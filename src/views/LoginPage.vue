@@ -165,37 +165,37 @@ const continueAsVisitor = () => {
 /* === Header === */
 .login-header {
   text-align: center;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   animation: fadeInDown 0.6s ease-out;
 }
 
 .app-icon {
-  width: 56px;
-  height: 56px;
+  width: 52px;
+  height: 52px;
   background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%);
   border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 10px;
-  box-shadow: 0 6px 24px rgba(0, 122, 255, 0.3);
+  margin: 0 auto 8px;
+  box-shadow: 0 6px 20px rgba(0, 122, 255, 0.3);
 }
 
 .app-icon ion-icon {
-  font-size: 28px;
+  font-size: 26px;
   color: white;
 }
 
 .app-title {
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 700;
   letter-spacing: -0.5px;
   color: #1d1d1f;
-  margin: 0 0 2px;
+  margin: 0;
 }
 
 .app-subtitle {
-  font-size: 13px;
+  font-size: 12px;
   color: #86868b;
   margin: 0;
   font-weight: 400;
@@ -218,11 +218,11 @@ const continueAsVisitor = () => {
 }
 
 .card-title {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   color: #1d1d1f;
   text-align: center;
-  margin: 0 0 12px;
+  margin: 0 0 10px;
   letter-spacing: -0.2px;
 }
 
@@ -232,7 +232,7 @@ const continueAsVisitor = () => {
 }
 
 .input-group {
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .input-group.half {
@@ -313,9 +313,9 @@ const continueAsVisitor = () => {
 /* === Buttons === */
 .apple-button {
   width: 100%;
-  padding: 12px 16px;
+  padding: 11px 14px;
   border-radius: 10px;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
@@ -411,7 +411,7 @@ const continueAsVisitor = () => {
 .divider {
   display: flex;
   align-items: center;
-  margin: 12px 0;
+  margin: 10px 0;
 }
 
 .divider::before,
@@ -431,8 +431,8 @@ const continueAsVisitor = () => {
 
 /* === Footer === */
 .footer-text {
-  margin-top: 14px;
-  font-size: 12px;
+  margin-top: 10px;
+  font-size: 11px;
   color: #86868b;
   text-align: center;
   animation: fadeIn 0.6s ease-out 0.3s both;
