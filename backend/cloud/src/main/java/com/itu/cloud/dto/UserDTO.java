@@ -12,35 +12,90 @@ public class UserDTO {
     private String lastName;
     private Boolean blocked;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+
     private List<EntrepriseSummaryDTO> entreprises = new ArrayList<>();
     private List<ReportSummaryDTO> reports = new ArrayList<>();
 
-    public UserDTO() {}
+    public UserDTO() {
+    }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() {
+        return id;
+    }
 
-    public String getFirebaseUid() { return firebaseUid; }
-    public void setFirebaseUid(String firebaseUid) { this.firebaseUid = firebaseUid; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
+    public String getFirebaseUid() {
+        return firebaseUid;
+    }
 
-    public String getFirstName() { return firstName; }
-    public void setFirstName(String firstName) { this.firstName = firstName; }
+    public void setFirebaseUid(String firebaseUid) {
+        this.firebaseUid = firebaseUid;
+    }
 
-    public String getLastName() { return lastName; }
-    public void setLastName(String lastName) { this.lastName = lastName; }
+    public String getEmail() {
+        return email;
+    }
 
-    public Boolean getBlocked() { return blocked; }
-    public void setBlocked(Boolean blocked) { this.blocked = blocked; }
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public String getFirstName() {
+        return firstName;
+    }
 
-    public List<EntrepriseSummaryDTO> getEntreprises() { return entreprises; }
-    public void setEntreprises(List<EntrepriseSummaryDTO> entreprises) { this.entreprises = entreprises; }
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
 
-    public List<ReportSummaryDTO> getReports() { return reports; }
-    public void setReports(List<ReportSummaryDTO> reports) { this.reports = reports; }
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public Boolean getBlocked() {
+        return blocked;
+    }
+
+    public void setBlocked(Boolean blocked) {
+        this.blocked = blocked;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public List<EntrepriseSummaryDTO> getEntreprises() {
+        return entreprises;
+    }
+
+    public void setEntreprises(List<EntrepriseSummaryDTO> entreprises) {
+        this.entreprises = entreprises;
+    }
+
+    public List<ReportSummaryDTO> getReports() {
+        return reports;
+    }
+
+    public void setReports(List<ReportSummaryDTO> reports) {
+        this.reports = reports;
+    }
+        public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
 }
