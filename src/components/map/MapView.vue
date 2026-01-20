@@ -67,13 +67,46 @@ onMounted(() => {
     preferCanvas: true,
   });
 
-  const tileLayer = L.tileLayer(defaultTile, {
+  // Try the configured/default tile URL first. If many tile errors occur
+  // (e.g. local tile server is down), automatically switch to a public
+  // fallback (OpenStreetMap) so the map still works online.
+  const onlineFallback = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+
+  let tileLayer: L.TileLayer = L.tileLayer(defaultTile, {
     maxZoom: 19,
     attribution: '&copy; OpenStreetMap contributors',
     noWrap: true, // don't repeat tiles horizontally (avoids loading global wrap)
     keepBuffer: 1, // reduce number of offscreen tiles to keep
     updateWhenIdle: true, // delay updates while panning to reduce requests
   }).addTo(map);
+
+  // fallback handling: if several tile errors occur, switch to online tiles
+  let tileErrorCount = 0;
+  const TILE_ERROR_THRESHOLD = 3;
+  let fallbackApplied = false;
+
+  tileLayer.on('tileerror', () => {
+    tileErrorCount += 1;
+    if (!fallbackApplied && tileErrorCount >= TILE_ERROR_THRESHOLD) {
+      fallbackApplied = true;
+      try {
+        console.warn('[MapView] tile errors detected — switching to online fallback tiles:', onlineFallback);
+        map.removeLayer(tileLayer);
+        tileLayer = L.tileLayer(onlineFallback, {
+          maxZoom: 19,
+          attribution: '&copy; OpenStreetMap contributors',
+          noWrap: true,
+          keepBuffer: 1,
+          updateWhenIdle: true,
+        }).addTo(map);
+        // expose updated layer for debugging
+        // @ts-ignore
+        (window as any)._tileLayer = tileLayer;
+      } catch (e) {
+        console.error('[MapView] failed to apply tile fallback', e);
+      }
+    }
+  });
 
   // Debug helpers (temporary): expose map and tile info on window for inspection
   // Use browser console to inspect `window._defaultTile` and `window._tileLayer`
