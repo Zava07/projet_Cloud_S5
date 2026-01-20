@@ -1,77 +1,81 @@
 <template>
-  <ion-card>
-    <ion-card-header>
-      <ion-card-title>Statistiques</ion-card-title>
-    </ion-card-header>
-
-    <ion-card-content>
-      <div class="stats-grid">
-        <!-- Total des problèmes -->
-        <div class="stat-item">
-          <ion-icon :icon="alertCircleOutline" class="stat-icon primary" />
-          <div class="stat-content">
-            <div class="stat-value">{{ stats.totalProblems }}</div>
-            <div class="stat-label">Signalements</div>
-          </div>
+  <div class="stats-container">
+    <!-- Grid de statistiques -->
+    <div class="stats-grid">
+      <!-- Total des problèmes -->
+      <div class="stat-card">
+        <div class="stat-icon-wrapper blue">
+          <ion-icon :icon="alertCircleOutline" />
         </div>
-
-        <!-- Surface totale -->
-        <div class="stat-item">
-          <ion-icon :icon="resizeOutline" class="stat-icon warning" />
-          <div class="stat-content">
-            <div class="stat-value">{{ formatNumber(stats.totalSurface) }} m²</div>
-            <div class="stat-label">Surface</div>
-          </div>
-        </div>
-
-        <!-- Budget total -->
-        <div class="stat-item">
-          <ion-icon :icon="cashOutline" class="stat-icon success" />
-          <div class="stat-content">
-            <div class="stat-value">{{ formatBudget(stats.totalBudget) }}</div>
-            <div class="stat-label">Budget</div>
-          </div>
-        </div>
-
-        <!-- Avancement -->
-        <div class="stat-item">
-          <ion-icon :icon="trendingUpOutline" class="stat-icon tertiary" />
-          <div class="stat-content">
-            <div class="stat-value">{{ stats.advancementPercentage }}%</div>
-            <div class="stat-label">Avancement</div>
-          </div>
+        <div class="stat-info">
+          <span class="stat-value">{{ stats.totalProblems }}</span>
+          <span class="stat-label">Signalements</span>
         </div>
       </div>
 
-      <!-- Répartition par statut -->
-      <div class="status-breakdown">
-        <h4>Répartition par statut</h4>
-        <div class="status-bars">
-          <div 
-            v-for="(count, status) in stats.byStatus" 
-            :key="status"
-            class="status-bar-item"
-          >
-            <div class="status-bar-label">
-              <span>{{ getStatusLabel(status as ProblemStatus) }}</span>
-              <span class="status-bar-count">{{ count }}</span>
-            </div>
-            <div class="status-bar">
-              <div 
-                class="status-bar-fill"
-                :class="`status-${status}`"
-                :style="{ width: getPercentage(count) + '%' }"
-              ></div>
-            </div>
-          </div>
+      <!-- Surface totale -->
+      <div class="stat-card">
+        <div class="stat-icon-wrapper orange">
+          <ion-icon :icon="resizeOutline" />
+        </div>
+        <div class="stat-info">
+          <span class="stat-value">{{ formatNumber(stats.totalSurface) }}</span>
+          <span class="stat-label">m² Surface</span>
         </div>
       </div>
-    </ion-card-content>
-  </ion-card>
+
+      <!-- Budget total -->
+      <div class="stat-card">
+        <div class="stat-icon-wrapper green">
+          <ion-icon :icon="cashOutline" />
+        </div>
+        <div class="stat-info">
+          <span class="stat-value">{{ formatBudget(stats.totalBudget) }}</span>
+          <span class="stat-label">Budget</span>
+        </div>
+      </div>
+
+      <!-- Avancement -->
+      <div class="stat-card">
+        <div class="stat-icon-wrapper purple">
+          <ion-icon :icon="trendingUpOutline" />
+        </div>
+        <div class="stat-info">
+          <span class="stat-value">{{ stats.advancementPercentage }}%</span>
+          <span class="stat-label">Terminés</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Barre de progression globale -->
+    <div class="progress-section">
+      <div class="progress-header">
+        <span class="progress-title">Progression globale</span>
+        <span class="progress-percent">{{ stats.advancementPercentage }}%</span>
+      </div>
+      <div class="progress-bar">
+        <div 
+          class="progress-fill"
+          :style="{ width: stats.advancementPercentage + '%' }"
+        ></div>
+      </div>
+      <div class="progress-legend">
+        <div 
+          v-for="(count, status) in stats.byStatus" 
+          :key="status"
+          class="legend-item"
+        >
+          <span class="legend-dot" :class="`dot-${status}`"></span>
+          <span class="legend-label">{{ getStatusLabel(status as ProblemStatus) }}</span>
+          <span class="legend-count">{{ count }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonIcon } from '@ionic/vue';
+import { IonIcon } from '@ionic/vue';
 import { 
   alertCircleOutline, 
   resizeOutline, 
@@ -84,7 +88,7 @@ interface Props {
   stats: Statistics;
 }
 
-const props = defineProps<Props>();
+defineProps<Props>();
 
 const formatNumber = (num: number): string => {
   return new Intl.NumberFormat('fr-FR', {
@@ -95,12 +99,12 @@ const formatNumber = (num: number): string => {
 
 const formatBudget = (amount: number): string => {
   if (amount >= 1000000) {
-    return `${(amount / 1000000).toFixed(1)}M Ar`;
+    return `${(amount / 1000000).toFixed(1)}M`;
   }
   if (amount >= 1000) {
-    return `${(amount / 1000).toFixed(0)}K Ar`;
+    return `${(amount / 1000).toFixed(0)}K`;
   }
-  return `${amount} Ar`;
+  return `${amount}`;
 };
 
 const getStatusLabel = (status: ProblemStatus): string => {
@@ -111,120 +115,251 @@ const getStatusLabel = (status: ProblemStatus): string => {
   };
   return labels[status];
 };
-
-const getPercentage = (count: number): number => {
-  return props.stats.totalProblems > 0 
-    ? (count / props.stats.totalProblems) * 100 
-    : 0;
-};
 </script>
 
 <style scoped>
+.stats-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* === Grid de Stats === */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
-  margin-bottom: 24px;
+  gap: 10px;
 }
 
-.stat-item {
+.stat-card {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   padding: 12px;
-  background: var(--ion-color-light);
-  border-radius: 8px;
+  background: white;
+  border-radius: 14px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06),
+              0 0 0 0.5px rgba(0, 0, 0, 0.04);
+  min-width: 0; /* Permet le shrink */
 }
 
-.stat-icon {
-  font-size: 2rem;
+.stat-icon-wrapper {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
 }
 
-.stat-icon.primary {
-  color: var(--ion-color-primary);
+.stat-icon-wrapper.blue {
+  background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
+  color: #1565C0;
 }
 
-.stat-icon.warning {
-  color: var(--ion-color-warning);
+.stat-icon-wrapper.orange {
+  background: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%);
+  color: #E65100;
 }
 
-.stat-icon.success {
-  color: var(--ion-color-success);
+.stat-icon-wrapper.green {
+  background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
+  color: #2E7D32;
 }
 
-.stat-icon.tertiary {
-  color: var(--ion-color-tertiary);
+.stat-icon-wrapper.purple {
+  background: linear-gradient(135deg, #F3E5F5 0%, #E1BEE7 100%);
+  color: #7B1FA2;
 }
 
-.stat-content {
+.stat-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
   flex: 1;
 }
 
 .stat-value {
-  font-size: 1.25rem;
-  font-weight: bold;
-  color: var(--ion-color-dark);
+  font-size: 18px;
+  font-weight: 700;
+  color: #1C1C1E;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
 }
 
 .stat-label {
-  font-size: 0.75rem;
-  color: var(--ion-color-medium);
+  font-size: 10px;
+  font-weight: 600;
+  color: #8E8E93;
   text-transform: uppercase;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.status-breakdown {
-  margin-top: 24px;
+/* === Progression === */
+.progress-section {
+  background: white;
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06),
+              0 0 0 0.5px rgba(0, 0, 0, 0.04);
 }
 
-.status-breakdown h4 {
-  margin-bottom: 16px;
-  font-size: 1rem;
-  color: var(--ion-color-dark);
-}
-
-.status-bars {
+.progress-header {
   display: flex;
-  flex-direction: column;
-  gap: 12px;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
 }
 
-.status-bar-item {
+.progress-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1C1C1E;
+}
+
+.progress-percent {
+  font-size: 15px;
+  font-weight: 700;
+  color: #34C759;
+}
+
+.progress-bar {
+  height: 8px;
+  background: #F2F2F7;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #34C759 0%, #30D158 100%);
+  border-radius: 4px;
+  transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.progress-legend {
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
   gap: 4px;
 }
 
-.status-bar-label {
+.legend-item {
   display: flex;
-  justify-content: space-between;
-  font-size: 0.875rem;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
 }
 
-.status-bar-count {
-  font-weight: bold;
+.legend-dot {
+  width: 6px;
+  height: 6px;
+  min-width: 6px;
+  border-radius: 50%;
 }
 
-.status-bar {
-  height: 8px;
-  background: var(--ion-color-light);
-  border-radius: 4px;
+.legend-dot.dot-new {
+  background: #FF9500;
+}
+
+.legend-dot.dot-in_progress {
+  background: #007AFF;
+}
+
+.legend-dot.dot-completed {
+  background: #34C759;
+}
+
+.legend-label {
+  font-size: 10px;
+  color: #8E8E93;
+  font-weight: 500;
+  white-space: nowrap;
   overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.status-bar-fill {
-  height: 100%;
-  transition: width 0.3s ease;
+.legend-count {
+  font-size: 11px;
+  font-weight: 600;
+  color: #1C1C1E;
+  margin-left: auto;
+  flex-shrink: 0;
 }
 
-.status-bar-fill.status-nouveau {
-  background: var(--ion-color-warning);
+/* === Mobile Responsive === */
+@media (max-width: 420px) {
+  .stats-grid {
+    gap: 8px;
+  }
+
+  .stat-card {
+    padding: 10px;
+    gap: 8px;
+  }
+
+  .stat-icon-wrapper {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    font-size: 16px;
+  }
+
+  .stat-value {
+    font-size: 16px;
+  }
+
+  .stat-label {
+    font-size: 9px;
+  }
+
+  .progress-section {
+    padding: 14px;
+  }
+
+  .progress-title {
+    font-size: 14px;
+  }
+
+  .legend-label {
+    font-size: 9px;
+  }
+
+  .legend-count {
+    font-size: 10px;
+  }
 }
 
-.status-bar-fill.status-en_cours {
-  background: var(--ion-color-primary);
-}
+/* === Dark Mode === */
+@media (prefers-color-scheme: dark) {
+  .stat-card,
+  .progress-section {
+    background: #1C1C1E;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2),
+                0 0 0 0.5px rgba(255, 255, 255, 0.08);
+  }
 
-.status-bar-fill.status-termine {
-  background: var(--ion-color-success);
+  .stat-value {
+    color: #FFFFFF;
+  }
+
+  .progress-title {
+    color: #FFFFFF;
+  }
+
+  .progress-bar {
+    background: #2C2C2E;
+  }
+
+  .legend-count {
+    color: #FFFFFF;
+  }
 }
 </style>
