@@ -3,8 +3,8 @@ import { User } from '@/types';
 import { mockUsers } from '@/data/mockUsers';
 
 // État global de l'authentification
-const currentUser = ref<User | null>(null);
-const isAuthenticated = computed(() => currentUser.value !== null);
+const currentUser = ref<User | null>(null); // ref: anaovana variable reactive, refa miova ny valeurny de miova ko ny interface
+const isAuthenticated = computed(() => currentUser.value !== null); // computed: variable calculer automatiquement
 const isManager = computed(() => currentUser.value?.role === 'manager');
 
 export function useAuth() {
@@ -38,7 +38,7 @@ export function useAuth() {
         }
 
         const newUser: User = {
-          id: `user${Date.now()}`,
+          id: `user${Date.now()}`, // atao user + date androany
           email,
           displayName,
           role: 'user',
