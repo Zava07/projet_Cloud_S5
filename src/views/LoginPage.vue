@@ -157,37 +157,37 @@ const continueAsVisitor = () => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 16px;
-  padding-top: max(16px, env(safe-area-inset-top));
-  padding-bottom: max(16px, env(safe-area-inset-bottom));
+  padding: 12px;
+  padding-top: max(8px, env(safe-area-inset-top));
+  padding-bottom: max(8px, env(safe-area-inset-bottom));
 }
 
 /* === Header === */
 .login-header {
   text-align: center;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
   animation: fadeInDown 0.6s ease-out;
 }
 
 .app-icon {
-  width: 52px;
-  height: 52px;
+  width: 44px;
+  height: 44px;
   background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%);
-  border-radius: 14px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 8px;
-  box-shadow: 0 6px 20px rgba(0, 122, 255, 0.3);
+  margin: 0 auto 6px;
+  box-shadow: 0 4px 16px rgba(0, 122, 255, 0.3);
 }
 
 .app-icon ion-icon {
-  font-size: 26px;
+  font-size: 22px;
   color: white;
 }
 
 .app-title {
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 700;
   letter-spacing: -0.5px;
   color: #1d1d1f;
@@ -195,7 +195,7 @@ const continueAsVisitor = () => {
 }
 
 .app-subtitle {
-  font-size: 12px;
+  font-size: 11px;
   color: #86868b;
   margin: 0;
   font-weight: 400;
@@ -208,8 +208,8 @@ const continueAsVisitor = () => {
   background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-radius: 16px;
-  padding: 16px;
+  border-radius: 14px;
+  padding: 12px;
   box-shadow: 
     0 4px 24px rgba(0, 0, 0, 0.06),
     0 1px 2px rgba(0, 0, 0, 0.04);
@@ -218,11 +218,11 @@ const continueAsVisitor = () => {
 }
 
 .card-title {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
   color: #1d1d1f;
   text-align: center;
-  margin: 0 0 10px;
+  margin: 0 0 8px;
   letter-spacing: -0.2px;
 }
 
@@ -232,7 +232,7 @@ const continueAsVisitor = () => {
 }
 
 .input-group {
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .input-group.half {
@@ -241,15 +241,15 @@ const continueAsVisitor = () => {
 
 .input-row {
   display: flex;
-  gap: 8px;
+  gap: 6px;
 }
 
 .input-label {
   display: block;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   color: #1d1d1f;
-  margin-bottom: 4px;
+  margin-bottom: 3px;
   letter-spacing: -0.2px;
 }
 
@@ -262,17 +262,17 @@ const continueAsVisitor = () => {
 .input-icon {
   position: absolute;
   left: 10px;
-  font-size: 16px;
+  font-size: 14px;
   color: #86868b;
   pointer-events: none;
 }
 
 .apple-input {
   width: 100%;
-  padding: 10px 10px 10px 34px;
+  padding: 9px 10px 9px 32px;
   border: 1px solid #d2d2d7;
   border-radius: 8px;
-  font-size: 15px;
+  font-size: 14px;
   font-family: inherit;
   background: #fafafa;
   transition: all 0.2s ease;
@@ -313,16 +313,16 @@ const continueAsVisitor = () => {
 /* === Buttons === */
 .apple-button {
   width: 100%;
-  padding: 11px 14px;
-  border-radius: 10px;
-  font-size: 14px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13px;
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 6px;
   transition: all 0.2s ease;
   border: none;
 }
@@ -351,7 +351,7 @@ const continueAsVisitor = () => {
 .apple-button.secondary {
   background: #f5f5f7;
   color: #1d1d1f;
-  margin-top: 12px;
+  margin-top: 8px;
 }
 
 .apple-button.secondary:hover {
@@ -363,37 +363,37 @@ const continueAsVisitor = () => {
 }
 
 .btn-icon {
-  font-size: 18px;
+  font-size: 16px;
 }
 
 .btn-icon-left {
-  font-size: 20px;
-  margin-right: 4px;
+  font-size: 16px;
+  margin-right: 2px;
 }
 
 /* === Demo Info === */
 .demo-info {
-  margin-top: 10px;
-  padding: 8px 10px;
+  margin-top: 8px;
+  padding: 6px 8px;
   background: linear-gradient(135deg, #f0f8ff 0%, #f5f0ff 100%);
-  border-radius: 8px;
+  border-radius: 6px;
   border: 1px solid rgba(0, 122, 255, 0.1);
 }
 
 .demo-badge {
   display: flex;
   align-items: center;
-  gap: 4px;
-  margin-bottom: 2px;
+  gap: 3px;
+  margin-bottom: 1px;
 }
 
 .demo-badge ion-icon {
-  font-size: 12px;
+  font-size: 10px;
   color: #007AFF;
 }
 
 .demo-badge span {
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 600;
   color: #007AFF;
   text-transform: uppercase;
@@ -402,7 +402,7 @@ const continueAsVisitor = () => {
 
 .demo-info p {
   margin: 0;
-  font-size: 11px;
+  font-size: 10px;
   color: #6e6e73;
   font-family: 'SF Mono', 'Menlo', monospace;
 }
@@ -411,7 +411,7 @@ const continueAsVisitor = () => {
 .divider {
   display: flex;
   align-items: center;
-  margin: 10px 0;
+  margin: 8px 0;
 }
 
 .divider::before,
@@ -423,16 +423,16 @@ const continueAsVisitor = () => {
 }
 
 .divider span {
-  padding: 0 10px;
-  font-size: 12px;
+  padding: 0 8px;
+  font-size: 11px;
   color: #86868b;
   font-weight: 500;
 }
 
 /* === Footer === */
 .footer-text {
-  margin-top: 10px;
-  font-size: 11px;
+  margin-top: 8px;
+  font-size: 10px;
   color: #86868b;
   text-align: center;
   animation: fadeIn 0.6s ease-out 0.3s both;
