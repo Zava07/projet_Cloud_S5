@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './styles/app.css';
 
 // Pages
@@ -50,25 +50,57 @@ export default function App() {
     },
   ]);
 
-  // Navigation & auth handlers
+  // Navigation & auth handlers with simple hash routing
   const [authUser, setAuthUser] = useState(null);
 
-  const navigateToList = () => {
-    setCurrentPage('list');
-    setEditingUser(null);
+  // parse location.hash to determine page and params
+  const parseHash = () => {
+    const hash = (window.location.hash || '#/login').replace('#', '');
+    if (hash.startsWith('/login')) return { page: 'login' };
+    if (hash.startsWith('/signup')) return { page: 'signup' };
+    if (hash.startsWith('/users/create')) return { page: 'create' };
+    if (hash.startsWith('/users/edit/')) {
+      const parts = hash.split('/');
+      const id = Number(parts[3]);
+      return { page: 'edit', id };
+    }
+    if (hash.startsWith('/users')) return { page: 'list' };
+    return { page: 'login' };
   };
 
-  const navigateToCreate = () => {
-    setCurrentPage('create');
-  };
+  // Sync UI with hash, protect /users routes if not authenticated
+  useEffect(() => {
+    const syncFromHash = () => {
+      const { page, id } = parseHash();
+      // Protected pages: list/create/edit require auth or guest
+      const protectedPages = ['list', 'create', 'edit'];
+      if (protectedPages.includes(page) && authUser == null) {
+        // redirect to login
+        window.location.hash = '#/login';
+        return;
+      }
 
-  const navigateToEdit = (user) => {
-    setEditingUser(user);
-    setCurrentPage('edit');
-  };
+      if (page === 'edit' && id) {
+        const user = users.find((u) => u.id === id);
+        setEditingUser(user || null);
+      }
 
-  const navigateToLogin = () => setCurrentPage('login');
-  const navigateToSignup = () => setCurrentPage('signup');
+      setCurrentPage(page);
+    };
+
+    // initial sync
+    syncFromHash();
+    // listen to hash changes
+    window.addEventListener('hashchange', syncFromHash);
+    return () => window.removeEventListener('hashchange', syncFromHash);
+  }, [authUser, users]);
+
+  // navigation functions update the hash (this drives the UI)
+  const navigateToList = () => { window.location.hash = '#/users'; };
+  const navigateToCreate = () => { window.location.hash = '#/users/create'; };
+  const navigateToEdit = (user) => { window.location.hash = `#/users/edit/${user.id}`; };
+  const navigateToLogin = () => { window.location.hash = '#/login'; };
+  const navigateToSignup = () => { window.location.hash = '#/signup'; };
 
   const handleLogin = (user) => {
     setAuthUser(user);
@@ -77,7 +109,6 @@ export default function App() {
   };
 
   const handleSignup = (user) => {
-    // Créez un utilisateur minimal et le sélectionnez
     const nextId = users.length ? Math.max(...users.map((u) => u.id)) + 1 : 1;
     const newUser = {
       id: nextId,
@@ -97,9 +128,15 @@ export default function App() {
   };
 
   const handleGuest = () => {
-    setAuthUser(null);
+    // allow guest access (mark as guest)
+    setAuthUser({ email: 'Visiteur', guest: true });
     navigateToList();
   };
+
+  const handleLogout = () => {
+    setAuthUser(null);
+    navigateToLogin();
+  }; 
 
   // CRUD handlers
   const handleCreateUser = (form) => {
@@ -177,6 +214,8 @@ export default function App() {
             onNavigateCreate={navigateToCreate}
             onNavigateEdit={navigateToEdit}
             onDelete={handleDeleteUser}
+            authUser={authUser}
+            onLogout={handleLogout}
           />
         );
     }
@@ -184,27 +223,6 @@ export default function App() {
 
   return (
     <div className="app-container">
-      <header className="app-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div>
-          <h1> Projet Cloud S5</h1>
-          <p>Application de gestion des utilisateurs</p>
-        </div>
-
-        <div className="header-actions">
-          {authUser ? (
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-              <span className="text-muted">Bonjour, <strong>{authUser.email}</strong></span>
-              <button className="btn btn-secondary" onClick={() => { setAuthUser(null); alert('Déconnecté'); }}>Déconnexion</button>
-            </div>
-          ) : (
-            <div style={{ display: 'flex', gap: 8 }}>
-              <button className="btn btn-outline" onClick={navigateToLogin}>Se connecter</button>
-              <button className="btn btn-primary" onClick={navigateToSignup}>S'inscrire</button>
-            </div>
-          )}
-        </div>
-      </header>
-
       <main className="app-main">
         {renderPage()}
       </main>

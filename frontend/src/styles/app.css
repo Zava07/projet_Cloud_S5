@@ -98,6 +98,19 @@ body {
   margin: 0 auto;
 }
 
+/* Auth wrapper (login/signup centered) */
+.auth-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 16px;
+}
+.auth-wrapper .card {
+  width: 100%;
+  max-width: 520px;
+}
+
 /* --------------------------------------------------------------------------
    3. Cards & Panels
    -------------------------------------------------------------------------- */
@@ -478,6 +491,10 @@ select.form-control {
 .text-center { text-align: center; }
 .text-right { text-align: right; }
 .text-muted { color: var(--text-muted); }
+
+/* Visitor greeting (white for visibility on blue header) */
+.visitor-text { color: white; font-weight: 600; text-shadow: 0 1px 0 rgba(0,0,0,0.12); }
+
 .text-danger { color: var(--danger-color); }
 .text-success { color: var(--success-color); }
 
