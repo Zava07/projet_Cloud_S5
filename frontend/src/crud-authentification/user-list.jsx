@@ -65,7 +65,7 @@ export default function Authentification() {
     setShowCreate(false);
   };
 
-  const handleEdit = (user) => setEditUser(user);
+  const handleEditUser = (user) => setEditUser(user);
 
   const handleSaveUser = (updated) => {
     setUsers((prev) => prev.map((u) => (u.id === updated.id ? { ...u, ...updated, updated_at: new Date().toLocaleDateString() } : u)));
@@ -115,7 +115,7 @@ export default function Authentification() {
               <td>{user.created_at}</td>
               <td>{user.updated_at}</td>
               <td>
-                <button onClick={() => handleEdit(user)} style={{ marginRight: 8 }}>
+                <button onClick={() => handleEditUser(user)} style={{ marginRight: 8 }}>
                   Modifier
                 </button>
                 <button onClick={() => handleDelete(user)} style={{ color: 'red' }}>Supprimer</button>

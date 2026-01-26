@@ -17,22 +17,9 @@ export default function LoginPage({ onLogin, onBack, onSignup, onGuest }) {
   };
 
   return (
-    <div>
-      <div className="breadcrumb">
-        <span className="breadcrumb-link" onClick={onBack}>Utilisateurs</span>
-        <span className="breadcrumb-separator">›</span>
-        <span className="breadcrumb-current">Connexion</span>
-      </div>
-
-      <div className="page-header">
-        <div>
-          <h1 className="page-title">Connexion</h1>
-          <p className="page-subtitle">Entrez vos identifiants pour vous connecter</p>
-        </div>
-      </div>
-
-      <div className="card" style={{ maxWidth: 520 }}>
-        <div className="card-header">
+    <div className="auth-wrapper">
+      <div className="card">
+        <div className="card-header card-header-primary">
           <h2>Se connecter</h2>
         </div>
         <div className="card-body">

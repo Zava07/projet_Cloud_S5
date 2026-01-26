@@ -21,21 +21,8 @@ export default function SignupPage({ onSignup, onBack }) {
   };
 
   return (
-    <div>
-      <div className="breadcrumb">
-        <span className="breadcrumb-link" onClick={onBack}>Utilisateurs</span>
-        <span className="breadcrumb-separator">›</span>
-        <span className="breadcrumb-current">Inscription</span>
-      </div>
-
-      <div className="page-header">
-        <div>
-          <h1 className="page-title">Créer un compte</h1>
-          <p className="page-subtitle">Créez votre compte pour gérer les utilisateurs</p>
-        </div>
-      </div>
-
-      <div className="card" style={{ maxWidth: 620 }}>
+    <div className="auth-wrapper">
+      <div className="card">
         <div className="card-header">
           <h2>Informations du compte</h2>
         </div>

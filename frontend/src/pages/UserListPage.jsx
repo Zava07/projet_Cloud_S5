@@ -1,9 +1,27 @@
 // src/pages/UserListPage.jsx
 import React from "react";
 
-export default function UserListPage({ users, onNavigateCreate, onNavigateEdit, onDelete }) {
+export default function UserListPage({ users, onNavigateCreate, onNavigateEdit, onDelete, authUser, onLogout }) {
   return (
     <div>
+      {/* App header moved here */}
+      <header className="app-header" style={{ marginBottom: 16 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <h1> Projet Cloud S5</h1>
+            {/* <p className="page-subtitle">Application de gestion des utilisateurs</p> */}
+          </div>
+          <div>
+            {authUser ? (
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <span className={authUser.guest ? 'visitor-text' : 'text-muted'}>Bonjour, <strong>{authUser.email}</strong></span>
+                <button className="btn btn-secondary" onClick={() => { if (onLogout) onLogout(); else window.location.hash = '#/login'; }}>Déconnexion</button>
+              </div>
+            ) : null}
+          </div>
+        </div>
+      </header>
+
       {/* Breadcrumb */}
       <div className="breadcrumb">
         <span className="breadcrumb-current">Utilisateurs</span>
