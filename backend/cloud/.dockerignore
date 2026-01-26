@@ -1,0 +1,7 @@
+target/
+*.log
+.idea/
+*.iml
+.git
+.gitignore
+.DS_Store
