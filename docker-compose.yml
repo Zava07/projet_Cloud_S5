@@ -20,13 +20,9 @@ services:
     build:
       context: ./backend/cloud
       dockerfile: ../Dockerfile
-    # run the Maven wrapper in the container and mount source so DevTools can reload
+    # Run the packaged jar from the multi-stage build (recommended)
     working_dir: /app
-    entrypoint: []
-    command: ["./mvnw", "spring-boot:run", "-Dspring-boot.run.fork=false"]
-    volumes:
-      - ./backend/cloud:/app
-      - ${M2_CACHE:-${HOME}/.m2}:/root/.m2
+    # Do not override the Dockerfile ENTRYPOINT so the container runs the built jar
     ports:
       - "${BACKEND_PORT:-8080}:8080"
     environment:
@@ -34,7 +30,6 @@ services:
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       SPRING_PROFILES_ACTIVE: docker
-      SPRING_DEVTOOLS_RESTART_ENABLED: "true"
       SPRING_JPA_HIBERNATE_DDL_AUTO: "update"
     depends_on:
       db:
