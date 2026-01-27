@@ -7,6 +7,7 @@ import UserCreatePage from './pages/UserCreatePage.jsx';
 import UserEditPage from './pages/UserEditPage.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import SignupPage from './pages/SignupPage.jsx';
+import MapPage from './pages/MapPage.jsx';
 
 export default function App() {
   // Navigation state: 'login' | 'signup' | 'list' | 'create' | 'edit'
@@ -58,6 +59,7 @@ export default function App() {
     const hash = (window.location.hash || '#/login').replace('#', '');
     if (hash.startsWith('/login')) return { page: 'login' };
     if (hash.startsWith('/signup')) return { page: 'signup' };
+    if (hash.startsWith('/map')) return { page: 'map' };
     if (hash.startsWith('/users/create')) return { page: 'create' };
     if (hash.startsWith('/users/edit/')) {
       const parts = hash.split('/');
@@ -72,8 +74,8 @@ export default function App() {
   useEffect(() => {
     const syncFromHash = () => {
       const { page, id } = parseHash();
-      // Protected pages: list/create/edit require auth or guest
-      const protectedPages = ['list', 'create', 'edit'];
+      // Protected pages: list/create/edit/map require auth or guest
+      const protectedPages = ['list', 'create', 'edit', 'map'];
       if (protectedPages.includes(page) && authUser == null) {
         // redirect to login
         window.location.hash = '#/login';
@@ -97,6 +99,7 @@ export default function App() {
 
   // navigation functions update the hash (this drives the UI)
   const navigateToList = () => { window.location.hash = '#/users'; };
+  const navigateToMap = () => { window.location.hash = '#/map'; };
   const navigateToCreate = () => { window.location.hash = '#/users/create'; };
   const navigateToEdit = (user) => { window.location.hash = `#/users/edit/${user.id}`; };
   const navigateToLogin = () => { window.location.hash = '#/login'; };
@@ -128,9 +131,9 @@ export default function App() {
   };
 
   const handleGuest = () => {
-    // allow guest access (mark as guest)
+    // allow guest access (mark as guest) and show map
     setAuthUser({ email: 'Visiteur', guest: true });
-    navigateToList();
+    navigateToMap();
   };
 
   const handleLogout = () => {
@@ -189,6 +192,13 @@ export default function App() {
           <SignupPage
             onSignup={handleSignup}
             onBack={navigateToList}
+          />
+        );
+      case 'map':
+        return (
+          <MapPage
+            authUser={authUser}
+            onLogout={handleLogout}
           />
         );
       case 'create':
