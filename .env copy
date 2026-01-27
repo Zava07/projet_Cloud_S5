@@ -1,0 +1,19 @@
+
+# Firebase Vite environment variables (replace placeholders with your values)
+# Get these values from Firebase Console → Project settings → Your apps → SDK config
+VITE_FIREBASE_API_KEY=AIzaSyBzPij_NADPbZIh9nWe8iScXv64vk78aig
+VITE_FIREBASE_AUTH_DOMAIN=iray-lalana.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=iray-lalana
+VITE_FIREBASE_STORAGE_BUCKET=iray-lalana.firebasestorage.app
+VITE_FIREBASE_MESSAGING_SENDER_ID=302056517170
+VITE_FIREBASE_APP_ID=1:302056517170:web:ef1a7b189051d01df8562b
+# Optional (Analytics)
+VITE_FIREBASE_MEASUREMENT_ID=G-705QXFTVSJ
+ 
+# API base (backend) - set to your API or keep localhost for development
+VITE_API_BASE=http://localhost:3000
+
+# Tile server URL. If you run a local tile server keep the localhost URL,
+# otherwise use the public OpenStreetMap tiles (used as online fallback).
+VITE_TILE_URL=https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png
+
