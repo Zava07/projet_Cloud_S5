@@ -31,6 +31,18 @@
           </ion-list>
         </div>
 
+          <!-- Mes signalements uniquement -->
+          <div class="filter-section">
+            <h3>Affichage</h3>
+            <ion-item>
+              <ion-label>Mes signalements uniquement</ion-label>
+              <ion-checkbox
+                :checked="!!localFilter.mineOnly"
+                @ionChange="e => toggleMine(e.detail.checked)"
+              />
+            </ion-item>
+          </div>
+
         <!-- Filtrer par entreprise -->
         <div class="filter-section" v-if="companies.length > 0">
           <h3>Entreprise</h3>
@@ -138,6 +150,7 @@ const activeFilterCount = computed(() => {
   if (props.modelValue.entrepriseId) count++;
   if (props.modelValue.dateFrom) count++;
   if (props.modelValue.dateTo) count++;
+  if (props.modelValue.mineOnly) count++;
   return count;
 });
 
@@ -176,12 +189,17 @@ const resetFilter = () => {
     entrepriseId: undefined,
     dateFrom: undefined,
     dateTo: undefined,
+    mineOnly: false,
   };
 };
 
 const applyFilter = () => {
   emit('update:modelValue', { ...localFilter.value });
   closeFilter();
+};
+
+const toggleMine = (checked: boolean) => {
+  localFilter.value.mineOnly = !!checked;
 };
 </script>
 
