@@ -75,6 +75,8 @@ export interface ProblemFilter {
   entrepriseId?: number;
   minBudget?: number;
   maxBudget?: number;
+  // Afficher uniquement les signalements créés par l'utilisateur courant
+  mineOnly?: boolean;
 }
 
 export interface MapMarker {
