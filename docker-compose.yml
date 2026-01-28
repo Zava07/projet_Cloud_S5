@@ -41,7 +41,6 @@ services:
     depends_on:
       db:
         condition: service_healthy
-
   frontend:
     build:
       context: ./frontend
@@ -50,6 +49,7 @@ services:
       - "${FRONTEND_PORT:-3000}:80"
     environment:
       - NODE_ENV=production
+      - VITE_API_BASE=http://backend:8080
     depends_on:
       - backend
 

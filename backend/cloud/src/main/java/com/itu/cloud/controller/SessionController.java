@@ -25,9 +25,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class SessionController {
 
     private final SessionService sessionService;
+    private final com.itu.cloud.service.UserService userService;
 
-    public SessionController(SessionService sessionService) {
+    public SessionController(SessionService sessionService, com.itu.cloud.service.UserService userService) {
         this.sessionService = sessionService;
+        this.userService = userService;
     }
 
     @GetMapping
@@ -64,5 +66,38 @@ public class SessionController {
     public List<SessionDTO> expired(@RequestParam(required = false) Long beforeEpochMillis) {
         LocalDateTime cutoff = beforeEpochMillis == null ? LocalDateTime.now() : LocalDateTime.ofEpochSecond(beforeEpochMillis/1000,0,java.time.ZoneOffset.UTC);
         return sessionService.findExpired(cutoff).stream().map(EntityToDtoMapper::toSessionDTO).collect(Collectors.toList());
+    }
+
+    // Simple login endpoint: accepts { email, mdp }
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody com.itu.cloud.dto.LoginRequest req) {
+        if (req == null || req.getEmail() == null || req.getMdp() == null) {
+            return ResponseEntity.badRequest().body("email and mdp are required");
+        }
+
+        return userService.findByEmail(req.getEmail())
+                .map(user -> {
+                    // For now compare plaintext mdp to stored passwordHash (which in test data contains placeholder values)
+                    // In production replace with proper password hashing (BCrypt) and verification
+                    if (user.getPasswordHash() != null && user.getPasswordHash().equals(req.getMdp())) {
+                        // create session
+                        Session s = new Session();
+                        s.setUser(user);
+                        s.setToken(java.util.UUID.randomUUID().toString());
+                        s.setExpiresAt(LocalDateTime.now().plusDays(7));
+                        Session saved = sessionService.save(s);
+                        return ResponseEntity.ok(EntityToDtoMapper.toSessionDTO(saved));
+                    } else {
+                        // increment login attempts and potentially block account
+                        user.setLoginAttempts(user.getLoginAttempts() == null ? 1 : user.getLoginAttempts() + 1);
+                        if (user.getLoginAttempts() != null && user.getLoginAttempts() >= 5) {
+                            user.setBlocked(true);
+                        }
+                        // persist user changes
+                        userService.save(user);
+                        return ResponseEntity.status(401).body("Invalid credentials");
+                    }
+                })
+                .orElse(ResponseEntity.status(401).body("Invalid credentials"));
     }
 }

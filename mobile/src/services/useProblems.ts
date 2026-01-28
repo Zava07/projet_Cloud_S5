@@ -13,6 +13,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '@/config/firebase';
 import { Problem, ProblemFilter, ProblemStatus, Statistics } from '@/types';
+import { useAuth } from '@/services/useAuth';
 
 // État global des problèmes
 const problems = ref<Problem[]>([]);
@@ -82,6 +83,14 @@ export function useProblems() {
       // Filtrer par budget
       if (filter.minBudget && (!problem.budget || problem.budget < filter.minBudget)) return false;
       if (filter.maxBudget && problem.budget && problem.budget > filter.maxBudget) return false;
+
+      // Filtrer uniquement mes signalements si demandé
+      if (filter.mineOnly) {
+        const { currentUser } = useAuth();
+        const uid = currentUser.value?.uid || currentUser.value?.uid;
+        if (!uid) return false;
+        if (problem.userId !== uid) return false;
+      }
 
       return true;
     });
