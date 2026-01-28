@@ -1,45 +1,44 @@
 // src/pages/Authentification.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import UserCreate from "./user-create.jsx";
 import UserEdit from "./user-edit.jsx";
 
 export default function Authentification() {
   console.log('Authentification component rendu (restored)')
-  const [users, setUsers] = useState([
-    {
-      id: 1,
-      firebase_uid: "uid_1",
-      email: "admin@gmail.com",
-      first_name: "admin",
-      last_name: "Randria",
-      role: "ADMIN",
-      is_blocked: false,
-      created_at: "19/01/26",
-      updated_at: "19/01/26",
-    },
-    {
-      id: 2,
-      firebase_uid: "uid_2",
-      email: "alice@gmail.com",
-      first_name: "alice",
-      last_name: "Rasoa",
-      role: "USER",
-      is_blocked: false,
-      created_at: "19/01/26",
-      updated_at: "19/01/26",
-    },
-    {
-      id: 3,
-      firebase_uid: "uid_3",
-      email: "bob@gmail.com",
-      first_name: "bob",
-      last_name: "Rakoto",
-      role: "USER",
-      is_blocked: false,
-      created_at: "19/01/26",
-      updated_at: "19/01/26",
-    },
-  ]);
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const base = import.meta.env.VITE_API_BASE || 'http://localhost:8080';
+    const url = `${base}/api/users?includeEntreprises=false&includeReports=false`;
+    setLoading(true);
+    fetch(url)
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then((data) => {
+        // map backend DTO fields to UI shape
+        const mapped = data.map((u) => ({
+          id: u.id,
+          firebase_uid: u.firebaseUid ?? u.firebase_uid,
+          email: u.email,
+          first_name: u.firstName ?? u.first_name,
+          last_name: u.lastName ?? u.last_name,
+          role: u.role ?? 'USER',
+          is_blocked: u.blocked ?? u.is_blocked ?? false,
+          created_at: u.createdAt ? new Date(u.createdAt).toLocaleString() : (u.created_at ?? ''),
+          updated_at: u.updatedAt ? new Date(u.updatedAt).toLocaleString() : (u.updated_at ?? ''),
+        }));
+        setUsers(mapped);
+      })
+      .catch((err) => {
+        console.error('Failed to load users', err);
+        setError(err.message || 'Fetch error');
+      })
+      .finally(() => setLoading(false));
+  }, []);
 
   const [showCreate, setShowCreate] = useState(false);
   const [editUser, setEditUser] = useState(null);

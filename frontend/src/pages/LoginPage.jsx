@@ -6,14 +6,32 @@ export default function LoginPage({ onLogin, onBack, onSignup, onGuest }) {
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.email || !form.password) {
       setError("Veuillez remplir l'email et le mot de passe.");
       return;
     }
     setError("");
-    if (onLogin) onLogin({ email: form.email });
+
+    const base = import.meta.env.VITE_API_BASE || 'http://localhost:8080';
+    try {
+      const res = await fetch(`${base}/api/sessions/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: form.email, mdp: form.password }),
+      });
+      if (!res.ok) {
+        if (res.status === 401) setError('Email ou mot de passe incorrect');
+        else setError(`Erreur serveur: ${res.status}`);
+        return;
+      }
+      const session = await res.json();
+      if (onLogin) onLogin({ email: form.email, token: session.token });
+    } catch (err) {
+      console.error('Login error', err);
+      setError('Impossible de contacter le serveur');
+    }
   };
 
   return (
@@ -26,12 +44,12 @@ export default function LoginPage({ onLogin, onBack, onSignup, onGuest }) {
           <form className="form" onSubmit={handleSubmit}>
             <div className="form-group">
               <label className="form-label">Email</label>
-              <input className="form-control" type="email" name="email" value={form.email} onChange={handleChange} placeholder="exemple@email.com" />
+              <input className="form-control" type="email" name="email" value={form.email} onChange={handleChange} placeholder="exemple@email.com"  />
             </div>
 
             <div className="form-group">
               <label className="form-label">Mot de passe</label>
-              <input className="form-control" type="password" name="password" value={form.password} onChange={handleChange} placeholder="Mot de passe" />
+              <input className="form-control" type="password" name="password" value={form.password} onChange={handleChange} placeholder="Mot de passe"  />
             </div>
 
             {error && <div className="alert alert-danger">{error}</div>}
