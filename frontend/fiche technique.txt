@@ -1,0 +1,80 @@
+Fiche technique - projet_Cloud_S5
+
+1. Titre
+- projet_Cloud_S5
+
+2. Résumé
+- Application web full-stack pour la gestion d'utilisateurs (frontend React + backend Spring Boot + PostgreSQL).
+
+3. Arbre du projet (principal)
+- frontend/: application client (Vite + React)
+- backend/: application serveur (Spring Boot, Maven)
+- postgres/: scripts d'initialisation PostgreSQL
+- docker-compose.yml / docker-compose.dev.yml: orchestration pour dev/prod
+
+4. Stack technique
+- Frontend: React (JSX), Vite, Node.js
+- Backend: Java 11+ (Spring Boot), Maven
+- Base de données: PostgreSQL
+- Conteneurisation: Docker, Docker Compose
+
+5. Fichiers frontend importants
+- [frontend/src/App.jsx] - point d'entrée principal de l'UI
+- [frontend/src/main.jsx] - bootstrap du client
+- [frontend/src/styles.css] - styles globaux
+- [frontend/src/crud-authentification/] - pages pour create/edit/list d'utilisateurs
+- [frontend/package.json] - dépendances et scripts
+
+6. Configuration et variables d'environnement
+- Frontend:
+  - NODE_ENV (development/production)
+  - API_BASE_URL: URL vers le backend (ex: http://localhost:8080)
+- Backend:
+  - Consulter [backend/cloud/src/main/resources/application.properties] pour paramètres Spring Boot (port, datasource)
+  - Variables DB: SPRING_DATASOURCE_URL, SPRING_DATASOURCE_USERNAME, SPRING_DATASOURCE_PASSWORD
+
+7. Commandes utiles
+- Frontend (développement):
+  - Installer dépendances: npm install
+  - Lancer dev server: npm run dev
+  - Builder pour production: npm run build
+- Backend (développement):
+  - Lancer: depuis backend/cloud : ./mvnw spring-boot:run (ou mvn spring-boot:run)
+  - Builder JAR: ./mvnw package
+- Docker / Compose:
+  - Lancer tout (dev/prod selon fichier): docker-compose up --build
+  - Arrêter: docker-compose down
+
+8. Docker
+- Le repo contient Dockerfile pour backend et frontend, et docker-compose.yml pour orchestrer les services (backend, frontend, postgres).
+- Vérifier DOCKER_SETUP.md pour détails spécifiques.
+
+9. Base de données
+- PostgreSQL initialisation: postgres/init.sql.
+- Connexion: config dans backend/cloud/src/main/resources/application.properties.
+
+10. Endpoints (général)
+- L'API REST est exposée par le backend Spring Boot.
+- Pour connaître les routes exactes, inspecter les contrôleurs Java sous backend/cloud/src/main/java/com/itu/cloud/.
+
+11. Tests
+- Backend: tests unitaires avec JUnit (voir dossier backend/cloud/src/test/java).
+- Frontend: ajouter tests si nécessaire (non fournis par défaut).
+
+12. Déploiement
+- Pipeline recommandé: builder backend (Maven) -> builder frontend (Vite) -> conteneurs Docker -> déployer via Docker Compose ou plateforme (Kubernetes / Azure App Service / Container Apps).
+
+13. Points d'attention / conseils
+- S'assurer que API_BASE_URL du frontend pointe vers le backend (CORS).
+- Ne pas committer les fichiers contenant mots de passe/credentials; utiliser variables d'environnement ou secret manager.
+- Adapter les fichiers docker-compose.*.yml pour les environnements (dev vs prod).
+
+14. Contacts / auteurs
+- Auteur/Repo: voir repository projet_Cloud_S5 (branche actuelle: zava-api).
+- Pour questions techniques, ouvrir une issue ou contacter le mainteneur du dépôt.
+
+15. Références rapides
+- README.md: vue générale du projet
+- DOCKER_SETUP.md: guide Docker
+
+Fin de la fiche technique.
