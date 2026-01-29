@@ -8,8 +8,10 @@
 /app/src/main/java/com/itu/cloud/controller/UserController.java
 /app/src/main/java/com/itu/cloud/dto/ConfigEntryDTO.java
 /app/src/main/java/com/itu/cloud/dto/EntrepriseSummaryDTO.java
+/app/src/main/java/com/itu/cloud/dto/LoginRequest.java
 /app/src/main/java/com/itu/cloud/dto/ReportSummaryDTO.java
 /app/src/main/java/com/itu/cloud/dto/SessionDTO.java
+/app/src/main/java/com/itu/cloud/dto/SignupRequest.java
 /app/src/main/java/com/itu/cloud/dto/SyncLogDTO.java
 /app/src/main/java/com/itu/cloud/dto/UserDTO.java
 /app/src/main/java/com/itu/cloud/entity/ConfigEntry.java
@@ -18,6 +20,7 @@
 /app/src/main/java/com/itu/cloud/entity/Session.java
 /app/src/main/java/com/itu/cloud/entity/SyncLog.java
 /app/src/main/java/com/itu/cloud/entity/User.java
+/app/src/main/java/com/itu/cloud/entity/VerificationToken.java
 /app/src/main/java/com/itu/cloud/mapper/EntityToDtoMapper.java
 /app/src/main/java/com/itu/cloud/repository/ConfigEntryRepository.java
 /app/src/main/java/com/itu/cloud/repository/EntrepriseRepository.java
@@ -25,9 +28,11 @@
 /app/src/main/java/com/itu/cloud/repository/SessionRepository.java
 /app/src/main/java/com/itu/cloud/repository/SyncLogRepository.java
 /app/src/main/java/com/itu/cloud/repository/UserRepository.java
+/app/src/main/java/com/itu/cloud/repository/VerificationTokenRepository.java
 /app/src/main/java/com/itu/cloud/service/ConfigEntryService.java
 /app/src/main/java/com/itu/cloud/service/EntrepriseService.java
 /app/src/main/java/com/itu/cloud/service/ReportService.java
 /app/src/main/java/com/itu/cloud/service/SessionService.java
 /app/src/main/java/com/itu/cloud/service/SyncLogService.java
 /app/src/main/java/com/itu/cloud/service/UserService.java
+/app/src/main/java/com/itu/cloud/service/VerificationService.java

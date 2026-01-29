@@ -10,6 +10,7 @@ public class UserDTO {
     private String email;
     private String firstName;
     private String lastName;
+    private String role;
     private Boolean blocked;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -58,6 +59,14 @@ public class UserDTO {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 
     public Boolean getBlocked() {
