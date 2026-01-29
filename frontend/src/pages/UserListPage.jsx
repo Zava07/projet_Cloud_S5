@@ -14,7 +14,12 @@ export default function UserListPage({ users, onNavigateCreate, onNavigateEdit, 
           <div>
             {authUser ? (
               <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                <span className={authUser.guest ? 'visitor-text' : 'text-muted'}>Bonjour, <strong>{authUser.email}</strong></span>
+                <span className={authUser.guest ? 'visitor-text' : 'text-muted'}>
+                  Bonjour, <strong>{authUser.email}</strong>
+                  {authUser.role ? (
+                    <span className="badge badge-secondary" style={{ marginLeft: 8, textTransform: 'capitalize' }}>{authUser.first_name}</span>
+                  ) : null}
+                </span>
                 <button className="btn btn-secondary" onClick={() => { if (onLogout) onLogout(); else window.location.hash = '#/login'; }}>Déconnexion</button>
               </div>
             ) : null}
@@ -33,14 +38,11 @@ export default function UserListPage({ users, onNavigateCreate, onNavigateEdit, 
           <h1 className="page-title">Gestion des utilisateurs</h1>
           <p className="page-subtitle">{users.length} utilisateur{users.length > 1 ? 's' : ''} au total</p>
         </div>
-        <button className="btn btn-primary" onClick={onNavigateCreate}>
-          <span>+</span> Nouvel utilisateur
-        </button>
-      </div>
-
-      {/* Table Card */}
-      <div className="card">
-        <div className="card-header">
+        {(authUser && ((authUser.role && (String(authUser.role).toLowerCase().includes('manager') || String(authUser.role).toLowerCase().includes('admin'))) || authUser.is_manager)) ? (
+          <button className="btn btn-primary" onClick={onNavigateCreate}>
+            <span>+</span> Nouvel utilisateur
+          </button>
+        ) : null}
           <h2>Liste des utilisateurs</h2>
         </div>
         
@@ -90,18 +92,24 @@ export default function UserListPage({ users, onNavigateCreate, onNavigateEdit, 
                     <td className="text-muted">{user.updated_at}</td>
                     <td>
                       <div className="table-actions">
-                        <button 
-                          className="btn btn-outline btn-sm" 
-                          onClick={() => onNavigateEdit(user)}
-                        >
-                          Modifier
-                        </button>
-                        <button 
-                          className="btn btn-danger btn-sm" 
-                          onClick={() => onDelete(user)}
-                        >
-                          Supprimer
-                        </button>
+                        {(authUser && ((authUser.role && (String(authUser.role).toLowerCase().includes('manager') || String(authUser.role).toLowerCase().includes('admin'))) || authUser.is_manager)) ? (
+                          <>
+                            <button 
+                              className="btn btn-outline btn-sm" 
+                              onClick={() => onNavigateEdit(user)}
+                            >
+                              Modifier
+                            </button>
+                            <button 
+                              className="btn btn-danger btn-sm" 
+                              onClick={() => onDelete(user)}
+                            >
+                              Supprimer
+                            </button>
+                          </>
+                        ) : (
+                          <span className="text-muted">Accès restreint</span>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -111,6 +119,6 @@ export default function UserListPage({ users, onNavigateCreate, onNavigateEdit, 
           </div>
         )}
       </div>
-    </div>
+  
   );
 }

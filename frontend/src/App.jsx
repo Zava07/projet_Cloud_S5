@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import './styles/app.css';
 
+// Components
+import Navigation from './components/Navigation';
+
 // Pages
 import UserListPage from './pages/UserListPage.jsx';
 import UserCreatePage from './pages/UserCreatePage.jsx';
@@ -8,11 +11,16 @@ import UserEditPage from './pages/UserEditPage.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import SignupPage from './pages/SignupPage.jsx';
 import MapPage from './pages/MapPage.jsx';
+import ReportsListPage from './pages/ReportsListPage.jsx';
 
 export default function App() {
-  // Navigation state: 'login' | 'signup' | 'list' | 'create' | 'edit'
-  const [currentPage, setCurrentPage] = useState('login');
+  // Navigation state: 'login' | 'signup' | 'map' | 'reports' | 'users' | 'create' | 'edit'
+  const [currentPage, setCurrentPage] = useState('login'); // Démarrer sur login par défaut
   const [editingUser, setEditingUser] = useState(null);
+  const [mapOptions, setMapOptions] = useState({}); // Pour passer des options à la carte
+
+  // Auth state
+  const [authUser, setAuthUser] = useState(null);
 
   // Users data (loaded from backend)
   const [users, setUsers] = useState([]);
@@ -40,9 +48,11 @@ export default function App() {
         updated_at: u.updatedAt ? new Date(u.updatedAt).toLocaleString() : (u.updated_at ?? ''),
       }));
       setUsers(mapped);
+      return mapped;
     } catch (err) {
       console.error('fetchUsers error', err);
       setUsersError(err.message || 'Failed to load users');
+      return [];
     } finally {
       setLoadingUsers(false);
     }
@@ -52,34 +62,79 @@ export default function App() {
     fetchUsers();
   }, []);
 
-  // Navigation & auth handlers with simple hash routing
-  const [authUser, setAuthUser] = useState(null);
+  // Navigation functions
+  const navigateToMap = () => { window.location.hash = '#/map'; };
+  const navigateToReports = () => { window.location.hash = '#/reports'; };
+  const navigateToUsers = () => { window.location.hash = '#/users'; };
+  const navigateToCreate = () => { window.location.hash = '#/users/create'; };
+  const navigateToEdit = (user) => { window.location.hash = `#/users/edit/${user.id}`; };
+  const navigateToLogin = () => { window.location.hash = '#/'; }; // Racine pour login
+  const navigateToSignup = () => { window.location.hash = '#/signup'; };
 
-  // parse location.hash to determine page and params
+  // Page change handler for navigation component
+  const handlePageChange = (page, options = {}) => {
+    setMapOptions(options);
+    
+    if (page === 'map') navigateToMap();
+    else if (page === 'reports') navigateToReports();
+    else if (page === 'users') navigateToUsers();
+    else if (page === 'login') navigateToLogin();
+    else if (page === 'signup') navigateToSignup();
+  };
+
+  // Helper to detect manager/admin roles
+  const isManagerOrAdmin = (role) => {
+    if (!role) return false;
+    const r = String(role).toLowerCase();
+    return r === 'manager' || r === 'admin' || r.includes('manager') || r.includes('admin');
+  };
+
+  // Parse location.hash to determine page and params
   const parseHash = () => {
     const hash = (window.location.hash || '#/login').replace('#', '');
+    if (hash === '' || hash === '/') return { page: 'login' };
     if (hash.startsWith('/login')) return { page: 'login' };
     if (hash.startsWith('/signup')) return { page: 'signup' };
     if (hash.startsWith('/map')) return { page: 'map' };
+    if (hash.startsWith('/reports')) return { page: 'reports' };
     if (hash.startsWith('/users/create')) return { page: 'create' };
     if (hash.startsWith('/users/edit/')) {
       const parts = hash.split('/');
       const id = Number(parts[3]);
       return { page: 'edit', id };
     }
-    if (hash.startsWith('/users')) return { page: 'list' };
+    if (hash.startsWith('/users')) return { page: 'users' };
     return { page: 'login' };
   };
 
-  // Sync UI with hash, protect /users routes if not authenticated
+  // Sync UI with hash, protect routes appropriately
   useEffect(() => {
     const syncFromHash = () => {
       const { page, id } = parseHash();
-      // Protected pages: list/create/edit/map require auth or guest
-      const protectedPages = ['list', 'create', 'edit', 'map'];
-      if (protectedPages.includes(page) && authUser == null) {
-        // redirect to login
-        window.location.hash = '#/login';
+
+      // Si pas d'utilisateur connecté, seules les pages login et signup sont autorisées
+      if (!authUser && !['login', 'signup'].includes(page)) {
+        setCurrentPage('login');
+        return;
+      }
+
+      // Handle protected routes
+      if (page === 'reports' && (!authUser || authUser.guest)) {
+        setCurrentPage('login');
+        return;
+      }
+
+      if (['users', 'create', 'edit'].includes(page)) {
+        if (!authUser || authUser.guest || !isManagerOrAdmin(authUser.role)) {
+          alert('Accès refusé. Seuls les managers peuvent accéder à la gestion des utilisateurs.');
+          setCurrentPage(authUser ? 'map' : 'login');
+          return;
+        }
+      }
+
+      // Pour les pages map et reports, rediriger les invités non connectés vers login
+      if (['map', 'reports'].includes(page) && !authUser) {
+        setCurrentPage('login');
         return;
       }
 
@@ -91,50 +146,66 @@ export default function App() {
       setCurrentPage(page);
     };
 
-    // initial sync
     syncFromHash();
-    // listen to hash changes
     window.addEventListener('hashchange', syncFromHash);
     return () => window.removeEventListener('hashchange', syncFromHash);
   }, [authUser, users]);
 
-  // navigation functions update the hash (this drives the UI)
-  const navigateToList = () => { window.location.hash = '#/users'; };
-  const navigateToMap = () => { window.location.hash = '#/map'; };
-  const navigateToCreate = () => { window.location.hash = '#/users/create'; };
-  const navigateToEdit = (user) => { window.location.hash = `#/users/edit/${user.id}`; };
-  const navigateToLogin = () => { window.location.hash = '#/login'; };
-  const navigateToSignup = () => { window.location.hash = '#/signup'; };
 
-  const handleLogin = (user) => {
-    setAuthUser(user);
-    alert(`Connecté en tant que ${user.email}`);
-    // redirect based on role
-    if (user && (user.role === 'ADMIN' || user.role === 'MANAGER')) {
-      navigateToList();
-    } else {
-      // visitor or regular user: go to map
-      navigateToMap();
+
+  const handleLogin = async (user) => {
+    // attach role info based on loaded users (if available)
+    let found = users.find((u) => u.email === user.email);
+    if (!found) {
+      // try to refresh users from backend to pick up role if missing
+      const fresh = await fetchUsers();
+      found = fresh.find((u) => u.email === user.email);
     }
+    const role = found ? found.role : (user.role || 'USER');
+    const id = found ? found.id : null;
+    const auth = { id, email: user.email, token: user.token, role };
+    setAuthUser(auth);
+    console.log('authUser after login:', auth);
+    alert(`Connecté en tant que ${user.email}`);
+    // After login take user to map; managers/admins will see the link to CRUD
+    navigateToMap();
   };
 
   const handleSignup = (user) => {
-    const nextId = users.length ? Math.max(...users.map((u) => u.id)) + 1 : 1;
-    const newUser = {
-      id: nextId,
-      firebase_uid: `uid_${nextId}`,
-      email: user.email,
-      first_name: user.first_name || "",
-      last_name: user.last_name || "",
-      role: "USER",
-      is_blocked: false,
-      created_at: new Date().toLocaleDateString(),
-      updated_at: new Date().toLocaleDateString(),
-    };
-    setUsers((prev) => [newUser, ...prev]);
-    setAuthUser({ email: user.email });
+    // If backend returned a created user DTO (with id), use it; otherwise fall back to local creation
+    let created;
+    if (user && user.id) {
+      created = {
+        id: user.id,
+        firebase_uid: user.firebaseUid ?? user.firebase_uid ?? `uid_${user.id}`,
+        email: user.email,
+        first_name: user.firstName ?? user.first_name ?? '',
+        last_name: user.lastName ?? user.last_name ?? '',
+        role: user.role ?? 'USER',
+        is_blocked: user.blocked ?? user.is_blocked ?? false,
+        created_at: user.createdAt ?? user.created_at ?? new Date().toLocaleDateString(),
+        updated_at: user.updatedAt ?? user.updated_at ?? new Date().toLocaleDateString(),
+      };
+    } else {
+      const nextId = users.length ? Math.max(...users.map((u) => u.id)) + 1 : 1;
+      created = {
+        id: nextId,
+        firebase_uid: `uid_${nextId}`,
+        email: user.email,
+        first_name: user.first_name || "",
+        last_name: user.last_name || "",
+        role: "USER",
+        is_blocked: false,
+        created_at: new Date().toLocaleDateString(),
+        updated_at: new Date().toLocaleDateString(),
+      };
+    }
+
+    setUsers((prev) => [created, ...prev]);
+    // set authUser with role from created user and redirect to map
+    setAuthUser({ id: created.id, email: created.email, role: created.role || 'USER' });
     alert('Compte créé et connecté');
-    navigateToList();
+    navigateToMap();
   };
 
   const handleGuest = () => {
@@ -193,7 +264,7 @@ export default function App() {
       };
       setUsers((prev) => [newUser, ...prev]);
     }
-    navigateToList();
+    navigateToUsers();
   };
 
   const handleSaveUser = async (updated) => {
@@ -230,7 +301,7 @@ export default function App() {
         prev.map((u) => (u.id === updated.id ? { ...u, ...updated, updated_at: new Date().toLocaleDateString() } : u))
       );
     }
-    navigateToList();
+    navigateToUsers();
   };
 
   const handleDeleteUser = async (user) => {
@@ -252,7 +323,7 @@ export default function App() {
         return (
           <LoginPage
             onLogin={handleLogin}
-            onBack={navigateToList}
+            onBack={() => handlePageChange('map')}
             onSignup={navigateToSignup}
             onGuest={handleGuest}
           />
@@ -261,21 +332,28 @@ export default function App() {
         return (
           <SignupPage
             onSignup={handleSignup}
-            onBack={navigateToList}
+            onBack={() => handlePageChange('login')}
           />
         );
       case 'map':
         return (
           <MapPage
             authUser={authUser}
-            onLogout={handleLogout}
+            mapOptions={mapOptions}
+          />
+        );
+      case 'reports':
+        return (
+          <ReportsListPage
+            authUser={authUser}
+            onPageChange={handlePageChange}
           />
         );
       case 'create':
         return (
           <UserCreatePage
             onCreate={handleCreateUser}
-            onBack={navigateToList}
+            onBack={navigateToUsers}
           />
         );
       case 'edit':
@@ -283,29 +361,49 @@ export default function App() {
           <UserEditPage
             user={editingUser}
             onSave={handleSaveUser}
-            onBack={navigateToList}
+            onBack={navigateToUsers}
           />
         );
-      case 'list':
-      default:
+      case 'users':
         return (
           <UserListPage
             users={users}
-            onNavigateCreate={navigateToCreate}
-            onNavigateEdit={navigateToEdit}
+            loading={loadingUsers}
+            error={usersError}
+            onRefresh={fetchUsers}
+            onEdit={navigateToEdit}
+            onCreate={navigateToCreate}
             onDelete={handleDeleteUser}
+          />
+        );
+      default:
+        return (
+          <MapPage
             authUser={authUser}
-            onLogout={handleLogout}
+            mapOptions={mapOptions}
           />
         );
     }
   };
 
   return (
-    <div className="app-container">
-      <main className="app-main">
-        {renderPage()}
-      </main>
+    <div className="app">
+      {/* Sidebar Navigation - only show if user is authenticated */}
+      {authUser && (
+        <Navigation
+          currentPage={currentPage}
+          onPageChange={handlePageChange}
+          authUser={authUser}
+          onLogout={handleLogout}
+        />
+      )}
+      
+      {/* Main Content */}
+      <div className={`main-content ${authUser ? 'with-sidebar' : 'full-width'}`}>
+        <div className="content-wrapper">
+          {renderPage()}
+        </div>
+      </div>
     </div>
   );
 }
