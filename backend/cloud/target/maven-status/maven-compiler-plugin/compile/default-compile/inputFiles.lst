@@ -8,6 +8,7 @@
 /app/src/main/java/com/itu/cloud/controller/UserController.java
 /app/src/main/java/com/itu/cloud/dto/ConfigEntryDTO.java
 /app/src/main/java/com/itu/cloud/dto/EntrepriseSummaryDTO.java
+/app/src/main/java/com/itu/cloud/dto/LoginRequest.java
 /app/src/main/java/com/itu/cloud/dto/ReportSummaryDTO.java
 /app/src/main/java/com/itu/cloud/dto/SessionDTO.java
 /app/src/main/java/com/itu/cloud/dto/SyncLogDTO.java

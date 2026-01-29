@@ -4,9 +4,11 @@ import com.itu.cloud.dto.UserDTO;
 import com.itu.cloud.dto.ReportSummaryDTO;
 import com.itu.cloud.dto.EntrepriseSummaryDTO;
 import com.itu.cloud.entity.User;
+import com.itu.cloud.dto.SignupRequest;
 import com.itu.cloud.mapper.EntityToDtoMapper;
 import com.itu.cloud.service.UserService;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -78,8 +80,31 @@ public class UserController {
 
     @PostMapping
     public UserDTO create(@RequestBody User user) {
+        Optional<User> existing = userService.findByEmail(user.getEmail());
+        if (existing.isPresent()) {
+            throw new IllegalArgumentException("A user with the given email already exists.");
+        }
         User saved = userService.save(user);
         return EntityToDtoMapper.toUserDTO(saved, true, true);
+    }
+
+    @PostMapping("/signup")
+    public ResponseEntity<?> signup(@RequestBody SignupRequest req) {
+        if (req.getEmail() == null || req.getPassword() == null || req.getFirstName() == null || req.getLastName() == null) {
+            return ResponseEntity.badRequest().body("Missing fields");
+        }
+        if (userService.findByEmail(req.getEmail()).isPresent()) {
+            return ResponseEntity.status(409).body("Email already in use");
+        }
+        User u = new User();
+        u.setEmail(req.getEmail());
+        u.setPasswordHash(req.getPassword()); // TODO: hash the password
+        u.setFirstName(req.getFirstName());
+        u.setLastName(req.getLastName());
+        u.setVerified(Boolean.FALSE);
+        User saved = userService.save(u);
+        // Do not create or return a verification token per requested change
+        return ResponseEntity.status(201).body(EntityToDtoMapper.toUserDTO(saved, false, false));
     }
 
     @PutMapping("/{id}")

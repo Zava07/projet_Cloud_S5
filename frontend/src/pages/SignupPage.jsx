@@ -3,11 +3,15 @@ import React, { useState } from "react";
 export default function SignupPage({ onSignup, onBack }) {
   const [form, setForm] = useState({ email: "", password: "", confirm: "", first_name: "", last_name: "" });
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [pending, setPending] = useState(false);
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setSuccess("");
+
     if (!form.email || !form.password || !form.confirm || !form.first_name || !form.last_name) {
       setError("Veuillez remplir tous les champs.");
       return;
@@ -16,8 +20,39 @@ export default function SignupPage({ onSignup, onBack }) {
       setError("Les mots de passe ne correspondent pas.");
       return;
     }
+
     setError("");
-    if (onSignup) onSignup({ email: form.email, first_name: form.first_name, last_name: form.last_name });
+    setPending(true);
+    const base = import.meta.env.VITE_API_BASE || 'http://localhost:8080';
+
+    try {
+      const res = await fetch(`${base}/api/users/signup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: form.email,
+          password: form.password,
+          firstName: form.first_name,
+          lastName: form.last_name
+        })
+      });
+
+      if (res.status === 201) {
+        const data = await res.json();
+        setSuccess('Inscription réussie !');
+        setError("");
+        if (onSignup) onSignup(data);
+      } else if (res.status === 409) {
+        setError('Email déjà utilisé');
+      } else {
+        const txt = await res.text();
+        setError(txt || 'Erreur serveur');
+      }
+    } catch (err) {
+      setError(err.message || 'Erreur réseau');
+    } finally {
+      setPending(false);
+    }
   };
 
   return (
