@@ -86,7 +86,11 @@ public class SessionController {
                         s.setToken(java.util.UUID.randomUUID().toString());
                         s.setExpiresAt(LocalDateTime.now().plusDays(7));
                         Session saved = sessionService.save(s);
-                        return ResponseEntity.ok(EntityToDtoMapper.toSessionDTO(saved));
+                        // Return both session DTO and user DTO so frontend can get role immediately
+                        java.util.Map<String, Object> resp = new java.util.HashMap<>();
+                        resp.put("session", EntityToDtoMapper.toSessionDTO(saved));
+                        resp.put("user", com.itu.cloud.mapper.EntityToDtoMapper.toUserDTO(user, false, false));
+                        return ResponseEntity.ok(resp);
                     } else {
                         // increment login attempts and potentially block account
                         user.setLoginAttempts(user.getLoginAttempts() == null ? 1 : user.getLoginAttempts() + 1);

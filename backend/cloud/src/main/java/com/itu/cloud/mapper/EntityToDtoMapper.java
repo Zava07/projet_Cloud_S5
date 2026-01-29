@@ -44,6 +44,7 @@ public class EntityToDtoMapper {
         dto.setEmail(u.getEmail());
         dto.setFirstName(u.getFirstName());
         dto.setLastName(u.getLastName());
+        dto.setRole(u.getRole());
         dto.setBlocked(u.getBlocked());
         dto.setCreatedAt(u.getCreatedAt());
         dto.setUpdatedAt(u.getUpdatedAt());
