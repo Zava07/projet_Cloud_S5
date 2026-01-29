@@ -43,6 +43,9 @@ public class User {
     @Column(name = "last_name")
     private String lastName;
 
+    @Column(name = "verified")
+    private Boolean verified = Boolean.FALSE;
+
     @Column(length = 20)
     private String role = "utilisateur";
 
@@ -122,6 +125,14 @@ public class User {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+    public Boolean getVerified() {
+        return verified;
+    }
+
+    public void setVerified(Boolean verified) {
+        this.verified = verified;
     }
 
     public String getRole() {
@@ -209,6 +220,9 @@ public class User {
         }
         if (blocked == null) {
             blocked = Boolean.FALSE;
+        }
+        if (verified == null) {
+            verified = Boolean.FALSE;
         }
     }
 

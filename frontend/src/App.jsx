@@ -109,7 +109,13 @@ export default function App() {
   const handleLogin = (user) => {
     setAuthUser(user);
     alert(`Connecté en tant que ${user.email}`);
-    navigateToList();
+    // redirect based on role
+    if (user && (user.role === 'ADMIN' || user.role === 'MANAGER')) {
+      navigateToList();
+    } else {
+      // visitor or regular user: go to map
+      navigateToMap();
+    }
   };
 
   const handleSignup = (user) => {
