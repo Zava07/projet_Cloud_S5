@@ -65,4 +65,21 @@ public class ReportController {
         reportService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/nouveau")
+    public List<ReportSummaryDTO> listNouveauReports() {
+        List<Report> reports = reportService.findByStatus("nouveau");
+        return reports.stream().map(EntityToDtoMapper::toReportSummary).collect(Collectors.toList());
+    }
+
+    @GetMapping("/en-cours")
+    public List<ReportSummaryDTO> listEnCoursReports() {
+        List<Report> reports = reportService.findByStatus("en-cours");
+        return reports.stream().map(EntityToDtoMapper::toReportSummary).collect(Collectors.toList());
+    }
+    @GetMapping("/termine")
+    public List<ReportSummaryDTO> listTermineReports() {
+        List<Report> reports = reportService.findByStatus("termine");
+        return reports.stream().map(EntityToDtoMapper::toReportSummary).collect(Collectors.toList());
+    }
 }
