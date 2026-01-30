@@ -58,7 +58,7 @@ export default function ReportModal({
       longitude: position.lng,
       description: form.description.trim(),
       surface: form.surface ? parseFloat(form.surface) : null,
-      budget: form.budget ? parseFloat(form.budget) : null,
+      // budget: form.budget ? parseFloat(form.budget) : null,
       status: 'nouveau'
     };
 
@@ -146,7 +146,7 @@ export default function ReportModal({
                 )}
               </div>
 
-              <div className="form-group">
+              {/* <div className="form-group">
                 <label className="form-label">
                   Budget estimé (€)
                 </label>
@@ -164,7 +164,7 @@ export default function ReportModal({
                 {errors.budget && (
                   <div className="invalid-feedback">{errors.budget}</div>
                 )}
-              </div>
+              </div> */}
             </div>
 
             <div className="modal-actions">

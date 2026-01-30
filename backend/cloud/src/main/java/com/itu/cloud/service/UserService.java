@@ -4,6 +4,7 @@ import com.itu.cloud.entity.Entreprise;
 import com.itu.cloud.entity.User;
 import com.itu.cloud.repository.EntrepriseRepository;
 import com.itu.cloud.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Value;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,41 @@ public class UserService {
     public UserService(UserRepository userRepository, EntrepriseRepository entrepriseRepository) {
         this.userRepository = userRepository;
         this.entrepriseRepository = entrepriseRepository;
+    }
+
+    @Value("${app.maxFailedLogins:3}")
+    private int maxFailedLogins;
+
+    /**
+     * Increment login attempts and block the user if threshold reached. Returns the saved user.
+     */
+    public User registerFailedLoginAttempt(User user) {
+        Integer attempts = user.getLoginAttempts();
+        attempts = (attempts == null) ? 1 : attempts + 1;
+        user.setLoginAttempts(attempts);
+        if (attempts >= maxFailedLogins) {
+            user.setBlocked(Boolean.TRUE);
+        }
+        return userRepository.save(user);
+    }
+
+    /**
+     * Reset failed login attempts and unblock the user.
+     */
+    public User resetFailedLoginAttempts(User user) {
+        user.setLoginAttempts(0);
+        user.setBlocked(Boolean.FALSE);
+        return userRepository.save(user);
+    }
+
+    /**
+     * Admin action to unblock a user by id.
+     */
+    public User unblockUser(Long id) {
+        User user = userRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("User not found"));
+        user.setLoginAttempts(0);
+        user.setBlocked(Boolean.FALSE);
+        return userRepository.save(user);
     }
 
     @Transactional(readOnly = true)
