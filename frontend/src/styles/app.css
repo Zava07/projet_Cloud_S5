@@ -192,6 +192,20 @@ body {
   font-weight: 500;
 }
 
+/* Ensure brand text is readable when placed on the dark sidebar */
+.sidebar .brand-title {
+  /* Override any gradient text used elsewhere */
+  background: none !important;
+  -webkit-background-clip: initial !important;
+  -webkit-text-fill-color: initial !important;
+  background-clip: initial !important;
+  color: white !important;
+}
+
+.sidebar .brand-subtitle {
+  color: var(--gray-300) !important;
+}
+
 .sidebar-toggle {
   width: 32px;
   height: 32px;

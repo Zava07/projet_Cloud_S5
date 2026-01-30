@@ -71,7 +71,7 @@ export default function Navigation({ currentPage, onPageChange, authUser, onLogo
   }
 
   return (
-    <aside className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}>
+    <aside className={`sidebar ${isCollapsed ? 'collapsed' : ''}`} aria-label="Navigation principale">
       {/* Header */}
       <div className="sidebar-header">
         <div className="brand-container">
@@ -100,16 +100,17 @@ export default function Navigation({ currentPage, onPageChange, authUser, onLogo
       </div>
 
       {/* Navigation Menu */}
-      <nav className="sidebar-nav">
+      <nav className="sidebar-nav" aria-label="Menu">
         <ul className="nav-list">
           {navItems.map((item) => (
             <li key={item.key} className="nav-item">
               <button
                 className={`nav-link ${currentPage === item.key ? 'active' : ''} ${item.isAdmin ? 'admin-item' : ''}`}
-                onClick={() => onPageChange(item.key)}
+                onClick={() => onPageChange && onPageChange(item.key)}
                 title={isCollapsed ? item.description : ''}
+                aria-current={currentPage === item.key ? 'page' : undefined}
               >
-                <span className="nav-icon">
+                <span className="nav-icon" aria-hidden>
                   {item.icon}
                 </span>
                 {!isCollapsed && (
