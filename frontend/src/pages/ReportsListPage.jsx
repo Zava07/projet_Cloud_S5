@@ -1,20 +1,34 @@
 // src/pages/ReportsListPage.jsx
 import React, { useState, useEffect } from 'react';
 
-export default function ReportsListPage({ authUser, onPageChange }) {
-  const [reports, setReports] = useState([]);
+export default function ReportsListPage({ authUser, onPageChange, mapOptions = {} }) {
+  const [userReports, setUserReports] = useState([]);
+  const [adminReportsByStatus, setAdminReportsByStatus] = useState({ nouveau: [], encours: [], termine: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState(String(mapOptions.initialTab || 'nouveau').toLowerCase());
 
   const apiBase = () => import.meta.env.VITE_API_BASE || 'http://localhost:8080';
 
   useEffect(() => {
-    fetchReports();
-  }, [authUser]);
+    // if adminView is requested via navigation, use admin fetch; otherwise fetch user reports
+    if (mapOptions?.adminView) {
+      fetchAdminReportsByStatus();
+    } else {
+      fetchUserReports();
+    }
+  }, [authUser, mapOptions]);
 
-  const fetchReports = async () => {
+  // update active tab if navigation passed an initialTab
+  useEffect(() => {
+    if (mapOptions && mapOptions.initialTab) {
+      setActiveTab(String(mapOptions.initialTab).toLowerCase());
+    }
+  }, [mapOptions]);
+
+  const fetchUserReports = async () => {
     if (!authUser || authUser.guest) {
-      setReports([]);
+      setUserReports([]);
       setLoading(false);
       return;
     }
@@ -22,15 +36,53 @@ export default function ReportsListPage({ authUser, onPageChange }) {
     setLoading(true);
     setError(null);
     try {
-      // Récupérer les rapports de l'utilisateur connecté
       const response = await fetch(`${apiBase()}/api/reports?userId=${authUser.id}`);
-      if (!response.ok) {
-        throw new Error(`Erreur HTTP: ${response.status}`);
-      }
+      if (!response.ok) throw new Error(`Erreur HTTP: ${response.status}`);
       const data = await response.json();
-      setReports(data);
+      setUserReports(data);
     } catch (err) {
-      console.error('Erreur lors du chargement des rapports:', err);
+      console.error('Erreur lors du chargement des rapports utilisateur:', err);
+      setError('Impossible de charger les rapports');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchAdminReportsByStatus = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const endpoints = [
+        { key: 'nouveau', path: '/api/reports/nouveau' },
+        { key: 'encours', path: '/api/reports/en-cours' },
+        { key: 'termine', path: '/api/reports/termine' },
+      ];
+
+      const calls = endpoints.map(async (e) => {
+        // prefer dedicated endpoint (e.path), but fallback to query parameter with canonical status token
+        try {
+          const res = await fetch(`${apiBase()}${e.path}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (Array.isArray(data) && data.length > 0) return { key: e.key, data };
+          }
+        } catch (err) {
+          // ignore and fallback
+        }
+        // fallback mapping
+        const fallbackStatus = e.key === 'encours' ? 'en_cours' : e.key;
+        const res2 = await fetch(`${apiBase()}/api/reports?status=${encodeURIComponent(fallbackStatus)}`);
+        if (!res2.ok) throw new Error(`HTTP ${res2.status}`);
+        const data2 = await res2.json();
+        return { key: e.key, data: data2 };
+      });
+
+      const results = await Promise.all(calls);
+      const grouped = { nouveau: [], encours: [], termine: [] };
+      results.forEach(r => { grouped[r.key] = r.data || []; });
+      setAdminReportsByStatus(grouped);
+    } catch (err) {
+      console.error('Erreur lors du chargement des rapports par statut (admin):', err);
       setError('Impossible de charger les rapports');
     } finally {
       setLoading(false);
@@ -43,7 +95,7 @@ export default function ReportsListPage({ authUser, onPageChange }) {
         return 'badge badge-primary';
       case 'en_cours':
         return 'badge badge-warning';
-      case 'resolu':
+      case 'termine':
         return 'badge badge-success';
       case 'ferme':
         return 'badge badge-secondary';
@@ -91,18 +143,32 @@ export default function ReportsListPage({ authUser, onPageChange }) {
       <div className="page-header">
         <div className="page-header-content">
           <div>
-            <h2>📋 Mes Rapports</h2>
+            <h2>📋 {mapOptions?.adminView ? 'Gestion des Rapports' : 'Mes Rapports'}</h2>
             <p className="page-subtitle">
-              {reports.length} rapport{reports.length !== 1 ? 's' : ''} trouvé{reports.length !== 1 ? 's' : ''}
+              {mapOptions?.adminView
+                ? `${(adminReportsByStatus.nouveau.length || 0) + (adminReportsByStatus.encours.length || 0) + (adminReportsByStatus.termine.length || 0)} rapport(s) trouvés`
+                : `${userReports.length} rapport(s) trouvés`
+              }
             </p>
           </div>
-          <button 
-            className="btn btn-primary"
-            onClick={() => onPageChange('map')}
-          >
-            ➕ Nouveau rapport
-          </button>
+          <div style={{display:'flex',gap:12}}>
+            {!mapOptions?.adminView && (
+              <button 
+                className="btn btn-primary"
+                onClick={() => onPageChange('map')}
+              >
+                ➕ Nouveau rapport
+              </button>
+            )}
+          </div>
         </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="reports-tabs" role="tablist" aria-label="Filtrer par statut">
+        <button className={`tab ${activeTab === 'nouveau' ? 'active' : ''}`} onClick={() => setActiveTab('nouveau')}>Nouveau</button>
+        <button className={`tab ${activeTab === 'encours' ? 'active' : ''}`} onClick={() => setActiveTab('encours')}>En cours</button>
+        <button className={`tab ${activeTab === 'termine' ? 'active' : ''}`} onClick={() => setActiveTab('termine')}>Terminé</button>
       </div>
 
       {loading ? (
@@ -118,94 +184,71 @@ export default function ReportsListPage({ authUser, onPageChange }) {
             <div className="alert alert-danger">
               <strong>Erreur :</strong> {error}
             </div>
-            <button className="btn btn-outline" onClick={fetchReports}>
+            <button className="btn btn-outline" onClick={() => mapOptions?.adminView ? fetchAdminReportsByStatus() : fetchUserReports()}>
               🔄 Réessayer
             </button>
           </div>
         </div>
-      ) : reports.length === 0 ? (
-        <div className="card">
-          <div className="card-body text-center">
-            <div className="empty-state">
-              <span className="empty-icon">📭</span>
-              <h3>Aucun rapport</h3>
-              <p>Vous n'avez pas encore créé de rapport. Cliquez sur la carte pour signaler un problème !</p>
-              <button className="btn btn-primary" onClick={() => onPageChange('map')}>
-                🗺️ Aller à la carte
-              </button>
-            </div>
-          </div>
-        </div>
       ) : (
-        <div className="reports-grid">
-          {reports.map((report) => (
-            <div key={report.id} className="card report-card">
-              <div className="card-header">
-                <div className="report-header">
-                  <div className="report-id">
-                    <span className="report-number">#{report.id}</span>
-                    <span className={getStatusBadgeClass(report.status)}>
-                      {report.status || 'Nouveau'}
-                    </span>
-                  </div>
-                  <div className="report-date">
-                    {formatDate(report.createdAt)}
-                  </div>
-                </div>
-              </div>
-              <div className="card-body">
-                <div className="report-location">
-                  <span className="location-icon">📍</span>
-                  <span className="coordinates">
-                    {report.latitude?.toFixed(6)}, {report.longitude?.toFixed(6)}
-                  </span>
-                </div>
-                {report.description && (
-                  <div className="report-description">
-                    <p>{report.description}</p>
-                  </div>
-                )}
-                {report.surface && (
-                  <div className="report-surface">
-                    <span className="surface-icon">📐</span>
-                    Surface: {report.surface} m²
-                  </div>
-                )}
-                {report.budget && (
-                  <div className="report-budget">
-                    <span className="budget-icon">💰</span>
-                    Budget estimé: {report.budget} €
-                  </div>
-                )}
-              </div>
-              <div className="card-footer">
-                <button 
-                  className="btn btn-outline btn-sm"
-                  onClick={() => {
-                    // Navigation vers la carte centrée sur ce rapport
-                    onPageChange('map', { 
-                      centerLat: report.latitude, 
-                      centerLng: report.longitude 
-                    });
-                  }}
-                >
-                  🗺️ Voir sur la carte
-                </button>
-                <button 
-                  className="btn btn-outline btn-sm"
-                  onClick={() => {
-                    // Navigation vers la carte centrée sur ce rapport
-                    onPageChange('map', { 
-                      centerLat: report.latitude, 
-                      centerLng: report.longitude 
-                    });
-                  }}
-                >
-                  Attribuer a un entreprise
-                </button>
-              </div>
-            </div>
-          ))}
+        <div className="reports-sections">
+          {/* Afficher seulement la section active */}
+          {mapOptions?.adminView ? (
+            <section className="reports-section">
+              <h3>{activeTab === 'nouveau' ? '🆕 Nouveau' : activeTab === 'encours' ? '🔄 En cours' : '✅ Terminé'} ({adminReportsByStatus[activeTab]?.length || 0})</h3>
+              { (adminReportsByStatus[activeTab] || []).length === 0 ? (
+                <p className="text-muted">Aucun rapport.</p>
+              ) : (
+                <ul className="reports-list">
+                  {(adminReportsByStatus[activeTab] || []).map((report) => (
+                    <li key={report.id} className="report-list-item card">
+                      <div className="card-body">
+                        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                          <div>
+                            <strong>#{report.id}</strong> — {report.description || '—'}
+                            <div className="text-muted">{formatDate(report.createdAt)}</div>
+                          </div>
+                          <div>
+                            <span className={getStatusBadgeClass(report.status)}>{report.status || ''}</span>
+                            <div style={{marginTop:8}}>
+                              <button className="btn btn-outline btn-sm" onClick={() => onPageChange('map', { centerLat: report.latitude, centerLng: report.longitude })}>Voir</button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+          ) : (
+            <section className="reports-section">
+              <h3>{activeTab === 'nouveau' ? '🆕 Nouveau' : activeTab === 'encours' ? '🔄 En cours' : '✅ Terminé'} ({userReports.filter(r => r.status === (activeTab === 'encours' ? 'en_cours' : activeTab)).length})</h3>
+              {userReports.filter(r => r.status === (activeTab === 'encours' ? 'en_cours' : activeTab)).length === 0 ? (
+                <p className="text-muted">Aucun rapport.</p>
+              ) : (
+                <ul className="reports-list">
+                  {userReports.filter(r => r.status === (activeTab === 'encours' ? 'en_cours' : activeTab)).map((report) => (
+                    <li key={report.id} className="report-list-item card">
+                      <div className="card-body">
+                        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                          <div>
+                            <strong>#{report.id}</strong> — {report.description || '—'}
+                            <div className="text-muted">{formatDate(report.createdAt)}</div>
+                          </div>
+                          <div>
+                            <span className={getStatusBadgeClass(report.status)}>{report.status || ''}</span>
+                            <div style={{marginTop:8}}>
+                              <button className="btn btn-outline btn-sm" onClick={() => onPageChange('map', { centerLat: report.latitude, centerLng: report.longitude })}>Voir</button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+          )}
         </div>
       )}
     </div>
