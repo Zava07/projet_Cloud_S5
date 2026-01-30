@@ -15,15 +15,21 @@ export default function LoginPage({ onLogin, onBack, onSignup, onGuest }) {
     setError("");
 
     const base = import.meta.env.VITE_API_BASE || 'http://localhost:8080';
-    try {
+      try {
       const res = await fetch(`${base}/api/sessions/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: form.email, mdp: form.password }),
       });
       if (!res.ok) {
-        if (res.status === 401) setError('Email ou mot de passe incorrect');
-        else setError(`Erreur serveur: ${res.status}`);
+        if (res.status === 401) {
+          setError('Email ou mot de passe incorrect');
+        } else if (res.status === 423) {
+          const text = await res.text();
+          setError(text || 'Cet utilisateur est bloqué');
+        } else {
+          setError(`Erreur serveur: ${res.status}`);
+        }
         return;
       }
       const data = await res.json();
@@ -31,7 +37,7 @@ export default function LoginPage({ onLogin, onBack, onSignup, onGuest }) {
       if (data && data.user && data.session) {
         const u = data.user;
         const s = data.session;
-        if (onLogin) onLogin({ email: u.email, token: s.token, role: u.role  });
+        if (onLogin) onLogin({ id: u.id, email: u.email, token: s.token, role: u.role  });
       } else {
         // fallback: old session-only response
         const session = data;

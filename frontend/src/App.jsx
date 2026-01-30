@@ -161,8 +161,8 @@ export default function App() {
       const fresh = await fetchUsers();
       found = fresh.find((u) => u.email === user.email);
     }
-    const role = found ? found.role : (user.role || 'USER');
-    const id = found ? found.id : null;
+    const role = user.role || (found ? found.role : 'USER');
+    const id = user.id ?? (found ? found.id : null);
     const auth = { id, email: user.email, token: user.token, role };
     setAuthUser(auth);
     console.log('authUser after login:', auth);
@@ -316,6 +316,23 @@ export default function App() {
     }
   };
 
+  const handleUnblockUser = async (user) => {
+    if (!window.confirm(`Débloquer ${user.email} ?`)) return;
+    try {
+      const res = await fetch(`${apiBase()}/api/users/${user.id}/unblock`, { method: 'POST' });
+      if (!res.ok) {
+        const text = await res.text();
+        alert('Erreur: ' + text);
+        return;
+      }
+      await fetchUsers();
+      alert('Utilisateur débloqué');
+    } catch (err) {
+      console.error('Unblock failed', err);
+      alert('Erreur réseau');
+    }
+  };
+
   // Render current page
   const renderPage = () => {
     switch (currentPage) {
@@ -347,6 +364,7 @@ export default function App() {
           <ReportsListPage
             authUser={authUser}
             onPageChange={handlePageChange}
+            mapOptions={mapOptions}
           />
         );
       case 'create':
@@ -374,6 +392,9 @@ export default function App() {
             onEdit={navigateToEdit}
             onCreate={navigateToCreate}
             onDelete={handleDeleteUser}
+            onUnblock={handleUnblockUser}
+            authUser={authUser}
+            onLogout={handleLogout}
           />
         );
       default:

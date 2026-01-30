@@ -3,6 +3,9 @@ import React, { useState } from 'react';
 
 export default function Navigation({ currentPage, onPageChange, authUser, onLogout }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [openMenus, setOpenMenus] = useState({});
+
+  const toggleMenu = (key) => setOpenMenus((prev) => ({ ...prev, [key]: !prev[key] }));
 
   // Éléments de navigation de base pour tous les utilisateurs connectés
   const navItems = [
@@ -67,11 +70,30 @@ export default function Navigation({ currentPage, onPageChange, authUser, onLogo
       ), 
       description: 'Administration des utilisateurs',
       isAdmin: true 
-    });
+    },
+    { 
+        key: 'gestion-reports', 
+        label: 'Gestion Reports', 
+        icon: (
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/>
+          </svg>
+        ), 
+        description: 'Administration des rapports',
+        isAdmin: true,
+        children: [
+          { key: 'gestion-reports-nouveau', label: 'Nouveau', tab: 'nouveau' },
+          { key: 'gestion-reports-encours', label: 'En cours', tab: 'encours' },
+          { key: 'gestion-reports-termine', label: 'Terminé', tab: 'termine' }
+        ]
+      });
   }
 
   return (
-    <aside className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}>
+    <aside className={`sidebar ${isCollapsed ? 'collapsed' : ''}`} aria-label="Navigation principale">
       {/* Header */}
       <div className="sidebar-header">
         <div className="brand-container">
@@ -100,27 +122,52 @@ export default function Navigation({ currentPage, onPageChange, authUser, onLogo
       </div>
 
       {/* Navigation Menu */}
-      <nav className="sidebar-nav">
+      <nav className="sidebar-nav" aria-label="Menu">
         <ul className="nav-list">
-          {navItems.map((item) => (
-            <li key={item.key} className="nav-item">
-              <button
-                className={`nav-link ${currentPage === item.key ? 'active' : ''} ${item.isAdmin ? 'admin-item' : ''}`}
-                onClick={() => onPageChange(item.key)}
-                title={isCollapsed ? item.description : ''}
-              >
-                <span className="nav-icon">
-                  {item.icon}
-                </span>
-                {!isCollapsed && (
-                  <>
-                    <span className="nav-label">{item.label}</span>
-                    {item.isAdmin && <span className="admin-badge">ADMIN</span>}
-                  </>
+          {navItems.map((item) => {
+            const hasChildren = Array.isArray(item.children) && item.children.length > 0;
+            const open = !!openMenus[item.key];
+            return (
+              <li key={item.key} className={`nav-item ${hasChildren ? 'has-children' : ''} ${open ? 'open' : ''}`}>
+                <button
+                  className={`nav-link ${currentPage === item.key || (currentPage === 'reports' && hasChildren && open) ? 'active' : ''} ${item.isAdmin ? 'admin-item' : ''}`}
+                  onClick={() => {
+                    if (hasChildren) toggleMenu(item.key);
+                    else onPageChange && onPageChange(item.key);
+                  }}
+                  title={isCollapsed ? item.description : ''}
+                  aria-current={currentPage === item.key ? 'page' : undefined}
+                  aria-expanded={hasChildren ? open : undefined}
+                >
+                  <span className="nav-icon" aria-hidden>
+                    {item.icon}
+                  </span>
+                  {!isCollapsed && (
+                    <>
+                      <span className="nav-label">{item.label}</span>
+                      {item.isAdmin && <span className="admin-badge">ADMIN</span>}
+                      {hasChildren && <span className={`submenu-arrow ${open ? 'open' : ''}`} aria-hidden>{open ? '▾' : '▸'}</span>}
+                    </>
+                  )}
+                </button>
+
+                {hasChildren && open && !isCollapsed && (
+                  <ul className="nav-submenu">
+                    {item.children.map((child) => (
+                      <li key={child.key} className="nav-subitem">
+                        <button
+                          className={`nav-sublink ${currentPage === 'reports' && child.tab ? 'active' : ''}`}
+                          onClick={() => onPageChange && onPageChange('reports', { initialTab: child.tab, adminView: true })}
+                        >
+                          {child.label}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
                 )}
-              </button>
-            </li>
-          ))}
+              </li>
+            );
+          })}
         </ul>
       </nav>
 
