@@ -119,4 +119,10 @@ public class UserController {
         userService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/{id}/unblock")
+    public ResponseEntity<UserDTO> unblock(@PathVariable Long id) {
+        User u = userService.unblockUser(id);
+        return ResponseEntity.ok(EntityToDtoMapper.toUserDTO(u, true, true));
+    }
 }
