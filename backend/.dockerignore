@@ -1,9 +1,7 @@
 target/
 *.log
-.mvn/
 .m2/
 .idea/
 *.iml
 .git
 .gitignore
-Dockerfile

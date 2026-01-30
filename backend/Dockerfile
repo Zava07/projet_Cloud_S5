@@ -1,19 +1,20 @@
 # Backend Dockerfile (Spring Boot, Java 17, Maven multi-stage build)
 
-# Stage 1 - build
+# Stage 1 - build (also used for dev mode via docker-compose target: build)
 FROM maven:3.9.4-eclipse-temurin-17 AS build
 WORKDIR /app
 
-# copy only pom first to leverage Docker cache
-COPY pom.xml mvnw* ./
-COPY .mvn .mvn
-# ensure the wrapper is executable and prefer it when available (fixes images without mvn)
-RUN if [ -f ./mvnw ]; then chmod +x ./mvnw; fi && \
-    if [ -x ./mvnw ]; then ./mvnw -B -f pom.xml -DskipTests dependency:go-offline; else mvn -B -f pom.xml -DskipTests dependency:go-offline; fi
+# For dev mode: copy wrapper files if they exist
+COPY mvnw* ./
+COPY .mvn .mvn/
+RUN if [ -f ./mvnw ]; then chmod +x ./mvnw; fi
+
+# copy pom first to leverage Docker cache
+COPY pom.xml ./
 
 # copy source and build
 COPY src ./src
-RUN if [ -x ./mvnw ]; then ./mvnw -B -DskipTests package; else mvn -B -DskipTests package; fi
+RUN mvn -B -DskipTests package
 
 # Stage 2 - runtime
 
