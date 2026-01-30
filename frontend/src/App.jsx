@@ -364,6 +364,7 @@ export default function App() {
           <ReportsListPage
             authUser={authUser}
             onPageChange={handlePageChange}
+            mapOptions={mapOptions}
           />
         );
       case 'create':

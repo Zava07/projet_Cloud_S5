@@ -141,7 +141,7 @@ export default function MapPage({ authUser, mapOptions = {} }) {
         return '#ef4444'; // Rouge
       case 'en_cours':
         return '#f59e0b'; // Orange
-      case 'resolu':
+      case 'termine':
         return '#10b981'; // Vert
       case 'ferme':
         return '#64748b'; // Gris
@@ -192,7 +192,7 @@ export default function MapPage({ authUser, mapOptions = {} }) {
           </div>
           <div className="stat-card">
             <div className="stat-number">
-              {reports.filter(r => r.status === 'resolu').length}
+              {reports.filter(r => r.status === 'termine').length}
             </div>
             <div className="stat-label">Résolus</div>
           </div>
