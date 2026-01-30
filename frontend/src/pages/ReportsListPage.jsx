@@ -191,6 +191,18 @@ export default function ReportsListPage({ authUser, onPageChange }) {
                 >
                   🗺️ Voir sur la carte
                 </button>
+                <button 
+                  className="btn btn-outline btn-sm"
+                  onClick={() => {
+                    // Navigation vers la carte centrée sur ce rapport
+                    onPageChange('map', { 
+                      centerLat: report.latitude, 
+                      centerLng: report.longitude 
+                    });
+                  }}
+                >
+                  Attribuer a un entreprise
+                </button>
               </div>
             </div>
           ))}
