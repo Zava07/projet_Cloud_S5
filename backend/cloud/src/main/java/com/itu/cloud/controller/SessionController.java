@@ -77,28 +77,29 @@ public class SessionController {
 
         return userService.findByEmail(req.getEmail())
                 .map(user -> {
+                    if (Boolean.TRUE.equals(user.getBlocked())) {
+                        return ResponseEntity.status(423).body("Cet utilisateur est bloqué");
+                    }
                     // For now compare plaintext mdp to stored passwordHash (which in test data contains placeholder values)
                     // In production replace with proper password hashing (BCrypt) and verification
                     if (user.getPasswordHash() != null && user.getPasswordHash().equals(req.getMdp())) {
-                        // create session
+                        // successful login: reset attempts and create session
+                        userService.resetFailedLoginAttempts(user);
                         Session s = new Session();
                         s.setUser(user);
                         s.setToken(java.util.UUID.randomUUID().toString());
                         s.setExpiresAt(LocalDateTime.now().plusDays(7));
                         Session saved = sessionService.save(s);
-                        // Return both session DTO and user DTO so frontend can get role immediately
                         java.util.Map<String, Object> resp = new java.util.HashMap<>();
                         resp.put("session", EntityToDtoMapper.toSessionDTO(saved));
                         resp.put("user", com.itu.cloud.mapper.EntityToDtoMapper.toUserDTO(user, false, false));
                         return ResponseEntity.ok(resp);
                     } else {
-                        // increment login attempts and potentially block account
-                        user.setLoginAttempts(user.getLoginAttempts() == null ? 1 : user.getLoginAttempts() + 1);
-                        if (user.getLoginAttempts() != null && user.getLoginAttempts() >= 5) {
-                            user.setBlocked(true);
+                        // register failed attempt via service which may block the user
+                        com.itu.cloud.entity.User updated = userService.registerFailedLoginAttempt(user);
+                        if (Boolean.TRUE.equals(updated.getBlocked())) {
+                            return ResponseEntity.status(423).body("Cet utilisateur est bloqué");
                         }
-                        // persist user changes
-                        userService.save(user);
                         return ResponseEntity.status(401).body("Invalid credentials");
                     }
                 })

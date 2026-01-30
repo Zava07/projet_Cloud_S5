@@ -1,7 +1,25 @@
 // src/pages/UserListPage.jsx
 import React from "react";
 
-export default function UserListPage({ users, onNavigateCreate, onNavigateEdit, onDelete, authUser, onLogout }) {
+export default function UserListPage(props) {
+  // support different prop names used across the app
+  const {
+    users = [],
+    loading = false,
+    error = null,
+    onNavigateCreate,
+    onNavigateEdit,
+    onCreate,
+    onEdit,
+    onDelete,
+    onRefresh,
+    authUser,
+    onLogout,
+    onUnblock,
+  } = props;
+
+  const handleCreate = onNavigateCreate || onCreate;
+  const handleEdit = onNavigateEdit || onEdit;
   return (
     <div>
       {/* App header moved here */}
@@ -39,14 +57,18 @@ export default function UserListPage({ users, onNavigateCreate, onNavigateEdit, 
           <p className="page-subtitle">{users.length} utilisateur{users.length > 1 ? 's' : ''} au total</p>
         </div>
         {(authUser && ((authUser.role && (String(authUser.role).toLowerCase().includes('manager') || String(authUser.role).toLowerCase().includes('admin'))) || authUser.is_manager)) ? (
-          <button className="btn btn-primary" onClick={onNavigateCreate}>
+          <button className="btn btn-primary" onClick={handleCreate}>
             <span>+</span> Nouvel utilisateur
           </button>
         ) : null}
           <h2>Liste des utilisateurs</h2>
         </div>
         
-        {users.length === 0 ? (
+            {loading ? (
+              <div>Chargement...</div>
+            ) : error ? (
+              <div className="text-danger">Erreur: {String(error)}</div>
+            ) : users.length === 0 ? (
           <div className="empty-state">
             <div className="empty-state-icon">👥</div>
             <div className="empty-state-title">Aucun utilisateur</div>
@@ -73,12 +95,12 @@ export default function UserListPage({ users, onNavigateCreate, onNavigateEdit, 
               </thead>
               <tbody>
                 {users.map((user) => (
-                  <tr key={user.id}>
+                          <tr key={user.id}>
                     <td><span className="text-muted">#{user.id}</span></td>
                     <td><strong>{user.email}</strong></td>
                     <td>{user.first_name}</td>
                     <td>{user.last_name}</td>
-                    <td>
+                            <td>
                       <span className={`badge ${user.role === 'ADMIN' ? 'badge-primary' : 'badge-secondary'}`}>
                         {user.role}
                       </span>
@@ -96,7 +118,7 @@ export default function UserListPage({ users, onNavigateCreate, onNavigateEdit, 
                           <>
                             <button 
                               className="btn btn-outline btn-sm" 
-                              onClick={() => onNavigateEdit(user)}
+                              onClick={() => handleEdit(user)}
                             >
                               Modifier
                             </button>
@@ -106,6 +128,15 @@ export default function UserListPage({ users, onNavigateCreate, onNavigateEdit, 
                             >
                               Supprimer
                             </button>
+                            {user.is_blocked ? (
+                              <button
+                                className="btn btn-warning btn-sm"
+                                onClick={() => { if (onUnblock) onUnblock(user); }}
+                                style={{ marginLeft: 8 }}
+                              >
+                                Débloquer
+                              </button>
+                            ) : null}
                           </>
                         ) : (
                           <span className="text-muted">Accès restreint</span>
