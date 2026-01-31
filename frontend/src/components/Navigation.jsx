@@ -220,4 +220,5 @@ export default function Navigation({ currentPage, onPageChange, authUser, onLogo
       </div>
     </aside>
   );
+  
 }
