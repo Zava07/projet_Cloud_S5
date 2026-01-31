@@ -12,11 +12,15 @@ import LoginPage from './pages/LoginPage.jsx';
 import SignupPage from './pages/SignupPage.jsx';
 import MapPage from './pages/MapPage.jsx';
 import ReportsListPage from './pages/ReportsListPage.jsx';
+import EntrepriseListPage from './pages/EntrepriseListPage.jsx';
+import EntrepriseCreatePage from './pages/EntrepriseCreatePage.jsx';
+import EntrepriseEditPage from './pages/EntrepriseEditPage.jsx';
 
 export default function App() {
-  // Navigation state: 'login' | 'signup' | 'map' | 'reports' | 'users' | 'create' | 'edit'
+  // Navigation state: 'login' | 'signup' | 'map' | 'reports' | 'users' | 'create' | 'edit' | 'entreprises' | 'entreprise-create' | 'entreprise-edit'
   const [currentPage, setCurrentPage] = useState('login'); // Démarrer sur login par défaut
   const [editingUser, setEditingUser] = useState(null);
+  const [editingEntreprise, setEditingEntreprise] = useState(null);
   const [mapOptions, setMapOptions] = useState({}); // Pour passer des options à la carte
 
   // Auth state
@@ -70,6 +74,13 @@ export default function App() {
   const navigateToEdit = (user) => { window.location.hash = `#/users/edit/${user.id}`; };
   const navigateToLogin = () => { window.location.hash = '#/'; }; // Racine pour login
   const navigateToSignup = () => { window.location.hash = '#/signup'; };
+  // Entreprises navigation
+  const navigateToEntreprises = () => { window.location.hash = '#/entreprises'; };
+  const navigateToEntrepriseCreate = () => { window.location.hash = '#/entreprises/create'; };
+  const navigateToEntrepriseEdit = (entreprise) => { 
+    setEditingEntreprise(entreprise);
+    window.location.hash = `#/entreprises/edit/${entreprise.id}`; 
+  };
 
   // Page change handler for navigation component
   const handlePageChange = (page, options = {}) => {
@@ -78,6 +89,7 @@ export default function App() {
     if (page === 'map') navigateToMap();
     else if (page === 'reports') navigateToReports();
     else if (page === 'users') navigateToUsers();
+    else if (page === 'entreprises') navigateToEntreprises();
     else if (page === 'login') navigateToLogin();
     else if (page === 'signup') navigateToSignup();
   };
@@ -104,6 +116,14 @@ export default function App() {
       return { page: 'edit', id };
     }
     if (hash.startsWith('/users')) return { page: 'users' };
+    // Entreprises routes
+    if (hash.startsWith('/entreprises/create')) return { page: 'entreprise-create' };
+    if (hash.startsWith('/entreprises/edit/')) {
+      const parts = hash.split('/');
+      const id = Number(parts[3]);
+      return { page: 'entreprise-edit', id };
+    }
+    if (hash.startsWith('/entreprises')) return { page: 'entreprises' };
     return { page: 'login' };
   };
 
@@ -127,6 +147,15 @@ export default function App() {
       if (['users', 'create', 'edit'].includes(page)) {
         if (!authUser || authUser.guest || !isManagerOrAdmin(authUser.role)) {
           alert('Accès refusé. Seuls les managers peuvent accéder à la gestion des utilisateurs.');
+          setCurrentPage(authUser ? 'map' : 'login');
+          return;
+        }
+      }
+
+      // Protect entreprises routes - managers et admins
+      if (['entreprises', 'entreprise-create', 'entreprise-edit'].includes(page)) {
+        if (!authUser || authUser.guest || !isManagerOrAdmin(authUser.role)) {
+          alert('Accès refusé. Seuls les managers peuvent accéder à la gestion des entreprises.');
           setCurrentPage(authUser ? 'map' : 'login');
           return;
         }
@@ -395,6 +424,35 @@ export default function App() {
             onUnblock={handleUnblockUser}
             authUser={authUser}
             onLogout={handleLogout}
+          />
+        );
+      case 'entreprises':
+        return (
+          <EntrepriseListPage
+            authUser={authUser}
+            onNavigateCreate={navigateToEntrepriseCreate}
+            onNavigateEdit={navigateToEntrepriseEdit}
+          />
+        );
+      case 'entreprise-create':
+        return (
+          <EntrepriseCreatePage
+            onCancel={navigateToEntreprises}
+            onCreate={(created) => {
+              alert('Entreprise créée avec succès!');
+              navigateToEntreprises();
+            }}
+          />
+        );
+      case 'entreprise-edit':
+        return (
+          <EntrepriseEditPage
+            entreprise={editingEntreprise}
+            onCancel={navigateToEntreprises}
+            onSave={(updated) => {
+              alert('Entreprise mise à jour!');
+              navigateToEntreprises();
+            }}
           />
         );
       default:
