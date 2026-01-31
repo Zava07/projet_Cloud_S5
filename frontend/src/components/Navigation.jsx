@@ -56,6 +56,9 @@ export default function Navigation({ currentPage, onPageChange, authUser, onLogo
     (String(authUser.role).toLowerCase().includes('manager') || 
      String(authUser.role).toLowerCase().includes('admin'));
 
+  const isAdmin = authUser?.role && 
+    String(authUser.role).toLowerCase().includes('admin');
+
   if (isManager) {
     navItems.push({ 
       key: 'users', 
@@ -68,8 +71,7 @@ export default function Navigation({ currentPage, onPageChange, authUser, onLogo
           <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
         </svg>
       ), 
-      description: 'Administration des utilisateurs',
-      isAdmin: true 
+      description: 'Administration des utilisateurs'
     },
     { 
         key: 'gestion-reports', 
@@ -83,13 +85,28 @@ export default function Navigation({ currentPage, onPageChange, authUser, onLogo
           </svg>
         ), 
         description: 'Administration des rapports',
-        isAdmin: true,
         children: [
           { key: 'gestion-reports-nouveau', label: 'Nouveau', tab: 'nouveau' },
           { key: 'gestion-reports-encours', label: 'En cours', tab: 'encours' },
           { key: 'gestion-reports-termine', label: 'Terminé', tab: 'termine' }
         ]
-      });
+      },
+    // Entreprises - visible pour managers et admins
+    {
+      key: 'entreprises',
+      label: 'Gestion Entreprises',
+      icon: (
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M3 21h18"/>
+          <path d="M5 21V7l8-4v18"/>
+          <path d="M19 21V11l-6-4"/>
+          <path d="M9 9h1"/>
+          <path d="M9 13h1"/>
+          <path d="M9 17h1"/>
+        </svg>
+      ),
+      description: 'Gérer les entreprises partenaires'
+    });
   }
 
   return (
@@ -130,7 +147,7 @@ export default function Navigation({ currentPage, onPageChange, authUser, onLogo
             return (
               <li key={item.key} className={`nav-item ${hasChildren ? 'has-children' : ''} ${open ? 'open' : ''}`}>
                 <button
-                  className={`nav-link ${currentPage === item.key || (currentPage === 'reports' && hasChildren && open) ? 'active' : ''} ${item.isAdmin ? 'admin-item' : ''}`}
+                  className={`nav-link ${currentPage === item.key || (currentPage === 'reports' && hasChildren && open) ? 'active' : ''}`}
                   onClick={() => {
                     if (hasChildren) toggleMenu(item.key);
                     else onPageChange && onPageChange(item.key);
@@ -145,7 +162,6 @@ export default function Navigation({ currentPage, onPageChange, authUser, onLogo
                   {!isCollapsed && (
                     <>
                       <span className="nav-label">{item.label}</span>
-                      {item.isAdmin && <span className="admin-badge">ADMIN</span>}
                       {hasChildren && <span className={`submenu-arrow ${open ? 'open' : ''}`} aria-hidden>{open ? '▾' : '▸'}</span>}
                     </>
                   )}
@@ -220,4 +236,5 @@ export default function Navigation({ currentPage, onPageChange, authUser, onLogo
       </div>
     </aside>
   );
+  
 }
