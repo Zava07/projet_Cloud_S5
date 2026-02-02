@@ -18,7 +18,7 @@ export default function EntrepriseListPage({
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${apiBase}/api/entreprises`);
+      const res = await fetch(`${apiBase}/api/entreprises/summaries`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       setEntreprises(data);
