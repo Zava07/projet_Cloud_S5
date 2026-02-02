@@ -20,6 +20,28 @@ const problems = ref<Problem[]>([]);
 const selectedProblem = ref<Problem | null>(null);
 const loading = ref(false);
 
+// Helper: normaliser le budget venant de Firestore (supporte nombre, string avec 'k'/'K' et suffixes)
+const parseBudgetValue = (value: any): number | null => {
+  if (value === null || value === undefined) return null;
+  if (typeof value === 'number') return value;
+  if (typeof value === 'string') {
+    const s = value.trim().toLowerCase();
+    // Handle thousand shorthand like '2k' or '2.5k'
+    let multiplier = 1;
+    let base = s;
+    if (s.endsWith('k')) {
+      multiplier = 1000;
+      base = s.slice(0, -1);
+    }
+    // Remove non-numeric characters except dot and minus
+    const cleaned = base.replace(/[^0-9.-]+/g, '');
+    const num = parseFloat(cleaned);
+    if (isNaN(num)) return null;
+    return num * multiplier;
+  }
+  return null;
+};
+
 // Convertir les données Firestore en Problem
 const convertFirestoreData = (id: string, data: DocumentData): Problem => {
   return {
@@ -32,7 +54,7 @@ const convertFirestoreData = (id: string, data: DocumentData): Problem => {
     description: data.description,
     status: data.status as ProblemStatus,
     surface: data.surface,
-    budget: data.budget,
+    budget: parseBudgetValue(data.budget),
     entreprise: data.entreprise,
     createdAt: data.createdAt?.toDate?.() || new Date(data.createdAt),
     updatedAt: data.updatedAt?.toDate?.() || new Date(data.updatedAt),
