@@ -15,6 +15,7 @@ import ReportsListPage from './pages/ReportsListPage.jsx';
 import EntrepriseListPage from './pages/EntrepriseListPage.jsx';
 import EntrepriseCreatePage from './pages/EntrepriseCreatePage.jsx';
 import EntrepriseEditPage from './pages/EntrepriseEditPage.jsx';
+import SyncPage from './pages/SyncPage.jsx';
 
 export default function App() {
   // Navigation state: 'login' | 'signup' | 'map' | 'reports' | 'users' | 'create' | 'edit' | 'entreprises' | 'entreprise-create' | 'entreprise-edit'
@@ -90,6 +91,7 @@ export default function App() {
     else if (page === 'reports') navigateToReports();
     else if (page === 'users') navigateToUsers();
     else if (page === 'entreprises') navigateToEntreprises();
+    else if (page === 'synchronization') { window.location.hash = '#/synchronization'; }
     else if (page === 'login') navigateToLogin();
     else if (page === 'signup') navigateToSignup();
   };
@@ -124,6 +126,7 @@ export default function App() {
       return { page: 'entreprise-edit', id };
     }
     if (hash.startsWith('/entreprises')) return { page: 'entreprises' };
+    if (hash.startsWith('/synchronization')) return { page: 'synchronization' };
     return { page: 'login' };
   };
 
@@ -453,6 +456,12 @@ export default function App() {
               alert('Entreprise mise à jour!');
               navigateToEntreprises();
             }}
+          />
+        );
+      case 'synchronization':
+        return (
+          <SyncPage
+            authUser={authUser}
           />
         );
       default:
