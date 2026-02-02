@@ -120,6 +120,8 @@ export default function ReportsListPage({ authUser, onPageChange, mapOptions = {
   const [assignSelectedEntreprise, setAssignSelectedEntreprise] = useState('0');
   const [assignBudget, setAssignBudget] = useState('');
   const [selectedReport, setSelectedReport] = useState(null);
+  const [showConfirmFinish, setShowConfirmFinish] = useState(false);
+  const [finishTargetReport, setFinishTargetReport] = useState(null);
 
   const fetchEntreprises = async () => {
     try {
@@ -165,6 +167,28 @@ export default function ReportsListPage({ authUser, onPageChange, mapOptions = {
     } finally {
       setLoading(false);
     }
+  };
+
+  const finishReport = async (reportId) => {
+    if (!reportId) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const url = `${apiBase()}/api/reports/finish-report?id_report=${encodeURIComponent(reportId)}`;
+      const res = await fetch(url, { method: 'POST' });
+      if (!res.ok) throw new Error(`Erreur HTTP: ${res.status}`);
+      if (mapOptions?.adminView) await fetchAdminReportsByStatus(); else await fetchUserReports();
+    } catch (err) {
+      console.error("Erreur lors de la terminaison du rapport:", err);
+      setError("Impossible de terminer le rapport");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const openFinishConfirm = (report) => {
+    setFinishTargetReport(report);
+    setShowConfirmFinish(true);
   };
 
   if (authUser?.guest) {
@@ -272,6 +296,15 @@ export default function ReportsListPage({ authUser, onPageChange, mapOptions = {
                                   Assigner
                                 </button>
                               )}
+                              {(report.status === 'en_cours' || report.status === 'en-cours') && (
+                                <button
+                                  className="btn btn-success btn-sm"
+                                  onClick={() => openFinishConfirm(report)}
+                                  disabled={loading}
+                                >
+                                  Terminer
+                                </button>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -298,8 +331,17 @@ export default function ReportsListPage({ authUser, onPageChange, mapOptions = {
                           </div>
                           <div>
                             <span className={getStatusBadgeClass(report.status)}>{report.status || ''}</span>
-                            <div style={{marginTop:8}}>
+                            <div style={{marginTop:8, display: 'flex', gap: 8}}>
                               <button className="btn btn-outline btn-sm" onClick={() => onPageChange('map', { centerLat: report.latitude, centerLng: report.longitude })}>Voir</button>
+                              {(report.status === 'en_cours' || report.status === 'en-cours') && (
+                                <button
+                                  className="btn btn-success btn-sm"
+                                  onClick={() => openFinishConfirm(report)}
+                                  disabled={loading}
+                                >
+                                  Terminer
+                                </button>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -333,6 +375,18 @@ export default function ReportsListPage({ authUser, onPageChange, mapOptions = {
                 <button className="btn btn-primary" onClick={submitAssign} disabled={loading}>Confirmer</button>
                 <button className="btn btn-outline" onClick={() => { setShowAssignModal(false); setSelectedReport(null); }}>Annuler</button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {showConfirmFinish && (
+        <div className="modal-overlay" style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.4)',display:'flex',alignItems:'center',justifyContent:'center'}}>
+          <div className="modal" style={{background:'#fff',padding:20,borderRadius:8,maxWidth:500,width:'90%'}}>
+            <h3>Confirmer la clôture</h3>
+            <p>Voulez-vous vraiment marquer le rapport #{finishTargetReport?.id} comme terminé ?</p>
+            <div style={{display:'flex',gap:8,marginTop:12,justifyContent:'flex-end'}}>
+              <button className="btn btn-primary" onClick={async () => { if (finishTargetReport) await finishReport(finishTargetReport.id); setShowConfirmFinish(false); setFinishTargetReport(null); }} disabled={loading}>Confirmer</button>
+              <button className="btn btn-outline" onClick={() => { setShowConfirmFinish(false); setFinishTargetReport(null); }}>Annuler</button>
             </div>
           </div>
         </div>
