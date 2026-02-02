@@ -33,6 +33,15 @@ const newReportIcon = new L.Icon({
   shadowSize: [41, 41]
 });
 
+const enCoursIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
+});
+
 // Antananarivo coordinates
 const ANTANANARIVO_CENTER = [-18.8792, 47.5079];
 
@@ -241,7 +250,7 @@ export default function MapPage({ authUser, mapOptions = {} }) {
               <Marker
                 key={report.id}
                 position={[report.latitude, report.longitude]}
-                icon={report.status === 'nouveau' ? newReportIcon : reportIcon}
+                icon={report.status === 'nouveau' ? newReportIcon : (report.status === 'en_cours' || report.status === 'en-cours' ? enCoursIcon : reportIcon)}
               >
                 <Popup maxWidth={300}>
                   <div className="report-popup">
