@@ -1,75 +1,166 @@
-/* Apple-inspired Design System */
+/* ═══════════════════════════════════════════════════════════════════════════
+   🍎 iOS DESIGN SYSTEM - Crafted with obsessive attention to detail
+   Version 2.0 - Digne d'une présentation à Steve Jobs
+   "Design is not just what it looks like and feels like. Design is how it works."
+   ═══════════════════════════════════════════════════════════════════════════ */
 
 :root {
-  /* === Couleurs Principales === */
+  /* ═══════════════════════════════════════════════════════════════════════════
+     COULEURS iOS 17+ - Human Interface Guidelines 2024
+     ═══════════════════════════════════════════════════════════════════════════ */
+  
+  /* Primary - Bleu iOS signature */
   --ion-color-primary: #007AFF;
   --ion-color-primary-rgb: 0, 122, 255;
   --ion-color-primary-contrast: #ffffff;
   --ion-color-primary-contrast-rgb: 255, 255, 255;
-  --ion-color-primary-shade: #006AE0;
+  --ion-color-primary-shade: #0066D6;
   --ion-color-primary-tint: #1A8CFF;
+  --ion-color-primary-soft: rgba(0, 122, 255, 0.12);
 
+  /* Secondary - Indigo élégant */
   --ion-color-secondary: #5856D6;
   --ion-color-secondary-rgb: 88, 86, 214;
   --ion-color-secondary-contrast: #ffffff;
   --ion-color-secondary-contrast-rgb: 255, 255, 255;
-  --ion-color-secondary-shade: #4D4BBD;
-  --ion-color-secondary-tint: #6A68DA;
+  --ion-color-secondary-shade: #4E4CC0;
+  --ion-color-secondary-tint: #6866DA;
+  --ion-color-secondary-soft: rgba(88, 86, 214, 0.12);
 
+  /* Tertiary - Rose vif */
+  --ion-color-tertiary: #FF2D55;
+  --ion-color-tertiary-rgb: 255, 45, 85;
+  --ion-color-tertiary-contrast: #ffffff;
+  --ion-color-tertiary-contrast-rgb: 255, 255, 255;
+  --ion-color-tertiary-shade: #E0274A;
+  --ion-color-tertiary-tint: #FF4266;
+  --ion-color-tertiary-soft: rgba(255, 45, 85, 0.12);
+
+  /* Success - Vert iOS */
   --ion-color-success: #34C759;
   --ion-color-success-rgb: 52, 199, 89;
   --ion-color-success-contrast: #ffffff;
   --ion-color-success-contrast-rgb: 255, 255, 255;
-  --ion-color-success-shade: #2FAF4E;
-  --ion-color-success-tint: #48CC6A;
+  --ion-color-success-shade: #2DB14E;
+  --ion-color-success-tint: #48CD6A;
+  --ion-color-success-soft: rgba(52, 199, 89, 0.12);
 
+  /* Warning - Orange iOS */
   --ion-color-warning: #FF9500;
   --ion-color-warning-rgb: 255, 149, 0;
   --ion-color-warning-contrast: #ffffff;
   --ion-color-warning-contrast-rgb: 255, 255, 255;
   --ion-color-warning-shade: #E08300;
-  --ion-color-warning-tint: #FFA01A;
+  --ion-color-warning-tint: #FFA31A;
+  --ion-color-warning-soft: rgba(255, 149, 0, 0.12);
 
+  /* Danger - Rouge iOS */
   --ion-color-danger: #FF3B30;
   --ion-color-danger-rgb: 255, 59, 48;
   --ion-color-danger-contrast: #ffffff;
   --ion-color-danger-contrast-rgb: 255, 255, 255;
   --ion-color-danger-shade: #E0342A;
   --ion-color-danger-tint: #FF4F45;
+  --ion-color-danger-soft: rgba(255, 59, 48, 0.12);
 
-  /* === Couleurs Neutres === */
+  /* ═══════════════════════════════════════════════════════════════════════════
+     PALETTE NEUTRE - Gris iOS raffinés
+     ═══════════════════════════════════════════════════════════════════════════ */
+  
+  --ios-gray-1: #8E8E93;
+  --ios-gray-2: #AEAEB2;
+  --ios-gray-3: #C7C7CC;
+  --ios-gray-4: #D1D1D6;
+  --ios-gray-5: #E5E5EA;
+  --ios-gray-6: #F2F2F7;
+
   --ion-color-light: #F2F2F7;
   --ion-color-light-rgb: 242, 242, 247;
   --ion-color-light-contrast: #000000;
   --ion-color-light-contrast-rgb: 0, 0, 0;
-  --ion-color-light-shade: #D5D5DB;
-  --ion-color-light-tint: #F3F3F8;
+  --ion-color-light-shade: #D5D5DA;
+  --ion-color-light-tint: #F4F4F8;
 
   --ion-color-medium: #8E8E93;
   --ion-color-medium-rgb: 142, 142, 147;
   --ion-color-medium-contrast: #ffffff;
   --ion-color-medium-contrast-rgb: 255, 255, 255;
   --ion-color-medium-shade: #7D7D81;
-  --ion-color-medium-tint: #999B9E;
+  --ion-color-medium-tint: #9A9A9E;
 
   --ion-color-dark: #1C1C1E;
   --ion-color-dark-rgb: 28, 28, 30;
   --ion-color-dark-contrast: #ffffff;
   --ion-color-dark-contrast-rgb: 255, 255, 255;
   --ion-color-dark-shade: #18181A;
-  --ion-color-dark-tint: #323234;
+  --ion-color-dark-tint: #2C2C2E;
 
-  /* === Arrière-plans === */
+  /* ═══════════════════════════════════════════════════════════════════════════
+     ARRIÈRE-PLANS & SURFACES - Light Mode
+     ═══════════════════════════════════════════════════════════════════════════ */
+  
   --ion-background-color: #FFFFFF;
   --ion-background-color-rgb: 255, 255, 255;
+  --ios-background-primary: #FFFFFF;
+  --ios-background-secondary: #F2F2F7;
+  --ios-background-tertiary: #FFFFFF;
+  --ios-background-grouped: #F2F2F7;
+  --ios-background-elevated: #FFFFFF;
   
   --ion-text-color: #000000;
   --ion-text-color-rgb: 0, 0, 0;
+  --ios-text-primary: #000000;
+  --ios-text-secondary: rgba(60, 60, 67, 0.6);
+  --ios-text-tertiary: rgba(60, 60, 67, 0.3);
+  --ios-text-quaternary: rgba(60, 60, 67, 0.18);
 
-  /* === Typographie === */
-  --ion-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  /* Separators */
+  --ios-separator: rgba(60, 60, 67, 0.29);
+  --ios-separator-opaque: #C6C6C8;
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     TYPOGRAPHIE - SF Pro / System Font Stack
+     ═══════════════════════════════════════════════════════════════════════════ */
   
-  /* === Espacements === */
+  --ion-font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 
+                     'Helvetica Neue', 'Segoe UI', 'Roboto', sans-serif;
+  
+  /* Dynamic Type Sizes - iOS HIG */
+  --ios-font-largeTitle: clamp(28px, 8vw, 34px);
+  --ios-font-title1: clamp(24px, 7vw, 28px);
+  --ios-font-title2: clamp(20px, 5.5vw, 22px);
+  --ios-font-title3: clamp(18px, 5vw, 20px);
+  --ios-font-headline: 17px;
+  --ios-font-body: 17px;
+  --ios-font-callout: 16px;
+  --ios-font-subhead: 15px;
+  --ios-font-footnote: 13px;
+  --ios-font-caption1: 12px;
+  --ios-font-caption2: 11px;
+
+  /* Letter Spacing (Tracking) */
+  --ios-tracking-tight: -0.41px;
+  --ios-tracking-normal: -0.24px;
+  --ios-tracking-wide: 0.07px;
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     ESPACEMENTS - 4pt Grid System
+     ═══════════════════════════════════════════════════════════════════════════ */
+  
+  --space-0: 0px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 28px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* Compatibilité ancien système */
   --spacing-xs: 4px;
   --spacing-sm: 8px;
   --spacing-md: 16px;
@@ -77,280 +168,224 @@
   --spacing-xl: 32px;
   --spacing-xxl: 48px;
 
-  /* === Border Radius === */
-  --border-radius-sm: 8px;
-  --border-radius-md: 12px;
-  --border-radius-lg: 16px;
-  --border-radius-xl: 20px;
-  --border-radius-full: 999px;
-
-  /* === Shadows === */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  /* ═══════════════════════════════════════════════════════════════════════════
+     BORDER RADIUS - iOS Continuous Corners (Squircle Effect)
+     ═══════════════════════════════════════════════════════════════════════════ */
   
-  /* === Transitions === */
-  --transition-fast: 150ms ease;
-  --transition-base: 250ms ease;
-  --transition-slow: 350ms ease;
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+  --radius-xl: 22px;
+  --radius-2xl: 28px;
+  --radius-3xl: 38px;
+  --radius-full: 9999px;
 
-  /* === Glassmorphism === */
-  --glass-background: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.2);
+  /* Compatibilité */
+  --border-radius-sm: 10px;
+  --border-radius-md: 14px;
+  --border-radius-lg: 18px;
+  --border-radius-xl: 22px;
+  --border-radius-full: 9999px;
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     OMBRES - Depth System iOS Premium
+     ═══════════════════════════════════════════════════════════════════════════ */
+  
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.10);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+  --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.16);
+  --shadow-2xl: 0 24px 64px rgba(0, 0, 0, 0.20);
+
+  /* Card Shadow - Subtile et élégante */
+  --shadow-card: 0 2px 10px rgba(0, 0, 0, 0.04),
+                 0 8px 24px rgba(0, 0, 0, 0.06);
+  
+  /* Button Shadow - Colored */
+  --shadow-button: 0 4px 14px rgba(0, 122, 255, 0.35);
+  --shadow-button-hover: 0 6px 20px rgba(0, 122, 255, 0.45);
+
+  /* Floating Elements */
+  --shadow-float: 0 10px 40px rgba(0, 0, 0, 0.12),
+                  0 2px 10px rgba(0, 0, 0, 0.06);
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     TRANSITIONS & ANIMATIONS - iOS Spring Physics
+     ═══════════════════════════════════════════════════════════════════════════ */
+  
+  /* Timing Functions - iOS Native Feel */
+  --ease-ios: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --ease-ios-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --ease-ios-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --ease-ios-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-ios-decelerate: cubic-bezier(0, 0, 0.2, 1);
+  --ease-ios-accelerate: cubic-bezier(0.4, 0, 1, 1);
+  --ease-ios-elastic: cubic-bezier(0.68, -0.6, 0.32, 1.6);
+
+  /* Duration */
+  --duration-instant: 100ms;
+  --duration-fast: 200ms;
+  --duration-normal: 300ms;
+  --duration-slow: 450ms;
+  --duration-slower: 600ms;
+
+  /* Compatibilité */
+  --transition-fast: 200ms var(--ease-ios);
+  --transition-base: 300ms var(--ease-ios);
+  --transition-slow: 450ms var(--ease-ios);
+  --transition-spring: 500ms var(--ease-ios-spring);
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     GLASSMORPHISM - Apple Vibrancy Effect
+     ═══════════════════════════════════════════════════════════════════════════ */
+  
+  --glass-background: rgba(255, 255, 255, 0.72);
+  --glass-background-thick: rgba(255, 255, 255, 0.85);
+  --glass-background-ultra: rgba(255, 255, 255, 0.95);
+  --glass-border: rgba(255, 255, 255, 0.5);
+  --glass-border-subtle: rgba(0, 0, 0, 0.04);
   --glass-blur: blur(20px);
+  --glass-blur-thick: blur(40px);
+  --glass-saturate: saturate(180%);
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     SAFE AREAS - Pour TOUS les iPhones (X → 16 Pro Max et au-delà)
+     ═══════════════════════════════════════════════════════════════════════════ */
+  
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     GRADIENTS - Apple Marketing Style
+     ═══════════════════════════════════════════════════════════════════════════ */
+  
+  --gradient-primary: linear-gradient(135deg, #007AFF 0%, #5856D6 100%);
+  --gradient-secondary: linear-gradient(135deg, #5856D6 0%, #FF2D55 100%);
+  --gradient-success: linear-gradient(135deg, #34C759 0%, #30D158 100%);
+  --gradient-warning: linear-gradient(135deg, #FF9500 0%, #FF6B00 100%);
+  --gradient-danger: linear-gradient(135deg, #FF3B30 0%, #FF2D55 100%);
+  --gradient-surface: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 100%);
+  --gradient-overlay: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.6) 100%);
+  
+  /* Premium Gradients */
+  --gradient-gold: linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF8C00 100%);
+  --gradient-platinum: linear-gradient(135deg, #E8E8E8 0%, #FFFFFF 50%, #E8E8E8 100%);
+  --gradient-rose-gold: linear-gradient(135deg, #B76E79 0%, #E8B4BC 50%, #D4A5A5 100%);
+  --gradient-midnight: linear-gradient(135deg, #1C1C1E 0%, #2C2C2E 50%, #3A3A3C 100%);
+  --gradient-ocean: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-sunset: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+     Z-INDEX LAYERS
+     ═══════════════════════════════════════════════════════════════════════════ */
+  
+  --z-base: 0;
+  --z-above: 10;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-overlay: 300;
+  --z-modal: 400;
+  --z-toast: 500;
+  --z-tooltip: 600;
+  --z-max: 9999;
 }
 
-/* === Mode Sombre === */
+/* ═══════════════════════════════════════════════════════════════════════════
+   🌙 DARK MODE - True Black OLED optimisé pour économie batterie
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 @media (prefers-color-scheme: dark) {
   :root {
+    /* Couleurs ajustées pour Dark Mode - Plus vibrantes */
     --ion-color-primary: #0A84FF;
     --ion-color-primary-rgb: 10, 132, 255;
     --ion-color-primary-shade: #0975E0;
-    --ion-color-primary-tint: #2491FF;
+    --ion-color-primary-tint: #3D9BFF;
+    --ion-color-primary-soft: rgba(10, 132, 255, 0.20);
 
-    --ion-color-success: #32D74B;
-    --ion-color-success-rgb: 50, 215, 75;
+    --ion-color-secondary: #5E5CE6;
+    --ion-color-secondary-rgb: 94, 92, 230;
+    --ion-color-secondary-soft: rgba(94, 92, 230, 0.20);
+
+    --ion-color-tertiary: #FF375F;
+    --ion-color-tertiary-rgb: 255, 55, 95;
+    --ion-color-tertiary-soft: rgba(255, 55, 95, 0.20);
+
+    --ion-color-success: #30D158;
+    --ion-color-success-rgb: 48, 209, 88;
+    --ion-color-success-soft: rgba(48, 209, 88, 0.20);
 
     --ion-color-warning: #FF9F0A;
     --ion-color-warning-rgb: 255, 159, 10;
+    --ion-color-warning-soft: rgba(255, 159, 10, 0.20);
 
     --ion-color-danger: #FF453A;
     --ion-color-danger-rgb: 255, 69, 58;
+    --ion-color-danger-soft: rgba(255, 69, 58, 0.20);
 
-    --ion-background-color: #000000;
-    --ion-background-color-rgb: 0, 0, 0;
-    
-    --ion-text-color: #FFFFFF;
-    --ion-text-color-rgb: 255, 255, 255;
+    /* Gris Dark Mode */
+    --ios-gray-1: #8E8E93;
+    --ios-gray-2: #636366;
+    --ios-gray-3: #48484A;
+    --ios-gray-4: #3A3A3C;
+    --ios-gray-5: #2C2C2E;
+    --ios-gray-6: #1C1C1E;
 
     --ion-color-light: #1C1C1E;
     --ion-color-light-rgb: 28, 28, 30;
+    --ion-color-light-contrast: #ffffff;
     
     --ion-color-dark: #F2F2F7;
     --ion-color-dark-rgb: 242, 242, 247;
 
-    --glass-background: rgba(28, 28, 30, 0.7);
+    /* Backgrounds OLED True Black */
+    --ion-background-color: #000000;
+    --ion-background-color-rgb: 0, 0, 0;
+    --ios-background-primary: #000000;
+    --ios-background-secondary: #1C1C1E;
+    --ios-background-tertiary: #2C2C2E;
+    --ios-background-grouped: #000000;
+    --ios-background-elevated: #1C1C1E;
+    
+    --ion-text-color: #FFFFFF;
+    --ion-text-color-rgb: 255, 255, 255;
+    --ios-text-primary: #FFFFFF;
+    --ios-text-secondary: rgba(235, 235, 245, 0.6);
+    --ios-text-tertiary: rgba(235, 235, 245, 0.3);
+    --ios-text-quaternary: rgba(235, 235, 245, 0.18);
+
+    /* Separators Dark */
+    --ios-separator: rgba(84, 84, 88, 0.65);
+    --ios-separator-opaque: #38383A;
+
+    /* Shadows Dark Mode - Plus subtiles */
+    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.45);
+    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+    --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.6);
+
+    --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.5),
+                   0 0 1px rgba(255, 255, 255, 0.05);
+    
+    --shadow-float: 0 12px 48px rgba(0, 0, 0, 0.6),
+                    0 0 1px rgba(255, 255, 255, 0.1);
+    
+    --shadow-button: 0 4px 14px rgba(10, 132, 255, 0.4);
+    --shadow-button-hover: 0 6px 20px rgba(10, 132, 255, 0.5);
+
+    /* Glassmorphism Dark */
+    --glass-background: rgba(28, 28, 30, 0.75);
+    --glass-background-thick: rgba(28, 28, 30, 0.88);
+    --glass-background-ultra: rgba(28, 28, 30, 0.95);
     --glass-border: rgba(255, 255, 255, 0.1);
-  }
-}
+    --glass-border-subtle: rgba(255, 255, 255, 0.05);
 
-/* === Styles Globaux === */
-* {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-ion-content {
-  --background: var(--ion-background-color);
-}
-
-/* === Cartes === */
-ion-card {
-  border-radius: var(--border-radius-lg);
-  box-shadow: var(--shadow-md);
-  margin: var(--spacing-md);
-  transition: transform var(--transition-base), box-shadow var(--transition-base);
-  overflow: hidden;
-}
-
-ion-card:active {
-  transform: scale(0.98);
-  box-shadow: var(--shadow-sm);
-}
-
-ion-card-header {
-  padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-md);
-}
-
-ion-card-title {
-  font-size: 20px;
-  font-weight: 600;
-  letter-spacing: -0.4px;
-}
-
-ion-card-content {
-  padding: 0 var(--spacing-lg) var(--spacing-lg);
-  font-size: 15px;
-  line-height: 1.5;
-}
-
-/* === Boutons === */
-ion-button {
-  --border-radius: var(--border-radius-md);
-  --padding-start: var(--spacing-lg);
-  --padding-end: var(--spacing-lg);
-  --padding-top: 12px;
-  --padding-bottom: 12px;
-  font-weight: 600;
-  letter-spacing: -0.2px;
-  text-transform: none;
-  transition: transform var(--transition-fast);
-}
-
-ion-button:active {
-  transform: scale(0.96);
-}
-
-ion-button[expand="block"] {
-  --border-radius: var(--border-radius-md);
-  margin: var(--spacing-md) 0;
-}
-
-/* === FAB === */
-ion-fab-button {
-  --box-shadow: var(--shadow-xl);
-  --border-radius: var(--border-radius-full);
-  transition: transform var(--transition-base), box-shadow var(--transition-base);
-}
-
-ion-fab-button:active {
-  transform: scale(0.92);
-}
-
-/* === Items === */
-ion-item {
-  --border-radius: var(--border-radius-md);
-  --padding-start: var(--spacing-md);
-  --padding-end: var(--spacing-md);
-  --inner-padding-end: 0;
-  --min-height: 52px;
-  margin-bottom: var(--spacing-xs);
-}
-
-ion-item ion-label {
-  margin-top: var(--spacing-sm);
-  margin-bottom: var(--spacing-sm);
-}
-
-/* === Inputs === */
-ion-input,
-ion-textarea,
-ion-select {
-  --padding-start: var(--spacing-md);
-  --padding-end: var(--spacing-md);
-  font-size: 16px;
-}
-
-/* === Toolbar === */
-ion-toolbar {
-  --background: var(--glass-background);
-  --border-width: 0 0 0.55px 0;
-  --border-color: var(--glass-border);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  --min-height: 56px;
-}
-
-ion-title {
-  font-size: 17px;
-  font-weight: 600;
-  letter-spacing: -0.4px;
-}
-
-/* === Chips === */
-ion-chip {
-  --background: var(--ion-color-light);
-  border-radius: var(--border-radius-full);
-  padding: 6px 12px;
-  font-weight: 500;
-  font-size: 13px;
-  letter-spacing: -0.2px;
-}
-
-/* === Liste === */
-ion-list {
-  background: transparent;
-  padding: var(--spacing-sm);
-}
-
-ion-list-header {
-  font-weight: 600;
-  font-size: 13px;
-  letter-spacing: -0.1px;
-  text-transform: uppercase;
-  color: var(--ion-color-medium);
-  padding-left: var(--spacing-md);
-  margin-top: var(--spacing-md);
-  margin-bottom: var(--spacing-sm);
-}
-
-/* === Modal === */
-ion-modal {
-  --border-radius: var(--border-radius-xl) var(--border-radius-xl) 0 0;
-  --box-shadow: var(--shadow-xl);
-}
-
-ion-modal::part(backdrop) {
-  background: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(10px);
-}
-
-/* === Loading === */
-ion-spinner {
-  --color: var(--ion-color-primary);
-}
-
-/* === Animations === */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.fade-in {
-  animation: fadeIn var(--transition-base) ease-out;
-}
-
-.slide-up {
-  animation: slideUp var(--transition-base) ease-out;
-}
-
-/* === Utilitaires === */
-.glass-card {
-  background: var(--glass-background);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--glass-border);
-}
-
-.text-balance {
-  text-wrap: balance;
-}
-
-/* === Mobile Optimizations === */
-@media (max-width: 768px) {
-  ion-card {
-    margin: var(--spacing-sm);
-    border-radius: var(--border-radius-md);
-  }
-
-  ion-card-title {
-    font-size: 18px;
-  }
-
-  ion-button {
-    --padding-start: var(--spacing-md);
-    --padding-end: var(--spacing-md);
-  }
-
-  ion-toolbar {
-    --min-height: 52px;
+    /* Gradients Dark Mode */
+    --gradient-surface: linear-gradient(180deg, rgba(28,28,30,0) 0%, rgba(28,28,30,1) 100%);
   }
 }
