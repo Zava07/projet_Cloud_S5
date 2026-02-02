@@ -175,22 +175,26 @@ export default function MapPage({ authUser, mapOptions = {} }) {
       <div className="map-stats">
         <div className="stats-grid">
           <div className="stat-card">
+            <div className="stat-top">Total</div>
             <div className="stat-number">{reports.length}</div>
             <div className="stat-label">Total rapports</div>
           </div>
           <div className="stat-card">
+            <div className="stat-top">Nouveaux</div>
             <div className="stat-number">
               {reports.filter(r => r.status === 'nouveau').length}
             </div>
             <div className="stat-label">Nouveaux</div>
           </div>
           <div className="stat-card">
+            <div className="stat-top">En cours</div>
             <div className="stat-number">
               {reports.filter(r => r.status === 'en_cours').length}
             </div>
             <div className="stat-label">En cours</div>
           </div>
           <div className="stat-card">
+            <div className="stat-top">Résolus</div>
             <div className="stat-number">
               {reports.filter(r => r.status === 'termine').length}
             </div>

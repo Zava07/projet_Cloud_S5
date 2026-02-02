@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 
 export default function ReportsListPage({ authUser, onPageChange, mapOptions = {} }) {
+  const isManager = !!(authUser && ((authUser.role && String(authUser.role).toLowerCase().includes('manager')) || authUser.is_manager));
   const [userReports, setUserReports] = useState([]);
   const [adminReportsByStatus, setAdminReportsByStatus] = useState({ nouveau: [], encours: [], termine: [] });
   const [loading, setLoading] = useState(true);
@@ -287,7 +288,7 @@ export default function ReportsListPage({ authUser, onPageChange, mapOptions = {
                             <span className={getStatusBadgeClass(report.status)}>{report.status || ''}</span>
                             <div style={{marginTop:8, display: 'flex', gap: 8}}>
                               <button className="btn btn-outline btn-sm" onClick={() => onPageChange('map', { centerLat: report.latitude, centerLng: report.longitude })}>Voir</button>
-                              {mapOptions?.adminView && report.status === 'nouveau' && (
+                              {mapOptions?.adminView && isManager && report.status === 'nouveau' && (
                                 <button
                                   className="btn btn-primary btn-sm"
                                   onClick={() => openAssignModal(report)}
@@ -296,7 +297,7 @@ export default function ReportsListPage({ authUser, onPageChange, mapOptions = {
                                   Assigner
                                 </button>
                               )}
-                              {(report.status === 'en_cours' || report.status === 'en-cours') && (
+                              {isManager && (report.status === 'en_cours' || report.status === 'en-cours') && (
                                 <button
                                   className="btn btn-success btn-sm"
                                   onClick={() => openFinishConfirm(report)}
@@ -333,7 +334,7 @@ export default function ReportsListPage({ authUser, onPageChange, mapOptions = {
                             <span className={getStatusBadgeClass(report.status)}>{report.status || ''}</span>
                             <div style={{marginTop:8, display: 'flex', gap: 8}}>
                               <button className="btn btn-outline btn-sm" onClick={() => onPageChange('map', { centerLat: report.latitude, centerLng: report.longitude })}>Voir</button>
-                              {(report.status === 'en_cours' || report.status === 'en-cours') && (
+                              {isManager && (report.status === 'en_cours' || report.status === 'en-cours') && (
                                 <button
                                   className="btn btn-success btn-sm"
                                   onClick={() => openFinishConfirm(report)}
