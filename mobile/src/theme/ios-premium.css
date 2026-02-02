@@ -1,0 +1,1066 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   🍎 iOS PREMIUM COMPONENTS - Apple-Quality UI Components
+   Pour une présentation digne de Steve Jobs
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   APPLE-STYLE NAVIGATION BAR
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.apple-header {
+  --background: transparent;
+}
+
+.apple-header ion-toolbar {
+  --background: var(--glass-background);
+  backdrop-filter: var(--glass-blur) var(--glass-saturate);
+  -webkit-backdrop-filter: var(--glass-blur) var(--glass-saturate);
+  border-bottom: 0.5px solid var(--ios-separator);
+  --padding-top: var(--safe-top);
+}
+
+.apple-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 600;
+  font-size: var(--ios-font-headline);
+  letter-spacing: var(--ios-tracking-tight);
+}
+
+.title-icon {
+  font-size: 20px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FLOATING HELP BADGE - Like Apple Maps
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.help-badge-container {
+  position: fixed;
+  top: calc(var(--safe-top) + 70px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: var(--z-sticky);
+  pointer-events: none;
+}
+
+.help-badge {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: var(--glass-background-thick);
+  backdrop-filter: var(--glass-blur) var(--glass-saturate);
+  -webkit-backdrop-filter: var(--glass-blur) var(--glass-saturate);
+  border-radius: var(--radius-full);
+  padding: var(--space-2) var(--space-4);
+  box-shadow: var(--shadow-float);
+  border: 0.5px solid var(--glass-border);
+  animation: slideInDown 500ms var(--ease-ios-spring) forwards;
+}
+
+.help-badge .help-icon {
+  color: var(--ion-color-primary);
+  font-size: 18px;
+}
+
+.help-badge span {
+  font-size: var(--ios-font-footnote);
+  font-weight: 500;
+  color: var(--ios-text-secondary);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PREMIUM FAB - Floating Action Button
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.apple-fab {
+  margin-bottom: calc(var(--safe-bottom) + 16px);
+  margin-right: var(--space-4);
+}
+
+.apple-fab-button {
+  --background: var(--gradient-primary);
+  --background-activated: var(--ion-color-primary-shade);
+  --box-shadow: 0 8px 32px rgba(0, 122, 255, 0.4);
+  width: 60px;
+  height: 60px;
+  transition: transform 300ms var(--ease-ios-spring),
+              box-shadow 300ms var(--ease-ios);
+}
+
+.apple-fab-button::part(native) {
+  background: var(--gradient-primary);
+}
+
+.apple-fab-button:hover {
+  transform: scale(1.08);
+  --box-shadow: 0 12px 48px rgba(0, 122, 255, 0.5);
+}
+
+.apple-fab-button:active {
+  transform: scale(0.92);
+  --box-shadow: 0 4px 16px rgba(0, 122, 255, 0.3);
+}
+
+.apple-fab-button ion-icon {
+  font-size: 28px;
+  font-weight: bold;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   APPLE MODAL - Sheet Style
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.apple-modal {
+  --border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+  --background: var(--ios-background-secondary);
+}
+
+.apple-modal::part(backdrop) {
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.apple-modal .modal-content {
+  background: var(--ios-background-secondary);
+  min-height: 100%;
+  padding-bottom: var(--safe-bottom);
+}
+
+/* Modal Header */
+.modal-header {
+  padding: var(--space-3) var(--space-5) var(--space-4);
+  text-align: center;
+  position: relative;
+}
+
+.modal-handle {
+  width: 36px;
+  height: 5px;
+  background: var(--ios-gray-3);
+  border-radius: 3px;
+  margin: 0 auto var(--space-4);
+}
+
+.modal-title {
+  font-size: var(--ios-font-title2);
+  font-weight: 700;
+  letter-spacing: var(--ios-tracking-tight);
+  color: var(--ios-text-primary);
+  margin: 0 0 var(--space-1);
+}
+
+.modal-subtitle {
+  font-size: var(--ios-font-subhead);
+  color: var(--ios-text-secondary);
+  margin: 0;
+}
+
+/* Modal Body */
+.modal-body {
+  padding: 0 var(--space-5);
+}
+
+/* Modal Actions */
+.modal-actions {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-5) 0;
+  margin-top: var(--space-4);
+}
+
+.modal-actions .apple-btn {
+  flex: 1;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   GPS LOCATION CARD - Position Capture
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.gps-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  background: var(--ios-background-elevated);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  margin-bottom: var(--space-5);
+  box-shadow: var(--shadow-card);
+  border: 0.5px solid var(--glass-border-subtle);
+}
+
+.gps-icon-wrapper {
+  width: 48px;
+  height: 48px;
+  background: var(--ion-color-success-soft);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.gps-icon {
+  color: var(--ion-color-success);
+  font-size: 24px;
+}
+
+.gps-info {
+  flex: 1;
+}
+
+.gps-label {
+  display: block;
+  font-size: var(--ios-font-subhead);
+  font-weight: 600;
+  color: var(--ios-text-primary);
+  margin-bottom: 2px;
+}
+
+.gps-coords {
+  font-size: var(--ios-font-footnote);
+  color: var(--ios-text-secondary);
+  font-family: 'SF Mono', 'Menlo', monospace;
+}
+
+.gps-check {
+  width: 32px;
+  height: 32px;
+  background: var(--ion-color-success);
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 16px;
+  animation: scaleIn 500ms var(--ease-ios-spring) forwards;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   APPLE INPUT FIELDS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.form-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.apple-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.apple-label {
+  font-size: var(--ios-font-subhead);
+  font-weight: 600;
+  color: var(--ios-text-primary);
+  letter-spacing: var(--ios-tracking-normal);
+}
+
+.apple-input,
+.apple-textarea {
+  width: 100%;
+  padding: 14px var(--space-4);
+  border: 1.5px solid var(--ios-separator-opaque);
+  border-radius: var(--radius-md);
+  font-size: var(--ios-font-body);
+  font-family: inherit;
+  background: var(--ios-background-elevated);
+  color: var(--ios-text-primary);
+  transition: border-color 200ms var(--ease-ios),
+              box-shadow 200ms var(--ease-ios),
+              background-color 200ms var(--ease-ios);
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.apple-input:focus,
+.apple-textarea:focus {
+  outline: none;
+  border-color: var(--ion-color-primary);
+  box-shadow: 0 0 0 4px var(--ion-color-primary-soft);
+  background: var(--ion-background-color);
+}
+
+.apple-input::placeholder,
+.apple-textarea::placeholder {
+  color: var(--ios-text-tertiary);
+}
+
+.apple-textarea {
+  min-height: 80px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   APPLE BUTTONS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.apple-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: 16px var(--space-6);
+  border-radius: var(--radius-md);
+  font-size: var(--ios-font-body);
+  font-weight: 600;
+  font-family: inherit;
+  letter-spacing: var(--ios-tracking-normal);
+  cursor: pointer;
+  transition: transform 200ms var(--ease-ios),
+              box-shadow 200ms var(--ease-ios),
+              filter 200ms var(--ease-ios),
+              background-color 200ms var(--ease-ios);
+  border: none;
+  min-height: 52px;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.apple-btn.primary {
+  background: var(--gradient-primary);
+  color: white;
+  box-shadow: var(--shadow-button);
+}
+
+.apple-btn.primary:hover {
+  box-shadow: var(--shadow-button-hover);
+  transform: translateY(-2px);
+}
+
+.apple-btn.primary:active {
+  transform: scale(0.96);
+  box-shadow: var(--shadow-md);
+  filter: brightness(0.95);
+}
+
+.apple-btn.primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.apple-btn.secondary {
+  background: var(--ios-background-secondary);
+  color: var(--ion-color-primary);
+}
+
+.apple-btn.secondary:active {
+  transform: scale(0.96);
+  background: var(--ios-gray-5);
+}
+
+.apple-btn.danger {
+  background: var(--ion-color-danger-soft);
+  color: var(--ion-color-danger);
+}
+
+.apple-btn.danger:active {
+  transform: scale(0.96);
+  background: rgba(255, 59, 48, 0.2);
+}
+
+.btn-spinner {
+  width: 20px;
+  height: 20px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   DETAIL MODAL - Problem/Item Details
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.detail-modal .modal-header {
+  padding-bottom: var(--space-3);
+}
+
+.detail-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-full);
+  font-size: var(--ios-font-footnote);
+  font-weight: 600;
+  margin-bottom: var(--space-3);
+}
+
+.detail-status-badge.status-nouveau {
+  background: var(--ion-color-warning-soft);
+  color: var(--ion-color-warning-shade);
+}
+
+.detail-status-badge.status-en_cours {
+  background: var(--ion-color-primary-soft);
+  color: var(--ion-color-primary-shade);
+}
+
+.detail-status-badge.status-termine {
+  background: var(--ion-color-success-soft);
+  color: var(--ion-color-success-shade);
+}
+
+.detail-title {
+  font-size: var(--ios-font-title2);
+  font-weight: 700;
+  letter-spacing: var(--ios-tracking-tight);
+  color: var(--ios-text-primary);
+  margin: 0 0 var(--space-2);
+  line-height: 1.2;
+}
+
+.detail-description {
+  font-size: var(--ios-font-body);
+  color: var(--ios-text-secondary);
+  line-height: 1.5;
+  margin-bottom: var(--space-5);
+}
+
+/* Detail Info Grid */
+.detail-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+
+.detail-info-item {
+  background: var(--ios-background-elevated);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  box-shadow: var(--shadow-xs);
+  border: 0.5px solid var(--glass-border-subtle);
+}
+
+.detail-info-label {
+  font-size: var(--ios-font-caption1);
+  font-weight: 500;
+  color: var(--ios-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: var(--ios-tracking-wide);
+  margin-bottom: var(--space-1);
+}
+
+.detail-info-value {
+  font-size: var(--ios-font-body);
+  font-weight: 600;
+  color: var(--ios-text-primary);
+}
+
+.detail-info-item.full-width {
+  grid-column: 1 / -1;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FILTER CHIPS - Horizontal Scroll
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.filter-chips-container {
+  display: flex;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.filter-chips-container::-webkit-scrollbar {
+  display: none;
+}
+
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  background: var(--ios-background-elevated);
+  border-radius: var(--radius-full);
+  font-size: var(--ios-font-subhead);
+  font-weight: 500;
+  color: var(--ios-text-secondary);
+  white-space: nowrap;
+  border: 1.5px solid var(--ios-separator-opaque);
+  transition: all 200ms var(--ease-ios);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.filter-chip:active {
+  transform: scale(0.95);
+}
+
+.filter-chip.active {
+  background: var(--ion-color-primary);
+  color: white;
+  border-color: var(--ion-color-primary);
+}
+
+.filter-chip ion-icon {
+  font-size: 16px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PROBLEM CARDS - List Items
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.problem-card {
+  background: var(--ios-background-elevated);
+  border-radius: var(--radius-xl);
+  padding: var(--space-4);
+  margin-bottom: var(--space-3);
+  box-shadow: var(--shadow-card);
+  border: 0.5px solid var(--glass-border-subtle);
+  transition: transform 300ms var(--ease-ios-spring),
+              box-shadow 300ms var(--ease-ios);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.problem-card:active {
+  transform: scale(0.98);
+  box-shadow: var(--shadow-sm);
+}
+
+.problem-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--space-3);
+}
+
+.problem-card-title {
+  font-size: var(--ios-font-body);
+  font-weight: 600;
+  color: var(--ios-text-primary);
+  line-height: 1.3;
+  flex: 1;
+  margin-right: var(--space-3);
+}
+
+.problem-card-description {
+  font-size: var(--ios-font-subhead);
+  color: var(--ios-text-secondary);
+  line-height: 1.4;
+  margin-bottom: var(--space-3);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.problem-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.problem-card-location {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--ios-font-footnote);
+  color: var(--ios-text-tertiary);
+}
+
+.problem-card-location ion-icon {
+  font-size: 14px;
+}
+
+.problem-card-date {
+  font-size: var(--ios-font-footnote);
+  color: var(--ios-text-tertiary);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   STATISTICS CARD - Dashboard Widget
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.statistics-card {
+  background: var(--ios-background-elevated);
+  border-radius: var(--radius-2xl);
+  padding: var(--space-5);
+  margin: var(--space-4);
+  box-shadow: var(--shadow-card);
+  border: 0.5px solid var(--glass-border-subtle);
+}
+
+.statistics-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-4);
+}
+
+.statistics-title {
+  font-size: var(--ios-font-headline);
+  font-weight: 600;
+  color: var(--ios-text-primary);
+}
+
+.statistics-period {
+  font-size: var(--ios-font-footnote);
+  color: var(--ios-text-secondary);
+  padding: var(--space-1) var(--space-3);
+  background: var(--ios-gray-6);
+  border-radius: var(--radius-full);
+}
+
+.statistics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-3);
+}
+
+.statistic-item {
+  text-align: center;
+  padding: var(--space-3);
+  background: var(--ios-background-secondary);
+  border-radius: var(--radius-lg);
+}
+
+.statistic-value {
+  font-size: var(--ios-font-title1);
+  font-weight: 700;
+  letter-spacing: -1px;
+  margin-bottom: var(--space-1);
+}
+
+.statistic-value.primary { color: var(--ion-color-primary); }
+.statistic-value.warning { color: var(--ion-color-warning); }
+.statistic-value.success { color: var(--ion-color-success); }
+
+.statistic-label {
+  font-size: var(--ios-font-caption1);
+  color: var(--ios-text-secondary);
+  font-weight: 500;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MAP CONTAINER - Full Screen Map
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.map-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+}
+
+.map-container .leaflet-container {
+  width: 100%;
+  height: 100%;
+  background: var(--ios-background-secondary);
+}
+
+/* Custom Map Controls */
+.leaflet-control-zoom {
+  border: none !important;
+  box-shadow: var(--shadow-float) !important;
+  border-radius: var(--radius-md) !important;
+  overflow: hidden;
+}
+
+.leaflet-control-zoom a {
+  background: var(--glass-background-thick) !important;
+  backdrop-filter: var(--glass-blur) !important;
+  -webkit-backdrop-filter: var(--glass-blur) !important;
+  color: var(--ios-text-primary) !important;
+  width: 40px !important;
+  height: 40px !important;
+  line-height: 40px !important;
+  font-size: 20px !important;
+  border: none !important;
+  border-bottom: 0.5px solid var(--ios-separator) !important;
+}
+
+.leaflet-control-zoom a:last-child {
+  border-bottom: none !important;
+}
+
+.leaflet-control-zoom a:hover {
+  background: var(--glass-background-ultra) !important;
+}
+
+.leaflet-control-zoom a:active {
+  background: var(--ios-gray-5) !important;
+}
+
+/* Custom Map Markers */
+.custom-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: var(--gradient-primary);
+  border-radius: var(--radius-full);
+  box-shadow: 0 4px 16px rgba(0, 122, 255, 0.4);
+  border: 3px solid white;
+  font-size: 20px;
+  color: white;
+  transition: transform 200ms var(--ease-ios-spring);
+}
+
+.custom-marker:hover {
+  transform: scale(1.1);
+}
+
+.custom-marker.warning {
+  background: var(--gradient-warning);
+  box-shadow: 0 4px 16px rgba(255, 149, 0, 0.4);
+}
+
+.custom-marker.success {
+  background: var(--gradient-success);
+  box-shadow: 0 4px 16px rgba(52, 199, 89, 0.4);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LOGIN PAGE - Premium Auth UI
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.auth-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--ion-background-color);
+  padding: var(--space-5);
+  padding-top: calc(var(--safe-top) + var(--space-8));
+  padding-bottom: calc(var(--safe-bottom) + var(--space-5));
+}
+
+.auth-logo {
+  text-align: center;
+  margin-bottom: var(--space-8);
+}
+
+.auth-logo-icon {
+  width: 80px;
+  height: 80px;
+  background: var(--gradient-primary);
+  border-radius: var(--radius-2xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto var(--space-4);
+  box-shadow: 0 8px 32px rgba(0, 122, 255, 0.3);
+  font-size: 40px;
+}
+
+.auth-title {
+  font-size: var(--ios-font-title1);
+  font-weight: 700;
+  letter-spacing: var(--ios-tracking-tight);
+  color: var(--ios-text-primary);
+  margin-bottom: var(--space-2);
+}
+
+.auth-subtitle {
+  font-size: var(--ios-font-body);
+  color: var(--ios-text-secondary);
+}
+
+.auth-form {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.auth-form .form-section {
+  flex: 1;
+}
+
+.auth-footer {
+  text-align: center;
+  padding-top: var(--space-5);
+}
+
+.auth-footer-text {
+  font-size: var(--ios-font-subhead);
+  color: var(--ios-text-secondary);
+}
+
+.auth-footer-link {
+  color: var(--ion-color-primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* Social Login Buttons */
+.social-login-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
+.social-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  background: var(--ios-background-secondary);
+  border: 1.5px solid var(--ios-separator-opaque);
+  border-radius: var(--radius-md);
+  font-size: var(--ios-font-subhead);
+  font-weight: 600;
+  color: var(--ios-text-primary);
+  transition: all 200ms var(--ease-ios);
+  cursor: pointer;
+}
+
+.social-btn:active {
+  transform: scale(0.96);
+  background: var(--ios-gray-5);
+}
+
+.social-btn ion-icon {
+  font-size: 22px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PULL TO REFRESH - Custom Indicator
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+ion-refresher-content {
+  --color: var(--ion-color-primary);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ACTION SHEET - iOS Native Style
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+ion-action-sheet {
+  --background: var(--glass-background-thick);
+  --backdrop-opacity: 0.4;
+}
+
+ion-action-sheet .action-sheet-group {
+  background: var(--glass-background-thick);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-radius: var(--radius-xl);
+  margin: var(--space-2);
+}
+
+ion-action-sheet .action-sheet-button {
+  --color: var(--ion-color-primary);
+  font-weight: 500;
+  min-height: 56px;
+}
+
+ion-action-sheet .action-sheet-button.action-sheet-destructive {
+  --color: var(--ion-color-danger);
+}
+
+ion-action-sheet .action-sheet-button.action-sheet-cancel {
+  font-weight: 600;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ALERT - iOS Native Style
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+ion-alert {
+  --background: var(--glass-background-ultra);
+  --backdrop-opacity: 0.4;
+}
+
+ion-alert .alert-wrapper {
+  border-radius: var(--radius-xl);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  box-shadow: var(--shadow-2xl);
+}
+
+ion-alert .alert-title {
+  font-size: var(--ios-font-headline);
+  font-weight: 600;
+}
+
+ion-alert .alert-message {
+  font-size: var(--ios-font-subhead);
+  color: var(--ios-text-secondary);
+}
+
+ion-alert .alert-button {
+  font-weight: 500;
+  color: var(--ion-color-primary);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TABS - Bottom Navigation Premium
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.premium-tabs ion-tab-bar {
+  --background: var(--glass-background);
+  backdrop-filter: var(--glass-blur-thick) var(--glass-saturate);
+  -webkit-backdrop-filter: var(--glass-blur-thick) var(--glass-saturate);
+  border-top: 0.5px solid var(--ios-separator);
+  height: calc(56px + var(--safe-bottom));
+  padding-bottom: var(--safe-bottom);
+}
+
+.premium-tabs ion-tab-button {
+  --color: var(--ios-gray-1);
+  --color-selected: var(--ion-color-primary);
+  max-width: none;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.premium-tabs ion-tab-button.tab-selected {
+  font-weight: 600;
+}
+
+.premium-tabs ion-tab-button ion-icon {
+  font-size: 26px;
+  margin-bottom: 2px;
+  transition: transform 200ms var(--ease-ios-spring);
+}
+
+.premium-tabs ion-tab-button.tab-selected ion-icon {
+  transform: scale(1.1);
+}
+
+/* Tab Badge */
+.tab-badge {
+  position: absolute;
+  top: 4px;
+  right: calc(50% - 20px);
+  min-width: 18px;
+  height: 18px;
+  background: var(--ion-color-danger);
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 600;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   DARK MODE SPECIFIC OVERRIDES
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (prefers-color-scheme: dark) {
+  .apple-input,
+  .apple-textarea {
+    background: var(--ios-gray-6);
+    border-color: var(--ios-gray-4);
+  }
+
+  .apple-input:focus,
+  .apple-textarea:focus {
+    background: var(--ios-gray-5);
+  }
+
+  .gps-card {
+    background: var(--ios-gray-6);
+  }
+
+  .filter-chip {
+    background: var(--ios-gray-6);
+    border-color: var(--ios-gray-4);
+  }
+
+  .problem-card {
+    background: var(--ios-gray-6);
+  }
+
+  .statistic-item {
+    background: var(--ios-gray-5);
+  }
+
+  .social-btn {
+    background: var(--ios-gray-6);
+    border-color: var(--ios-gray-4);
+  }
+
+  .detail-info-item {
+    background: var(--ios-gray-6);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RESPONSIVE ADJUSTMENTS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Small phones (iPhone SE) */
+@media (max-width: 320px) {
+  .modal-header {
+    padding: var(--space-2) var(--space-4) var(--space-3);
+  }
+
+  .modal-title {
+    font-size: var(--ios-font-title3);
+  }
+
+  .modal-body {
+    padding: 0 var(--space-4);
+  }
+
+  .gps-card {
+    padding: var(--space-3);
+    gap: var(--space-3);
+  }
+
+  .gps-icon-wrapper {
+    width: 40px;
+    height: 40px;
+  }
+
+  .apple-btn {
+    padding: 14px var(--space-4);
+    min-height: 48px;
+  }
+
+  .statistics-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-2);
+  }
+
+  .statistic-item {
+    padding: var(--space-2);
+  }
+
+  .statistic-value {
+    font-size: var(--ios-font-title3);
+  }
+}
+
+/* Landscape mode */
+@media (orientation: landscape) and (max-height: 500px) {
+  .modal-header {
+    padding: var(--space-2) var(--space-4);
+  }
+
+  .modal-body {
+    padding: 0 var(--space-4);
+  }
+
+  .form-section {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-3);
+  }
+
+  .modal-actions {
+    padding: var(--space-3) 0;
+    margin-top: var(--space-2);
+  }
+}

@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 
 export default function ReportsListPage({ authUser, onPageChange, mapOptions = {} }) {
+  const isManager = !!(authUser && ((authUser.role && String(authUser.role).toLowerCase().includes('manager')) || authUser.is_manager));
   const [userReports, setUserReports] = useState([]);
   const [adminReportsByStatus, setAdminReportsByStatus] = useState({ nouveau: [], encours: [], termine: [] });
   const [loading, setLoading] = useState(true);
@@ -115,6 +116,82 @@ export default function ReportsListPage({ authUser, onPageChange, mapOptions = {
     });
   };
 
+  const [showAssignModal, setShowAssignModal] = useState(false);
+  const [assignEntreprises, setAssignEntreprises] = useState([]);
+  const [assignSelectedEntreprise, setAssignSelectedEntreprise] = useState('0');
+  const [assignBudget, setAssignBudget] = useState('');
+  const [selectedReport, setSelectedReport] = useState(null);
+  const [showConfirmFinish, setShowConfirmFinish] = useState(false);
+  const [finishTargetReport, setFinishTargetReport] = useState(null);
+
+  const fetchEntreprises = async () => {
+    try {
+      const res = await fetch(`${apiBase()}/api/entreprises/summaries`);
+      if (!res.ok) throw new Error(`Erreur HTTP: ${res.status}`);
+      const data = await res.json();
+      setAssignEntreprises(data || []);
+      setAssignSelectedEntreprise((data && data.length > 0 && String(data[0].id)) || '0');
+    } catch (err) {
+      console.error("Erreur lors du chargement des entreprises:", err);
+    }
+  };
+
+  const openAssignModal = async (report) => {
+    setSelectedReport(report);
+    setAssignBudget(report.budget || '');
+    await fetchEntreprises();
+    setShowAssignModal(true);
+  };
+
+  const submitAssign = async () => {
+    if (!selectedReport) return;
+    const entrepriseId = assignSelectedEntreprise || 0;
+    const budget = assignBudget;
+    if (!entrepriseId || entrepriseId === '0') {
+      setError("Veuillez sélectionner une entreprise");
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      // backend expects request params: id_report, id_entreprise, budget
+      const url = `${apiBase()}/api/reports/do-report?id_report=${encodeURIComponent(selectedReport.id)}&id_entreprise=${encodeURIComponent(entrepriseId)}&budget=${encodeURIComponent(budget)}`;
+      const res = await fetch(url, { method: 'POST' });
+      if (!res.ok) throw new Error(`Erreur HTTP: ${res.status}`);
+      // refresh
+      if (mapOptions?.adminView) await fetchAdminReportsByStatus(); else await fetchUserReports();
+      setShowAssignModal(false);
+      setSelectedReport(null);
+    } catch (err) {
+      console.error("Erreur lors de l'assignation du rapport:", err);
+      setError("Impossible d'assigner le rapport");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const finishReport = async (reportId) => {
+    if (!reportId) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const url = `${apiBase()}/api/reports/finish-report?id_report=${encodeURIComponent(reportId)}`;
+      const res = await fetch(url, { method: 'POST' });
+      if (!res.ok) throw new Error(`Erreur HTTP: ${res.status}`);
+      if (mapOptions?.adminView) await fetchAdminReportsByStatus(); else await fetchUserReports();
+    } catch (err) {
+      console.error("Erreur lors de la terminaison du rapport:", err);
+      setError("Impossible de terminer le rapport");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const openFinishConfirm = (report) => {
+    setFinishTargetReport(report);
+    setShowConfirmFinish(true);
+  };
+
   if (authUser?.guest) {
     return (
       <div className="reports-container">
@@ -209,8 +286,26 @@ export default function ReportsListPage({ authUser, onPageChange, mapOptions = {
                           </div>
                           <div>
                             <span className={getStatusBadgeClass(report.status)}>{report.status || ''}</span>
-                            <div style={{marginTop:8}}>
+                            <div style={{marginTop:8, display: 'flex', gap: 8}}>
                               <button className="btn btn-outline btn-sm" onClick={() => onPageChange('map', { centerLat: report.latitude, centerLng: report.longitude })}>Voir</button>
+                              {mapOptions?.adminView && isManager && report.status === 'nouveau' && (
+                                <button
+                                  className="btn btn-primary btn-sm"
+                                  onClick={() => openAssignModal(report)}
+                                  disabled={loading}
+                                >
+                                  Assigner
+                                </button>
+                              )}
+                              {isManager && (report.status === 'en_cours' || report.status === 'en-cours') && (
+                                <button
+                                  className="btn btn-success btn-sm"
+                                  onClick={() => openFinishConfirm(report)}
+                                  disabled={loading}
+                                >
+                                  Terminer
+                                </button>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -237,8 +332,17 @@ export default function ReportsListPage({ authUser, onPageChange, mapOptions = {
                           </div>
                           <div>
                             <span className={getStatusBadgeClass(report.status)}>{report.status || ''}</span>
-                            <div style={{marginTop:8}}>
+                            <div style={{marginTop:8, display: 'flex', gap: 8}}>
                               <button className="btn btn-outline btn-sm" onClick={() => onPageChange('map', { centerLat: report.latitude, centerLng: report.longitude })}>Voir</button>
+                              {isManager && (report.status === 'en_cours' || report.status === 'en-cours') && (
+                                <button
+                                  className="btn btn-success btn-sm"
+                                  onClick={() => openFinishConfirm(report)}
+                                  disabled={loading}
+                                >
+                                  Terminer
+                                </button>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -249,6 +353,43 @@ export default function ReportsListPage({ authUser, onPageChange, mapOptions = {
               )}
             </section>
           )}
+        </div>
+      )}
+      {showAssignModal && (
+        <div className="modal-overlay" style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.4)',display:'flex',alignItems:'center',justifyContent:'center'}}>
+          <div className="modal" style={{background:'#fff',padding:20,borderRadius:8,maxWidth:600,width:'90%'}}>
+            <h3>Assigner le rapport #{selectedReport?.id}</h3>
+            <p style={{marginTop:4,marginBottom:8}}>{selectedReport?.description}</p>
+            <div style={{display:'flex',flexDirection:'column',gap:8}}>
+              <label>Entreprise</label>
+              <select id="assign-entreprise-select" value={assignSelectedEntreprise} onChange={(e) => setAssignSelectedEntreprise(e.target.value)}>
+                <option value="0">-- Sélectionner --</option>
+                {assignEntreprises.map(ent => (
+                  <option key={ent.id} value={ent.id}>{ent.nom || ent.name || `Entreprise ${ent.id}`}</option>
+                ))}
+              </select>
+
+              <label>Budget</label>
+              <input type="number" value={assignBudget} onChange={(e) => setAssignBudget(e.target.value)} placeholder="0.00" />
+
+              <div style={{display:'flex',gap:8,marginTop:12}}>
+                <button className="btn btn-primary" onClick={submitAssign} disabled={loading}>Confirmer</button>
+                <button className="btn btn-outline" onClick={() => { setShowAssignModal(false); setSelectedReport(null); }}>Annuler</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {showConfirmFinish && (
+        <div className="modal-overlay" style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.4)',display:'flex',alignItems:'center',justifyContent:'center'}}>
+          <div className="modal" style={{background:'#fff',padding:20,borderRadius:8,maxWidth:500,width:'90%'}}>
+            <h3>Confirmer la clôture</h3>
+            <p>Voulez-vous vraiment marquer le rapport #{finishTargetReport?.id} comme terminé ?</p>
+            <div style={{display:'flex',gap:8,marginTop:12,justifyContent:'flex-end'}}>
+              <button className="btn btn-primary" onClick={async () => { if (finishTargetReport) await finishReport(finishTargetReport.id); setShowConfirmFinish(false); setFinishTargetReport(null); }} disabled={loading}>Confirmer</button>
+              <button className="btn btn-outline" onClick={() => { setShowConfirmFinish(false); setFinishTargetReport(null); }}>Annuler</button>
+            </div>
+          </div>
         </div>
       )}
     </div>

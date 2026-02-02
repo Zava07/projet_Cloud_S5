@@ -36,6 +36,14 @@ public class EntrepriseController {
         return entrepriseService.findAll();
     }
 
+    @GetMapping("/summaries")
+    public List<EntrepriseSummaryDTO> listSummaries() {
+        List<Entreprise> entreprises = entrepriseService.findAll();
+        return entreprises.stream()
+                .map(EntityToDtoMapper::toEntrepriseSummary)
+                .collect(Collectors.toList());
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<EntrepriseSummaryDTO> get(@PathVariable Long id,
                                                     @RequestParam(name = "includeReports", defaultValue = "false") boolean includeReports) {
