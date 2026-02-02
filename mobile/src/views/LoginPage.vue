@@ -1,85 +1,113 @@
 <template>
   <ion-page>
-    <ion-content :fullscreen="true" class="login-content">
-      <div class="login-wrapper">
-        <!-- Header avec blur effect -->
-        <div class="login-header">
-          <div class="app-icon">
-            <ion-icon :icon="mapOutline" />
+    <ion-content :fullscreen="true" class="tesla-login">
+      <!-- Background -->
+      <div class="bg-container">
+        <div class="bg-gradient"></div>
+        <div class="bg-grid"></div>
+        <div class="bg-glow"></div>
+      </div>
+
+      <div class="login-container">
+        <!-- Logo & Brand -->
+        <header class="brand-section">
+          <div class="logo-container">
+            <div class="logo-ring"></div>
+            <ion-icon :icon="mapOutline" class="logo-icon" />
           </div>
-          <h1 class="app-title">Iray Lalana</h1>
-          <p class="app-subtitle">Signalement routier intelligent</p>
-        </div>
+          <h1 class="brand-name">IRAY LALANA</h1>
+          <p class="brand-tagline">Infrastructure Monitoring System</p>
+        </header>
 
-        <!-- Card principale -->
-        <div class="login-card">
-          <!-- Titre de la section -->
-          <h2 class="card-title">Connexion</h2>
-
-          <!-- Formulaire de connexion -->
-          <form @submit.prevent="handleLogin" class="auth-form">
-            <div class="input-group">
-              <label class="input-label">Email</label>
-              <div class="input-wrapper">
+        <!-- Login Card -->
+        <main class="login-card">
+          <div class="card-accent"></div>
+          
+          <h2 class="card-title">Sign In</h2>
+          
+          <form @submit.prevent="handleLogin" class="login-form">
+            <!-- Email -->
+            <div class="form-group">
+              <label class="form-label">EMAIL</label>
+              <div class="input-container">
                 <ion-icon :icon="mailOutline" class="input-icon" />
                 <input 
                   v-model="loginForm.email" 
                   type="email" 
-                  placeholder="votre@email.com"
+                  placeholder="your@email.com"
                   required
-                  class="apple-input"
+                  class="form-input"
+                  autocomplete="email"
                 />
               </div>
             </div>
 
-            <div class="input-group">
-              <label class="input-label">Mot de passe</label>
-              <div class="input-wrapper">
+            <!-- Password -->
+            <div class="form-group">
+              <label class="form-label">PASSWORD</label>
+              <div class="input-container">
                 <ion-icon :icon="lockClosedOutline" class="input-icon" />
                 <input 
                   v-model="loginForm.password" 
                   :type="showPassword ? 'text' : 'password'"
                   placeholder="••••••••"
                   required
-                  class="apple-input"
+                  class="form-input"
+                  autocomplete="current-password"
                 />
-                <button type="button" class="toggle-password" @click="showPassword = !showPassword">
+                <button type="button" class="password-toggle" @click="showPassword = !showPassword">
                   <ion-icon :icon="showPassword ? eyeOffOutline : eyeOutline" />
                 </button>
               </div>
             </div>
 
-            <button type="submit" class="apple-button primary" :disabled="loading">
-              <ion-spinner v-if="loading" name="crescent" />
-              <span v-else>Se connecter</span>
-              <ion-icon v-if="!loading" :icon="arrowForwardOutline" class="btn-icon" />
+            <!-- Submit Button -->
+            <button type="submit" class="btn-primary" :disabled="loading">
+              <ion-spinner v-if="loading" name="crescent" class="btn-spinner" />
+              <template v-else>
+                <span>CONTINUE</span>
+                <ion-icon :icon="arrowForwardOutline" class="btn-arrow" />
+              </template>
             </button>
-
-            <div class="demo-info">
-              <div class="demo-badge">
-                <ion-icon :icon="informationCircleOutline" />
-                <span>Compte démo</span>
-              </div>
-              <p>manager@Outlook.com / Admin123!</p>
-            </div>
           </form>
+
+          <!-- Demo Credentials -->
+          <div class="demo-box">
+            <div class="demo-header">
+              <span class="demo-indicator"></span>
+              <span class="demo-label">DEMO ACCOUNT</span>
+            </div>
+            <div class="demo-credentials">
+              <code>manager@Outlook.com</code>
+              <code>Admin123!</code>
+            </div>
+          </div>
 
           <!-- Divider -->
           <div class="divider">
-            <span>ou</span>
+            <span class="divider-line"></span>
+            <span class="divider-text">OR</span>
+            <span class="divider-line"></span>
           </div>
 
-          <!-- Bouton visiteur -->
-          <button class="apple-button secondary" @click="continueAsVisitor">
-            <ion-icon :icon="eyeOutline" class="btn-icon-left" />
-            <span>Continuer en tant que visiteur</span>
+          <!-- Guest Button -->
+          <button class="btn-secondary" @click="continueAsVisitor">
+            <ion-icon :icon="eyeOutline" />
+            <span>CONTINUE AS GUEST</span>
           </button>
-        </div>
+        </main>
 
         <!-- Footer -->
-        <p class="footer-text">
-          Antananarivo • Madagascar 🇲🇬
-        </p>
+        <footer class="footer">
+          <div class="footer-location">
+            <ion-icon :icon="locationOutline" />
+            <span>Antananarivo, Madagascar</span>
+          </div>
+          <div class="footer-status">
+            <span class="status-dot"></span>
+            <span>System Online</span>
+          </div>
+        </footer>
       </div>
     </ion-content>
   </ion-page>
@@ -102,7 +130,7 @@ import {
   eyeOutline,
   eyeOffOutline,
   arrowForwardOutline,
-  informationCircleOutline,
+  locationOutline,
 } from 'ionicons/icons';
 import { useAuth } from '@/services/useAuth';
 
@@ -122,7 +150,7 @@ const handleLogin = async () => {
   try {
     await login(loginForm.value.email, loginForm.value.password);
     const toast = await toastController.create({
-      message: 'Connexion réussie !',
+      message: 'Login successful',
       duration: 2000,
       color: 'success',
     });
@@ -130,7 +158,7 @@ const handleLogin = async () => {
     router.push('/map');
   } catch (error: any) {
     const toast = await toastController.create({
-      message: error.message || 'Erreur de connexion',
+      message: error.message || 'Login failed',
       duration: 3000,
       color: 'danger',
     });
@@ -146,114 +174,201 @@ const continueAsVisitor = () => {
 </script>
 
 <style scoped>
-/* === Base Styles === */
-.login-content {
-  --background: linear-gradient(180deg, #f5f5f7 0%, #ffffff 100%);
+/* ═══════════════════════════════════════════════════════════════════════════
+   ⚡ TESLA LOGIN PAGE - Minimalist & Professional
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.tesla-login {
+  --background: #000000;
 }
 
-.login-wrapper {
+/* === Background Effects === */
+.bg-container {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.bg-gradient {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 0%, rgba(232, 33, 39, 0.08) 0%, transparent 50%),
+              radial-gradient(ellipse at 80% 80%, rgba(0, 82, 136, 0.06) 0%, transparent 40%);
+}
+
+.bg-grid {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
+}
+
+.bg-glow {
+  position: absolute;
+  top: -50%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 800px;
+  height: 800px;
+  background: radial-gradient(circle, rgba(232, 33, 39, 0.03) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+/* === Main Container === */
+.login-container {
+  position: relative;
+  z-index: 1;
   min-height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 12px;
-  padding-top: max(8px, env(safe-area-inset-top));
-  padding-bottom: max(8px, env(safe-area-inset-bottom));
+  padding: 24px;
+  padding-top: max(48px, env(safe-area-inset-top, 24px));
+  padding-bottom: max(48px, env(safe-area-inset-bottom, 24px));
 }
 
-/* === Header === */
-.login-header {
+/* === Brand Section === */
+.brand-section {
   text-align: center;
-  margin-bottom: 8px;
-  animation: fadeInDown 0.6s ease-out;
+  margin-bottom: 40px;
+  animation: fadeInDown 0.8s ease-out;
 }
 
-.app-icon {
-  width: 44px;
-  height: 44px;
-  background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%);
-  border-radius: 12px;
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.logo-container {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 6px;
-  box-shadow: 0 4px 16px rgba(0, 122, 255, 0.3);
 }
 
-.app-icon ion-icon {
-  font-size: 22px;
-  color: white;
+.logo-ring {
+  position: absolute;
+  inset: 0;
+  border: 2px solid rgba(232, 33, 39, 0.3);
+  border-radius: 50%;
+  animation: ringPulse 3s ease-in-out infinite;
 }
 
-.app-title {
-  font-size: 20px;
-  font-weight: 700;
-  letter-spacing: -0.5px;
-  color: #1d1d1f;
+@keyframes ringPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.5;
+  }
+}
+
+.logo-icon {
+  font-size: 36px;
+  color: #E82127;
+  filter: drop-shadow(0 0 20px rgba(232, 33, 39, 0.5));
+}
+
+.brand-name {
+  font-size: 28px;
+  font-weight: 300;
+  letter-spacing: 8px;
+  color: #FFFFFF;
   margin: 0;
+  text-transform: uppercase;
 }
 
-.app-subtitle {
+.brand-tagline {
   font-size: 11px;
-  color: #86868b;
-  margin: 0;
-  font-weight: 400;
+  font-weight: 500;
+  letter-spacing: 3px;
+  color: #6B6B6B;
+  margin: 8px 0 0;
+  text-transform: uppercase;
 }
 
-/* === Card === */
+/* === Login Card === */
 .login-card {
   width: 100%;
   max-width: 400px;
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(18, 18, 18, 0.8);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-radius: 14px;
-  padding: 12px;
-  box-shadow: 
-    0 4px 24px rgba(0, 0, 0, 0.06),
-    0 1px 2px rgba(0, 0, 0, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.7);
-  animation: fadeInUp 0.6s ease-out 0.1s both;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 32px 28px;
+  position: relative;
+  overflow: hidden;
+  animation: fadeInUp 0.8s ease-out 0.2s both;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card-accent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #E82127, #E82127 30%, transparent 30%);
 }
 
 .card-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: #1d1d1f;
-  text-align: center;
-  margin: 0 0 8px;
-  letter-spacing: -0.2px;
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  color: #FFFFFF;
+  margin: 0 0 28px;
+  text-transform: uppercase;
 }
 
 /* === Form === */
-.auth-form {
-  animation: fadeIn 0.4s ease-out;
-}
-
-.input-group {
-  margin-bottom: 6px;
-}
-
-.input-group.half {
-  flex: 1;
-}
-
-.input-row {
+.login-form {
   display: flex;
-  gap: 6px;
+  flex-direction: column;
+  gap: 20px;
 }
 
-.input-label {
-  display: block;
-  font-size: 11px;
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-label {
+  font-size: 10px;
   font-weight: 600;
-  color: #1d1d1f;
-  margin-bottom: 3px;
-  letter-spacing: -0.2px;
+  letter-spacing: 2px;
+  color: #6B6B6B;
+  text-transform: uppercase;
 }
 
-.input-wrapper {
+.input-container {
   position: relative;
   display: flex;
   align-items: center;
@@ -261,334 +376,331 @@ const continueAsVisitor = () => {
 
 .input-icon {
   position: absolute;
-  left: 10px;
-  font-size: 14px;
-  color: #86868b;
+  left: 14px;
+  font-size: 18px;
+  color: #6B6B6B;
   pointer-events: none;
+  transition: color 0.25s ease;
+  z-index: 1;
 }
 
-.apple-input {
+.input-container:focus-within .input-icon {
+  color: #E82127;
+}
+
+.form-input {
   width: 100%;
-  padding: 9px 10px 9px 32px;
-  border: 1px solid #d2d2d7;
+  padding: 14px 14px 14px 46px;
+  background: rgba(26, 26, 26, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
-  font-size: 14px;
   font-family: inherit;
-  background: #fafafa;
-  transition: all 0.2s ease;
+  font-size: 15px;
+  color: #FFFFFF;
+  transition: all 0.25s ease;
   outline: none;
 }
 
-.apple-input:focus {
-  border-color: #007AFF;
-  background: white;
-  box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
+.form-input:focus {
+  border-color: #E82127;
+  background: rgba(26, 26, 26, 1);
+  box-shadow: 0 0 0 3px rgba(232, 33, 39, 0.1);
 }
 
-.apple-input::placeholder {
-  color: #c7c7cc;
+.form-input::placeholder {
+  color: #4A4A4A;
 }
 
-.input-group.half .apple-input {
-  padding-left: 16px;
-}
-
-.toggle-password {
+.password-toggle {
   position: absolute;
   right: 12px;
   background: none;
   border: none;
   padding: 8px;
   cursor: pointer;
-  color: #86868b;
+  color: #6B6B6B;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: color 0.2s ease;
+  z-index: 1;
 }
 
-.toggle-password ion-icon {
-  font-size: 20px;
+.password-toggle:hover {
+  color: #FFFFFF;
+}
+
+.password-toggle ion-icon {
+  font-size: 18px;
 }
 
 /* === Buttons === */
-.apple-button {
-  width: 100%;
-  padding: 10px 12px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  font-family: inherit;
-  cursor: pointer;
+.btn-primary {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  transition: all 0.2s ease;
+  gap: 10px;
+  width: 100%;
+  padding: 16px 24px;
+  background: #FFFFFF;
+  color: #000000;
   border: none;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  margin-top: 8px;
 }
 
-.apple-button.primary {
-  background: linear-gradient(135deg, #007AFF 0%, #0055d4 100%);
-  color: white;
-  box-shadow: 0 4px 16px rgba(0, 122, 255, 0.3);
+.btn-primary:hover:not(:disabled) {
+  background: #E8E8E8;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(255, 255, 255, 0.1);
 }
 
-.apple-button.primary:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 24px rgba(0, 122, 255, 0.4);
-}
-
-.apple-button.primary:active {
+.btn-primary:active:not(:disabled) {
   transform: scale(0.98);
 }
 
-.apple-button.primary:disabled {
-  opacity: 0.6;
+.btn-primary:disabled {
+  opacity: 0.5;
   cursor: not-allowed;
-  transform: none;
 }
 
-.apple-button.secondary {
-  background: #f5f5f7;
-  color: #1d1d1f;
-  margin-top: 8px;
+.btn-spinner {
+  width: 20px;
+  height: 20px;
+  color: #000000;
 }
 
-.apple-button.secondary:hover {
-  background: #ebebed;
-}
-
-.apple-button.secondary:active {
-  transform: scale(0.98);
-}
-
-.btn-icon {
+.btn-arrow {
   font-size: 16px;
+  transition: transform 0.25s ease;
 }
 
-.btn-icon-left {
-  font-size: 16px;
-  margin-right: 2px;
+.btn-primary:hover .btn-arrow {
+  transform: translateX(4px);
 }
 
-/* === Demo Info === */
-.demo-info {
-  margin-top: 8px;
-  padding: 6px 8px;
-  background: linear-gradient(135deg, #f0f8ff 0%, #f5f0ff 100%);
-  border-radius: 6px;
-  border: 1px solid rgba(0, 122, 255, 0.1);
-}
-
-.demo-badge {
+.btn-secondary {
   display: flex;
   align-items: center;
-  gap: 3px;
-  margin-bottom: 1px;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 14px 24px;
+  background: transparent;
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.25s ease;
 }
 
-.demo-badge ion-icon {
-  font-size: 10px;
-  color: #007AFF;
+.btn-secondary:hover {
+  border-color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.05);
 }
 
-.demo-badge span {
+.btn-secondary ion-icon {
+  font-size: 16px;
+}
+
+/* === Demo Box === */
+.demo-box {
+  margin-top: 24px;
+  padding: 14px 16px;
+  background: rgba(232, 33, 39, 0.05);
+  border: 1px solid rgba(232, 33, 39, 0.15);
+  border-radius: 8px;
+}
+
+.demo-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.demo-indicator {
+  width: 6px;
+  height: 6px;
+  background: #E82127;
+  border-radius: 50%;
+  animation: blink 2s ease-in-out infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.demo-label {
   font-size: 9px;
   font-weight: 600;
-  color: #007AFF;
+  letter-spacing: 1.5px;
+  color: #E82127;
   text-transform: uppercase;
-  letter-spacing: 0.3px;
 }
 
-.demo-info p {
-  margin: 0;
-  font-size: 10px;
-  color: #6e6e73;
-  font-family: 'SF Mono', 'Menlo', monospace;
+.demo-credentials {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.demo-credentials code {
+  font-family: 'SF Mono', 'Menlo', 'Monaco', monospace;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
 }
 
 /* === Divider === */
 .divider {
   display: flex;
   align-items: center;
-  margin: 8px 0;
+  gap: 16px;
+  margin: 24px 0;
 }
 
-.divider::before,
-.divider::after {
-  content: '';
+.divider-line {
   flex: 1;
   height: 1px;
-  background: #d2d2d7;
+  background: rgba(255, 255, 255, 0.1);
 }
 
-.divider span {
-  padding: 0 8px;
-  font-size: 11px;
-  color: #86868b;
+.divider-text {
+  font-size: 10px;
   font-weight: 500;
+  letter-spacing: 2px;
+  color: #6B6B6B;
 }
 
 /* === Footer === */
-.footer-text {
-  margin-top: 8px;
-  font-size: 10px;
-  color: #86868b;
+.footer {
+  margin-top: 32px;
   text-align: center;
-  animation: fadeIn 0.6s ease-out 0.3s both;
-}
-
-/* === Animations === */
-@keyframes fadeInDown {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  animation: fadeIn 0.8s ease-out 0.4s both;
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-/* === Dark Mode === */
-@media (prefers-color-scheme: dark) {
-  .login-content {
-    --background: linear-gradient(180deg, #1c1c1e 0%, #000000 100%);
-  }
-
-  .app-title {
-    color: #f5f5f7;
-  }
-
-  .app-subtitle {
-    color: #98989d;
-  }
-
-  .login-card {
-    background: rgba(44, 44, 46, 0.8);
-    border-color: rgba(255, 255, 255, 0.1);
-  }
-
-  .segment-container {
-    background: #3a3a3c;
-  }
-
-  .segment-btn {
-    color: #98989d;
-  }
-
-  .segment-btn.active {
-    color: #f5f5f7;
-  }
-
-  .segment-indicator {
-    background: #636366;
-  }
-
-  .input-label {
-    color: #f5f5f7;
-  }
-
-  .apple-input {
-    background: #2c2c2e;
-    border-color: #3a3a3c;
-    color: #f5f5f7;
-  }
-
-  .apple-input:focus {
-    background: #3a3a3c;
-    border-color: #0a84ff;
-  }
-
-  .apple-input::placeholder {
-    color: #636366;
-  }
-
-  .apple-button.secondary {
-    background: #2c2c2e;
-    color: #f5f5f7;
-  }
-
-  .apple-button.secondary:hover {
-    background: #3a3a3c;
-  }
-
-  .demo-info {
-    background: linear-gradient(135deg, rgba(10, 132, 255, 0.1) 0%, rgba(94, 92, 230, 0.1) 100%);
-    border-color: rgba(10, 132, 255, 0.2);
-  }
-
-  .demo-info p {
-    color: #98989d;
-  }
-
-  .divider::before,
-  .divider::after {
-    background: #3a3a3c;
-  }
-
-  .divider span {
-    color: #98989d;
-  }
-
-  .footer-text {
-    color: #98989d;
-  }
+.footer-location {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #6B6B6B;
+  margin-bottom: 12px;
 }
 
-/* === Mobile Responsive === */
-@media (max-width: 480px) {
-  .login-wrapper {
-    padding: 16px;
-    justify-content: flex-start;
-    padding-top: max(60px, env(safe-area-inset-top) + 40px);
-  }
+.footer-location ion-icon {
+  font-size: 14px;
+}
 
+.footer-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  color: #00B140;
+  text-transform: uppercase;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  background: #00B140;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #00B140;
+  animation: blink 2s ease-in-out infinite;
+}
+
+/* === Responsive === */
+@media (max-width: 380px) {
+  .login-container {
+    padding: 20px 16px;
+  }
+  
+  .brand-name {
+    font-size: 22px;
+    letter-spacing: 5px;
+  }
+  
   .login-card {
     padding: 24px 20px;
   }
-
-  .app-icon {
-    width: 70px;
-    height: 70px;
-    border-radius: 18px;
+  
+  .form-input {
+    padding: 12px 12px 12px 42px;
+    font-size: 14px;
   }
-
-  .app-icon ion-icon {
-    font-size: 34px;
+  
+  .btn-primary {
+    padding: 14px 20px;
   }
+}
 
-  .app-title {
+@media (max-height: 700px) {
+  .brand-section {
+    margin-bottom: 24px;
+  }
+  
+  .logo-container {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 12px;
+  }
+  
+  .logo-icon {
     font-size: 28px;
   }
-
-  .input-row {
-    flex-direction: column;
-    gap: 0;
+  
+  .brand-name {
+    font-size: 22px;
   }
+}
 
-  .input-group.half {
-    flex: none;
+/* Landscape */
+@media (orientation: landscape) and (max-height: 500px) {
+  .login-container {
+    flex-direction: row;
+    gap: 40px;
+    padding: 16px 32px;
+  }
+  
+  .brand-section {
+    margin-bottom: 0;
+    flex: 1;
+  }
+  
+  .login-card {
+    flex: 1;
+    max-width: 360px;
+  }
+  
+  .footer {
+    position: fixed;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    margin: 0;
   }
 }
 </style>

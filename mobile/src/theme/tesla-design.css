@@ -1,0 +1,524 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   ⚡ TESLA / SPACEX DESIGN SYSTEM
+   "The future is already here – it's just not evenly distributed."
+   Minimalist • Futuristic • Professional • Premium
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ═══════════════════════════════════════════════════════════════════════════
+     COULEURS TESLA
+     ═══════════════════════════════════════════════════════════════════════════ */
+  
+  /* Primary - Tesla Red */
+  --tesla-red: #E82127;
+  --tesla-red-rgb: 232, 33, 39;
+  --tesla-red-soft: rgba(232, 33, 39, 0.1);
+  --tesla-red-medium: rgba(232, 33, 39, 0.2);
+  
+  /* Accent - Electric Blue (SpaceX) */
+  --spacex-blue: #005288;
+  --spacex-blue-light: #0077B5;
+  --spacex-blue-soft: rgba(0, 82, 136, 0.1);
+  
+  /* Neutrals - Minimalist Palette */
+  --tesla-white: #FFFFFF;
+  --tesla-off-white: #F4F4F4;
+  --tesla-gray-100: #E8E8E8;
+  --tesla-gray-200: #D0D0D0;
+  --tesla-gray-300: #A0A0A0;
+  --tesla-gray-400: #6B6B6B;
+  --tesla-gray-500: #393939;
+  --tesla-gray-600: #262626;
+  --tesla-gray-700: #1A1A1A;
+  --tesla-gray-800: #121212;
+  --tesla-black: #000000;
+  
+  /* Status Colors */
+  --status-success: #00B140;
+  --status-warning: #FFB800;
+  --status-danger: #E82127;
+  --status-info: #0077B5;
+  
+  /* ═══════════════════════════════════════════════════════════════════════════
+     TYPOGRAPHY - Gotham/Inter Style
+     ═══════════════════════════════════════════════════════════════════════════ */
+  
+  --font-tesla: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', 'Menlo', 'Monaco', monospace;
+  
+  /* Font Sizes */
+  --text-xs: 0.75rem;     /* 12px */
+  --text-sm: 0.875rem;    /* 14px */
+  --text-base: 1rem;      /* 16px */
+  --text-lg: 1.125rem;    /* 18px */
+  --text-xl: 1.25rem;     /* 20px */
+  --text-2xl: 1.5rem;     /* 24px */
+  --text-3xl: 1.875rem;   /* 30px */
+  --text-4xl: 2.25rem;    /* 36px */
+  --text-5xl: 3rem;       /* 48px */
+  
+  /* Font Weights */
+  --font-light: 300;
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+  
+  /* Letter Spacing */
+  --tracking-tighter: -0.05em;
+  --tracking-tight: -0.025em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.025em;
+  --tracking-wider: 0.05em;
+  --tracking-widest: 0.1em;
+  
+  /* ═══════════════════════════════════════════════════════════════════════════
+     SPACING - 8px Grid System
+     ═══════════════════════════════════════════════════════════════════════════ */
+  
+  --space-0: 0;
+  --space-1: 0.25rem;   /* 4px */
+  --space-2: 0.5rem;    /* 8px */
+  --space-3: 0.75rem;   /* 12px */
+  --space-4: 1rem;      /* 16px */
+  --space-5: 1.25rem;   /* 20px */
+  --space-6: 1.5rem;    /* 24px */
+  --space-8: 2rem;      /* 32px */
+  --space-10: 2.5rem;   /* 40px */
+  --space-12: 3rem;     /* 48px */
+  --space-16: 4rem;     /* 64px */
+  --space-20: 5rem;     /* 80px */
+  
+  /* ═══════════════════════════════════════════════════════════════════════════
+     BORDERS & RADIUS
+     ═══════════════════════════════════════════════════════════════════════════ */
+  
+  --radius-none: 0;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 24px;
+  --radius-full: 9999px;
+  
+  /* ═══════════════════════════════════════════════════════════════════════════
+     SHADOWS - Subtle & Elegant
+     ═══════════════════════════════════════════════════════════════════════════ */
+  
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1), 0 4px 10px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.15), 0 8px 20px rgba(0, 0, 0, 0.1);
+  --shadow-glow-red: 0 0 40px rgba(232, 33, 39, 0.3);
+  --shadow-glow-blue: 0 0 40px rgba(0, 119, 181, 0.3);
+  
+  /* ═══════════════════════════════════════════════════════════════════════════
+     TRANSITIONS - Smooth & Professional
+     ═══════════════════════════════════════════════════════════════════════════ */
+  
+  --transition-fast: 150ms ease;
+  --transition-base: 250ms ease;
+  --transition-slow: 400ms ease;
+  --transition-spring: 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
+  
+  /* ═══════════════════════════════════════════════════════════════════════════
+     Z-INDEX
+     ═══════════════════════════════════════════════════════════════════════════ */
+  
+  --z-base: 0;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-fixed: 300;
+  --z-modal-backdrop: 400;
+  --z-modal: 500;
+  --z-toast: 600;
+  --z-tooltip: 700;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   GLOBAL BASE STYLES
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.tesla-app {
+  font-family: var(--font-tesla);
+  background: var(--tesla-black);
+  color: var(--tesla-white);
+  min-height: 100vh;
+}
+
+/* Typography Utilities */
+.text-display {
+  font-size: var(--text-5xl);
+  font-weight: var(--font-light);
+  letter-spacing: var(--tracking-tight);
+  line-height: 1.1;
+}
+
+.text-headline {
+  font-size: var(--text-3xl);
+  font-weight: var(--font-medium);
+  letter-spacing: var(--tracking-tight);
+  line-height: 1.2;
+}
+
+.text-title {
+  font-size: var(--text-xl);
+  font-weight: var(--font-semibold);
+  letter-spacing: var(--tracking-normal);
+  line-height: 1.3;
+}
+
+.text-body {
+  font-size: var(--text-base);
+  font-weight: var(--font-normal);
+  line-height: 1.6;
+}
+
+.text-caption {
+  font-size: var(--text-sm);
+  font-weight: var(--font-normal);
+  color: var(--tesla-gray-300);
+  letter-spacing: var(--tracking-wide);
+}
+
+.text-overline {
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BUTTON STYLES - Tesla Signature
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.tesla-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-8);
+  font-family: var(--font-tesla);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  text-decoration: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  position: relative;
+  overflow: hidden;
+}
+
+.tesla-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to right, transparent, rgba(255,255,255,0.1), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.6s ease;
+}
+
+.tesla-btn:hover::before {
+  transform: translateX(100%);
+}
+
+.tesla-btn-primary {
+  background: var(--tesla-white);
+  color: var(--tesla-black);
+}
+
+.tesla-btn-primary:hover {
+  background: var(--tesla-gray-100);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.tesla-btn-primary:active {
+  transform: scale(0.98);
+}
+
+.tesla-btn-secondary {
+  background: transparent;
+  color: var(--tesla-white);
+  border: 2px solid var(--tesla-gray-400);
+}
+
+.tesla-btn-secondary:hover {
+  border-color: var(--tesla-white);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.tesla-btn-danger {
+  background: var(--tesla-red);
+  color: var(--tesla-white);
+}
+
+.tesla-btn-danger:hover {
+  background: #CC1D22;
+  box-shadow: var(--shadow-glow-red);
+}
+
+.tesla-btn-small {
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--text-xs);
+}
+
+.tesla-btn-large {
+  padding: var(--space-5) var(--space-10);
+  font-size: var(--text-base);
+}
+
+.tesla-btn-full {
+  width: 100%;
+}
+
+.tesla-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   INPUT STYLES - Minimalist
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.tesla-input-group {
+  margin-bottom: var(--space-5);
+}
+
+.tesla-label {
+  display: block;
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  color: var(--tesla-gray-300);
+  margin-bottom: var(--space-2);
+}
+
+.tesla-input {
+  width: 100%;
+  padding: var(--space-4);
+  background: var(--tesla-gray-700);
+  border: 1px solid var(--tesla-gray-500);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-tesla);
+  font-size: var(--text-base);
+  color: var(--tesla-white);
+  transition: all var(--transition-fast);
+  outline: none;
+}
+
+.tesla-input:focus {
+  border-color: var(--tesla-white);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
+}
+
+.tesla-input::placeholder {
+  color: var(--tesla-gray-400);
+}
+
+.tesla-textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CARD STYLES - Clean & Modern
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.tesla-card {
+  background: var(--tesla-gray-800);
+  border: 1px solid var(--tesla-gray-600);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: all var(--transition-base);
+}
+
+.tesla-card:hover {
+  border-color: var(--tesla-gray-400);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-xl);
+}
+
+.tesla-card-header {
+  padding: var(--space-5);
+  border-bottom: 1px solid var(--tesla-gray-600);
+}
+
+.tesla-card-body {
+  padding: var(--space-5);
+}
+
+.tesla-card-footer {
+  padding: var(--space-4) var(--space-5);
+  border-top: 1px solid var(--tesla-gray-600);
+  background: var(--tesla-gray-700);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   STATUS BADGES
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.tesla-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  border-radius: var(--radius-sm);
+}
+
+.tesla-badge-new {
+  background: var(--spacex-blue-soft);
+  color: var(--spacex-blue-light);
+}
+
+.tesla-badge-progress {
+  background: rgba(255, 184, 0, 0.15);
+  color: var(--status-warning);
+}
+
+.tesla-badge-completed {
+  background: rgba(0, 177, 64, 0.15);
+  color: var(--status-success);
+}
+
+.tesla-badge-danger {
+  background: var(--tesla-red-soft);
+  color: var(--tesla-red);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LOADER / SPINNER
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.tesla-loader {
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--tesla-gray-600);
+  border-top-color: var(--tesla-white);
+  border-radius: 50%;
+  animation: tesla-spin 0.8s linear infinite;
+}
+
+@keyframes tesla-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ANIMATIONS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@keyframes tesla-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes tesla-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes tesla-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes tesla-glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(232, 33, 39, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(232, 33, 39, 0.5);
+  }
+}
+
+.animate-fade-in {
+  animation: tesla-fade-in 0.6s var(--ease-out-expo) forwards;
+}
+
+.animate-slide-up {
+  animation: tesla-slide-up 0.8s var(--ease-out-expo) forwards;
+}
+
+.animate-scale-in {
+  animation: tesla-scale-in 0.4s var(--ease-out-expo) forwards;
+}
+
+/* Stagger animation delays */
+.stagger-1 { animation-delay: 0.1s; }
+.stagger-2 { animation-delay: 0.2s; }
+.stagger-3 { animation-delay: 0.3s; }
+.stagger-4 { animation-delay: 0.4s; }
+.stagger-5 { animation-delay: 0.5s; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RESPONSIVE UTILITIES
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Mobile First Approach */
+@media (max-width: 359px) {
+  /* Extra small devices */
+  :root {
+    --text-5xl: 2.25rem;
+    --text-4xl: 1.875rem;
+    --text-3xl: 1.5rem;
+    --text-2xl: 1.25rem;
+  }
+}
+
+@media (min-width: 360px) and (max-width: 479px) {
+  /* Small phones */
+}
+
+@media (min-width: 480px) and (max-width: 767px) {
+  /* Large phones */
+}
+
+@media (min-width: 768px) {
+  /* Tablets and up */
+  :root {
+    --text-5xl: 3.5rem;
+    --text-4xl: 2.5rem;
+  }
+}
+
+/* Safe Areas for notched phones */
+.safe-area-top {
+  padding-top: env(safe-area-inset-top, 20px);
+}
+
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 20px);
+}
+
+.safe-area-x {
+  padding-left: env(safe-area-inset-left, 0);
+  padding-right: env(safe-area-inset-right, 0);
+}
