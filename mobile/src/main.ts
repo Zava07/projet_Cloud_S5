@@ -33,9 +33,11 @@ import {defineCustomElements} from '@ionic/pwa-elements/loader';
 /* @import '@ionic/vue/css/palettes/dark.class.css'; */
 import '@ionic/vue/css/palettes/dark.system.css';
 
-/* Theme variables */
+/* Theme variables - Tesla/SpaceX Premium Design System */
 import './theme/variables.css';
 import './theme/global.css';
+import './theme/tesla-design.css';
+
 // Leaflet styles
 import 'leaflet/dist/leaflet.css';
 

@@ -1,0 +1,714 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   🍎 iOS ADVANCED ANIMATIONS - Micro-interactions & Motion Design
+   "Details matter, it's worth waiting to get it right." - Steve Jobs
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   HAPTIC FEEDBACK SIMULATION - Visual Response
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.haptic-light:active {
+  transform: scale(0.98);
+  transition: transform 50ms var(--ease-ios);
+}
+
+.haptic-medium:active {
+  transform: scale(0.96);
+  transition: transform 50ms var(--ease-ios);
+}
+
+.haptic-heavy:active {
+  transform: scale(0.94);
+  transition: transform 50ms var(--ease-ios);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PAGE TRANSITIONS - iOS Native Navigation
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Push Animation (Forward Navigation) */
+@keyframes ios-push-enter {
+  from {
+    transform: translateX(100%);
+    opacity: 0.8;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes ios-push-leave {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(-30%);
+    opacity: 0.6;
+  }
+}
+
+/* Pop Animation (Back Navigation) */
+@keyframes ios-pop-enter {
+  from {
+    transform: translateX(-30%);
+    opacity: 0.6;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes ios-pop-leave {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0.8;
+  }
+}
+
+/* Modal Present Animation */
+@keyframes ios-modal-present {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes ios-modal-dismiss {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+/* Scale Modal (Alert/Action Sheet) */
+@keyframes ios-scale-present {
+  from {
+    transform: scale(1.2);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes ios-scale-dismiss {
+  from {
+    transform: scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SPRING ANIMATIONS - Physics-Based Motion
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@keyframes spring-bounce {
+  0% { transform: scale(0); }
+  50% { transform: scale(1.1); }
+  70% { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+
+@keyframes spring-pop {
+  0% { transform: scale(0.5); opacity: 0; }
+  60% { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+@keyframes spring-shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+  20%, 40%, 60%, 80% { transform: translateX(4px); }
+}
+
+@keyframes spring-wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-3deg); }
+  75% { transform: rotate(3deg); }
+}
+
+.spring-bounce { animation: spring-bounce 500ms var(--ease-ios-spring) forwards; }
+.spring-pop { animation: spring-pop 400ms var(--ease-ios-spring) forwards; }
+.spring-shake { animation: spring-shake 500ms var(--ease-ios) forwards; }
+.spring-wiggle { animation: spring-wiggle 500ms var(--ease-ios) infinite; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BUTTON INTERACTIONS - Premium Feedback
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.btn-interactive {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-interactive::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 400ms var(--ease-ios), height 400ms var(--ease-ios);
+}
+
+.btn-interactive:active::after {
+  width: 200%;
+  height: 200%;
+}
+
+/* Ripple Effect */
+@keyframes ripple {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0.5;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(4);
+    opacity: 0;
+  }
+}
+
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  animation: ripple 600ms var(--ease-ios) forwards;
+  pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CARD INTERACTIONS - 3D Depth Effects
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.card-3d {
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+
+.card-3d-inner {
+  transition: transform 400ms var(--ease-ios);
+}
+
+.card-3d:hover .card-3d-inner {
+  transform: rotateX(5deg) rotateY(-5deg) translateZ(10px);
+}
+
+/* Lift Effect */
+.card-lift {
+  transition: transform 300ms var(--ease-ios),
+              box-shadow 300ms var(--ease-ios);
+}
+
+.card-lift:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+.card-lift:active {
+  transform: translateY(-2px) scale(0.98);
+  box-shadow: var(--shadow-md);
+  transition: transform 100ms var(--ease-ios);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LOADING ANIMATIONS - Progress Indicators
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* iOS Activity Indicator */
+@keyframes ios-spinner {
+  0% { opacity: 1; }
+  100% { opacity: 0.15; }
+}
+
+.ios-activity-indicator {
+  width: 20px;
+  height: 20px;
+  position: relative;
+}
+
+.ios-activity-indicator span {
+  position: absolute;
+  width: 2px;
+  height: 6px;
+  background: currentColor;
+  border-radius: 1px;
+  left: 50%;
+  top: 50%;
+  transform-origin: center 10px;
+}
+
+.ios-activity-indicator span:nth-child(1) { transform: rotate(0deg) translateY(-6px); animation: ios-spinner 1s ease-in-out 0s infinite; }
+.ios-activity-indicator span:nth-child(2) { transform: rotate(30deg) translateY(-6px); animation: ios-spinner 1s ease-in-out 0.083s infinite; }
+.ios-activity-indicator span:nth-child(3) { transform: rotate(60deg) translateY(-6px); animation: ios-spinner 1s ease-in-out 0.166s infinite; }
+.ios-activity-indicator span:nth-child(4) { transform: rotate(90deg) translateY(-6px); animation: ios-spinner 1s ease-in-out 0.25s infinite; }
+.ios-activity-indicator span:nth-child(5) { transform: rotate(120deg) translateY(-6px); animation: ios-spinner 1s ease-in-out 0.333s infinite; }
+.ios-activity-indicator span:nth-child(6) { transform: rotate(150deg) translateY(-6px); animation: ios-spinner 1s ease-in-out 0.416s infinite; }
+.ios-activity-indicator span:nth-child(7) { transform: rotate(180deg) translateY(-6px); animation: ios-spinner 1s ease-in-out 0.5s infinite; }
+.ios-activity-indicator span:nth-child(8) { transform: rotate(210deg) translateY(-6px); animation: ios-spinner 1s ease-in-out 0.583s infinite; }
+.ios-activity-indicator span:nth-child(9) { transform: rotate(240deg) translateY(-6px); animation: ios-spinner 1s ease-in-out 0.666s infinite; }
+.ios-activity-indicator span:nth-child(10) { transform: rotate(270deg) translateY(-6px); animation: ios-spinner 1s ease-in-out 0.75s infinite; }
+.ios-activity-indicator span:nth-child(11) { transform: rotate(300deg) translateY(-6px); animation: ios-spinner 1s ease-in-out 0.833s infinite; }
+.ios-activity-indicator span:nth-child(12) { transform: rotate(330deg) translateY(-6px); animation: ios-spinner 1s ease-in-out 0.916s infinite; }
+
+/* Progress Bar */
+@keyframes progress-indeterminate {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+
+.progress-bar {
+  width: 100%;
+  height: 4px;
+  background: var(--ios-gray-5);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: var(--gradient-primary);
+  border-radius: 2px;
+  transition: width 300ms var(--ease-ios);
+}
+
+.progress-bar-indeterminate .progress-bar-fill {
+  width: 30%;
+  animation: progress-indeterminate 1.5s var(--ease-ios) infinite;
+}
+
+/* Skeleton Loading - Advanced */
+@keyframes skeleton-wave {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-text {
+  background: linear-gradient(
+    90deg,
+    var(--ios-gray-5) 0%,
+    var(--ios-gray-4) 20%,
+    var(--ios-gray-5) 40%,
+    var(--ios-gray-5) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-wave 2s var(--ease-ios) infinite;
+  border-radius: var(--radius-sm);
+  min-height: 16px;
+}
+
+.skeleton-circle {
+  background: linear-gradient(
+    90deg,
+    var(--ios-gray-5) 0%,
+    var(--ios-gray-4) 20%,
+    var(--ios-gray-5) 40%,
+    var(--ios-gray-5) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-wave 2s var(--ease-ios) infinite;
+  border-radius: 50%;
+}
+
+.skeleton-rect {
+  background: linear-gradient(
+    90deg,
+    var(--ios-gray-5) 0%,
+    var(--ios-gray-4) 20%,
+    var(--ios-gray-5) 40%,
+    var(--ios-gray-5) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-wave 2s var(--ease-ios) infinite;
+  border-radius: var(--radius-md);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SUCCESS/ERROR ANIMATIONS - Feedback States
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Checkmark Animation */
+@keyframes checkmark-draw {
+  0% {
+    stroke-dashoffset: 100;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes checkmark-circle {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.success-checkmark {
+  width: 80px;
+  height: 80px;
+}
+
+.success-checkmark .checkmark-circle {
+  fill: none;
+  stroke: var(--ion-color-success);
+  stroke-width: 3;
+  animation: checkmark-circle 500ms var(--ease-ios-spring) forwards;
+}
+
+.success-checkmark .checkmark {
+  fill: none;
+  stroke: var(--ion-color-success);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: checkmark-draw 400ms var(--ease-ios) 300ms forwards;
+}
+
+/* Error Animation */
+@keyframes error-shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-8px); }
+  20%, 40%, 60%, 80% { transform: translateX(8px); }
+}
+
+.error-shake {
+  animation: error-shake 600ms var(--ease-ios);
+}
+
+/* Success Pulse */
+@keyframes success-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(52, 199, 89, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 20px rgba(52, 199, 89, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(52, 199, 89, 0);
+  }
+}
+
+.success-pulse {
+  animation: success-pulse 1.5s var(--ease-ios) infinite;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   NOTIFICATION ANIMATIONS - Alerts & Badges
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Badge Bounce */
+@keyframes badge-bounce {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+}
+
+.badge-bounce {
+  animation: badge-bounce 300ms var(--ease-ios-spring);
+}
+
+/* Toast Slide */
+@keyframes toast-slide-in {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes toast-slide-out {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+}
+
+.toast-enter {
+  animation: toast-slide-in 400ms var(--ease-ios-spring) forwards;
+}
+
+.toast-leave {
+  animation: toast-slide-out 300ms var(--ease-ios) forwards;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SCROLL ANIMATIONS - Reveal on Scroll
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 600ms var(--ease-ios),
+              transform 600ms var(--ease-ios);
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-left {
+  opacity: 0;
+  transform: translateX(-30px);
+  transition: opacity 600ms var(--ease-ios),
+              transform 600ms var(--ease-ios);
+}
+
+.reveal-left.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.reveal-right {
+  opacity: 0;
+  transform: translateX(30px);
+  transition: opacity 600ms var(--ease-ios),
+              transform 600ms var(--ease-ios);
+}
+
+.reveal-right.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.reveal-scale {
+  opacity: 0;
+  transform: scale(0.8);
+  transition: opacity 600ms var(--ease-ios),
+              transform 600ms var(--ease-ios-spring);
+}
+
+.reveal-scale.visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   INTERACTIVE ELEMENTS - Touch Feedback
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Toggle Switch Animation */
+@keyframes toggle-on {
+  0% { transform: translateX(0); }
+  50% { transform: translateX(24px) scale(1.1); }
+  100% { transform: translateX(24px); }
+}
+
+@keyframes toggle-off {
+  0% { transform: translateX(24px); }
+  50% { transform: translateX(0) scale(1.1); }
+  100% { transform: translateX(0); }
+}
+
+/* Swipe Action */
+@keyframes swipe-hint {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(-20px); }
+}
+
+.swipe-hint {
+  animation: swipe-hint 1.5s var(--ease-ios) infinite;
+}
+
+/* Pull to Refresh */
+@keyframes pull-rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.pull-spinner {
+  animation: pull-rotate 1s linear infinite;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FLOATING ELEMENTS - Ambient Motion
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-15px) rotate(2deg); }
+}
+
+@keyframes float-medium {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(-2deg); }
+}
+
+@keyframes float-fast {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+.float-slow { animation: float-slow 6s var(--ease-ios) infinite; }
+.float-medium { animation: float-medium 4s var(--ease-ios) infinite; }
+.float-fast { animation: float-fast 2s var(--ease-ios) infinite; }
+
+/* Particle Animation */
+@keyframes particle-rise {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100px) scale(0);
+    opacity: 0;
+  }
+}
+
+.particle {
+  animation: particle-rise 2s var(--ease-ios-decelerate) forwards;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   GRADIENT ANIMATIONS - Living Colors
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.gradient-animated {
+  background: linear-gradient(
+    -45deg,
+    var(--ion-color-primary),
+    var(--ion-color-secondary),
+    var(--ion-color-tertiary),
+    var(--ion-color-primary)
+  );
+  background-size: 400% 400%;
+  animation: gradient-shift 15s ease infinite;
+}
+
+/* Shimmer Effect */
+@keyframes shimmer-effect {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer-effect 2s linear infinite;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ACCESSIBILITY - Reduced Motion Support
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .reveal,
+  .reveal-left,
+  .reveal-right,
+  .reveal-scale {
+    opacity: 1;
+    transform: none;
+  }
+
+  .float-slow,
+  .float-medium,
+  .float-fast,
+  .spring-wiggle,
+  .gradient-animated,
+  .shimmer {
+    animation: none;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   DARK MODE ANIMATION ADJUSTMENTS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (prefers-color-scheme: dark) {
+  .skeleton-text,
+  .skeleton-circle,
+  .skeleton-rect {
+    background: linear-gradient(
+      90deg,
+      var(--ios-gray-5) 0%,
+      var(--ios-gray-4) 20%,
+      var(--ios-gray-5) 40%,
+      var(--ios-gray-5) 100%
+    );
+    background-size: 200% 100%;
+  }
+
+  .btn-interactive::after {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  .ripple {
+    background: rgba(255, 255, 255, 0.3);
+  }
+
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.1) 50%,
+      transparent 100%
+    );
+    background-size: 200% 100%;
+  }
+}
