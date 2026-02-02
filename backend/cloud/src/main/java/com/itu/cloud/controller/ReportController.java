@@ -1,9 +1,12 @@
 package com.itu.cloud.controller;
 
 import com.itu.cloud.dto.ReportSummaryDTO;
+import com.itu.cloud.entity.Entreprise;
 import com.itu.cloud.entity.Report;
 import com.itu.cloud.mapper.EntityToDtoMapper;
 import com.itu.cloud.service.ReportService;
+
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import com.itu.cloud.service.EntrepriseService; 
 
 @CrossOrigin
 @RestController
@@ -25,8 +29,11 @@ public class ReportController {
 
     private final ReportService reportService;
 
-    public ReportController(ReportService reportService) {
+    private final EntrepriseService entrepriseService;
+
+    public ReportController(ReportService reportService , EntrepriseService entrepriseService) {
         this.reportService = reportService;
+        this.entrepriseService = entrepriseService;
     }
 
     @GetMapping
@@ -81,5 +88,40 @@ public class ReportController {
     public List<ReportSummaryDTO> listTermineReports() {
         List<Report> reports = reportService.findByStatus("termine");
         return reports.stream().map(EntityToDtoMapper::toReportSummary).collect(Collectors.toList());
+    }
+
+    
+    @PostMapping("/do-report")
+    public ReportSummaryDTO doReport(@RequestParam long id_report , @RequestParam long id_entreprise  , @RequestParam BigDecimal  budget) {
+
+        if(id_report == 0){
+            throw new IllegalArgumentException("L'identifiant du rapport ne peut pas être nul ou zéro.");
+        }
+        Report report  = reportService.findById(id_report)
+                .orElseThrow(() -> new IllegalArgumentException("Rapport avec l'identifiant " + id_report + " non trouvée."));
+
+        report.setStatus("en_cours");
+        report.setBudget(budget);
+        if(id_entreprise == 0){
+            throw new IllegalArgumentException("L'identifiant de l'entreprise ne peut pas être nul ou zéro.");
+        }
+
+        Entreprise e  = entrepriseService.findById(id_entreprise)
+                .orElseThrow(() -> new IllegalArgumentException("Entreprise avec l'identifiant " + id_entreprise + " non trouvée."));
+        report.setEntreprise(e);
+        Report saved = reportService.save(report);
+        return EntityToDtoMapper.toReportSummary(saved);
+    }
+
+    @PostMapping("/finish-report")
+    public ReportSummaryDTO finishReport(@RequestParam long id_report ) {
+        if(id_report == 0){
+            throw new IllegalArgumentException("L'identifiant du rapport ne peut pas être nul ou zéro.");
+        }
+        Report report  = reportService.findById(id_report)
+                .orElseThrow(() -> new IllegalArgumentException("Rapport avec l'identifiant " + id_report + " non trouvée."));
+        report.setStatus("termine");
+        Report saved = reportService.save(report);
+        return EntityToDtoMapper.toReportSummary(saved);
     }
 }
