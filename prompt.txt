@@ -1,0 +1,59 @@
+OBJECTIF: Configurer Firebase dans mon app mobile Ionic
+
+CONFIGURATION FIREBASE:
+- Projet: iray-lalana
+- API Key: AIzaSyBzPij_NADPbZIh9nWe8iScXv64vk78aig
+- Auth Domain: iray-lalana.firebaseapp.com
+- Project ID: iray-lalana
+- Storage Bucket: iray-lalana.firebasestorage.app
+- Messaging Sender ID: 302056517170
+- App ID: 1:302056517170:web:ef1a7b189051d01df8562b
+
+FONCTIONNALITÉS REQUISES:
+1. Firebase Authentication (Email/Password)
+2. Firestore Database (collections: users, reports)
+3. Géolocalisation pour capturer GPS
+4. Formulaires: Inscription, Connexion, Créer un signalement
+5. Liste des signalements avec filtre "Mes signalements"
+
+STRUCTURE DES DONNÉES:
+
+Collection "users":
+{
+  uid: string,
+  email: string,
+  firstName: string,
+  lastName: string,
+  role: "utilisateur" | "manager",
+  createdAt: Timestamp,
+  updatedAt: Timestamp
+}
+
+Collection "reports":
+{
+  id: string,
+  userId: string,
+  userName: string,
+  userEmail: string,
+  latitude: number,
+  longitude: number,
+  description: string,
+  status: "nouveau" | "en_cours" | "termine",
+  surface: number | null,
+  budget: number | null,
+  entreprise: string | null,
+  createdAt: Timestamp,
+  updatedAt: Timestamp
+}
+
+TÂCHES À FAIRE:
+1. Créer src/firebase-config.ts avec la configuration Firebase
+2. Installer les packages nécessaires (firebase, @capacitor/geolocation)
+3. Créer un composant RegisterForm pour l'inscription
+4. Créer un composant LoginForm pour la connexion
+5. Créer un composant CreateReport pour créer un signalement (avec GPS)
+6. Créer un composant ReportsList pour afficher les signalements
+7. Créer un composant MyReports pour filtrer mes signalements
+8. Ajouter la gestion d'état pour l'utilisateur connecté
+9. Ajouter la navigation entre les pages
+10. Gérer les erreurs Firebase (email déjà utilisé, mot de passe faible, etc.)
