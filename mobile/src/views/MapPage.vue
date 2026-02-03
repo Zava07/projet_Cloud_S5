@@ -358,7 +358,7 @@ import { Problem, ProblemStatus } from '@/types';
 
 const router = useRouter();
 const { isAuthenticated, currentUser, logout } = useAuth();
-const { addProblem, loadProblems, getProblemById, problems, getStatistics } = useProblems();
+const { addProblem, loadProblems, getProblemById, problems, getStatistics, setSelectedProblem } = useProblems();
 
 const tileUrl = TILE_URL || (import.meta.env.VITE_TILE_URL as string) || 'http://localhost:8080/tiles/{z}/{x}/{y}.png';
 const center = { lat: -18.9145, lng: 47.5281 };
@@ -508,7 +508,7 @@ const submitReport = async () => {
 
   submitting.value = true;
   try {
-    await addProblem({
+    const newReport = await addProblem({
       userId: currentUser.value.uid,
       userName: currentUser.value.displayName || `${currentUser.value.firstName} ${currentUser.value.lastName}`,
       userEmail: currentUser.value.email,
@@ -517,6 +517,11 @@ const submitReport = async () => {
       description: reportForm.value.description,
       surface: reportForm.value.surface,
     });
+
+    // Refresh data and highlight the created report so it is not hidden by filters
+    await loadProblems();
+    setSelectedProblem(newReport);
+    router.push(`/problem/${newReport.id}`);
 
     const toast = await toastController.create({
       message: '✓ Report submitted successfully',
