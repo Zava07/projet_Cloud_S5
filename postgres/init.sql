@@ -48,6 +48,13 @@ CREATE TABLE reports (
     synced_at TIMESTAMP
 );
 
+CREATE TABLE histo_reports (
+    id_histo_reports SERIAL PRIMARY KEY,
+    report_id INTEGER NOT NULL REFERENCES reports(id),
+    status VARCHAR(20) CHECK (status IN ('nouveau', 'en_cours', 'termine')),
+    date_changement TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- 5. TABLE SYNC_LOG
 CREATE TABLE sync_log (
     id SERIAL PRIMARY KEY,
@@ -136,7 +143,16 @@ VALUES
   (1, 'app.name', 'projet_cloud_s5', 'Application name', now()),
   (2, 'reports.default_status', 'nouveau', 'Default status for new reports', now());
 
+
 SELECT setval(pg_get_serial_sequence('config','id'), (SELECT MAX(id) FROM config));
+
+INSERT INTO config (id, key, value, description, updated_at)
+VALUES
+  (3, 'nouveau', '0', 'valuer de calcule avancement', now()),
+  (4, 'en_cours', '50', 'valuer de calcule avancement', now()),
+  (5, 'termine', '100', 'valuer de calcule avancement', now());
+
+  (2, 'reports.default_status', 'nouveau', 'Default status for new reports', now());
 
 -- Optional: map some users to entreprises if a join table exists (created by JPA many-to-many)
 -- Uncomment and adjust if `user_entreprise` table is present in your DB schema

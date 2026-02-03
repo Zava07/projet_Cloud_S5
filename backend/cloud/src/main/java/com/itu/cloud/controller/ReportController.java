@@ -2,11 +2,16 @@ package com.itu.cloud.controller;
 
 import com.itu.cloud.dto.ReportSummaryDTO;
 import com.itu.cloud.entity.Entreprise;
+import com.itu.cloud.entity.HistoReport;
 import com.itu.cloud.entity.Report;
 import com.itu.cloud.mapper.EntityToDtoMapper;
 import com.itu.cloud.service.ReportService;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.itu.cloud.service.EntrepriseService; 
+import com.itu.cloud.service.HistoReportService;
 
 @CrossOrigin
 @RestController
@@ -31,9 +37,45 @@ public class ReportController {
 
     private final EntrepriseService entrepriseService;
 
-    public ReportController(ReportService reportService , EntrepriseService entrepriseService) {
+    private final HistoReportService histoReportService;
+
+    public ReportController(ReportService reportService , EntrepriseService entrepriseService, HistoReportService histoReportService) {
         this.reportService = reportService;
         this.entrepriseService = entrepriseService;
+        this.histoReportService = histoReportService;
+    }
+
+    @GetMapping("/stats")
+    public java.util.Map<String, Object> stats() {
+        // Compute average processing time between first en_cours and termine for reports that have both
+        java.util.List<Report> all = reportService.findAll();
+        long totalSeconds = 0L;
+        int count = 0;
+        for (Report r : all) {
+            java.util.List<HistoReport> history = histoReportService.findByReportId(r.getId());
+            java.time.LocalDateTime enCoursAt = null;
+            java.time.LocalDateTime termineAt = null;
+            for (HistoReport h : history) {
+                String s = h.getStatus();
+                if (s == null) continue;
+                if (s.equalsIgnoreCase("en_cours") || s.equalsIgnoreCase("en-cours")) {
+                    if (enCoursAt == null || h.getDateChangement().isBefore(enCoursAt)) enCoursAt = h.getDateChangement();
+                }
+                if (s.equalsIgnoreCase("termine") || s.equalsIgnoreCase("terminer")) {
+                    if (termineAt == null || h.getDateChangement().isAfter(termineAt)) termineAt = h.getDateChangement();
+                    termineAt = h.getDateChangement();
+                }
+            }
+            if (enCoursAt != null && termineAt != null && termineAt.isAfter(enCoursAt)) {
+                totalSeconds += java.time.Duration.between(enCoursAt, termineAt).getSeconds();
+                count++;
+            }
+        }
+        double avgSeconds = count > 0 ? (double) totalSeconds / count : 0.0;
+        java.util.Map<String, Object> result = new java.util.LinkedHashMap<>();
+        result.put("average_processing_seconds", avgSeconds);
+        result.put("count_processed", count);
+        return result;
     }
 
     @GetMapping
@@ -57,6 +99,11 @@ public class ReportController {
     @PostMapping
     public ReportSummaryDTO create(@RequestBody Report report) {
         Report saved = reportService.save(report);
+        HistoReport histoReport = new HistoReport();
+        histoReport.setReport(report);
+        histoReport.setStatus(report.getStatus());
+        histoReport.setDateChangement(LocalDateTime.now());
+        histoReportService.save(histoReport);
         return EntityToDtoMapper.toReportSummary(saved);
     }
 
@@ -64,6 +111,11 @@ public class ReportController {
     public ResponseEntity<ReportSummaryDTO> update(@PathVariable Long id, @RequestBody Report report) {
         report.setId(id);
         Report saved = reportService.save(report);
+        HistoReport histoReport = new HistoReport();
+        histoReport.setReport(report);
+        histoReport.setStatus(report.getStatus());
+        histoReport.setDateChangement(LocalDateTime.now());
+        histoReportService.save(histoReport);
         return ResponseEntity.ok(EntityToDtoMapper.toReportSummary(saved));
     }
 
@@ -92,10 +144,15 @@ public class ReportController {
 
     
     @PostMapping("/do-report")
-    public ReportSummaryDTO doReport(@RequestParam long id_report , @RequestParam long id_entreprise  , @RequestParam BigDecimal  budget) {
+    public ReportSummaryDTO doReport(@RequestParam long id_report , @RequestParam long id_entreprise  , @RequestParam BigDecimal  budget , @RequestParam(name = "date_changement", required = false) String dateString) {
+
+        LocalDateTime dateChangement = parseDateString(dateString);
 
         if(id_report == 0){
             throw new IllegalArgumentException("L'identifiant du rapport ne peut pas être nul ou zéro.");
+        }
+        if(dateChangement == null){
+            throw new IllegalArgumentException("La date de changement ne peut pas être nulle.");
         }
         Report report  = reportService.findById(id_report)
                 .orElseThrow(() -> new IllegalArgumentException("Rapport avec l'identifiant " + id_report + " non trouvée."));
@@ -110,11 +167,17 @@ public class ReportController {
                 .orElseThrow(() -> new IllegalArgumentException("Entreprise avec l'identifiant " + id_entreprise + " non trouvée."));
         report.setEntreprise(e);
         Report saved = reportService.save(report);
+
+        HistoReport histoReport = new HistoReport();
+        histoReport.setReport(report);
+        histoReport.setStatus(report.getStatus());
+        histoReport.setDateChangement(dateChangement);
+        histoReportService.save(histoReport);
         return EntityToDtoMapper.toReportSummary(saved);
     }
 
     @PostMapping("/finish-report")
-    public ReportSummaryDTO finishReport(@RequestParam long id_report ) {
+    public ReportSummaryDTO finishReport(@RequestParam long id_report , @RequestParam(name = "date_changement", required = false) String dateString) {
         if(id_report == 0){
             throw new IllegalArgumentException("L'identifiant du rapport ne peut pas être nul ou zéro.");
         }
@@ -122,6 +185,45 @@ public class ReportController {
                 .orElseThrow(() -> new IllegalArgumentException("Rapport avec l'identifiant " + id_report + " non trouvée."));
         report.setStatus("termine");
         Report saved = reportService.save(report);
+        LocalDateTime dateChangement = parseDateString(dateString);
+        HistoReport histoReport = new HistoReport();
+        histoReport.setReport(report);
+        histoReport.setStatus(report.getStatus());
+        histoReport.setDateChangement(dateChangement);
+        histoReportService.save(histoReport);
         return EntityToDtoMapper.toReportSummary(saved);
+    }
+
+    private LocalDateTime parseDateString(String dateString) {
+        if (dateString == null || dateString.isBlank()) return null;
+        // Try ISO parse first
+        try {
+            return LocalDateTime.parse(dateString);
+        } catch (DateTimeParseException e) {
+            // try replacing space with 'T' (e.g. 'yyyy-MM-dd HH:mm:ss[.nnnnnn]')
+            try {
+                return LocalDateTime.parse(dateString.replace(' ', 'T'));
+            } catch (DateTimeParseException e2) {
+                // try with microseconds fraction (6 digits)
+                try {
+                    DateTimeFormatter fmtMicro = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS");
+                    return LocalDateTime.parse(dateString, fmtMicro);
+                } catch (DateTimeParseException e3) {
+                    // try without fraction
+                    try {
+                        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                        return LocalDateTime.parse(dateString, fmt);
+                    } catch (DateTimeParseException e4) {
+                        // try date only
+                        try {
+                            LocalDate ld = LocalDate.parse(dateString);
+                            return ld.atStartOfDay();
+                        } catch (DateTimeParseException e5) {
+                            throw new IllegalArgumentException("Format de date invalide: " + dateString);
+                        }
+                    }
+                }
+            }
+        }
     }
 }
