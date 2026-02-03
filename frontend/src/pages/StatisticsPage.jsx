@@ -53,6 +53,23 @@ export default function StatisticsPage({ authUser, onBack }) {
     return typeof v === 'number' && !Number.isNaN(v) ? Math.min(Math.max(v,0),100) : 0;
   };
 
+  const totalReports = reports.length;
+  const countsByStatus = reports.reduce((acc, r) => {
+    const k = normalizeStatus(r.status);
+    acc[k] = (acc[k] || 0) + 1;
+    return acc;
+  }, {});
+  const processedCount = countsByStatus['termine'] || 0;
+  const percentProcessed = totalReports > 0 ? Math.round((processedCount / totalReports) * 100) : 0;
+  const inProgressCount = countsByStatus['en_cours'] || 0;
+  const newCount = countsByStatus['nouveau'] || 0;
+
+  const progressColor = (p) => {
+    if (p >= 66) return 'var(--success-color)';
+    if (p >= 33) return 'var(--primary-color)';
+    return 'var(--warning-color)';
+  };
+
   return (
     <div className="page statistics-page">
       <div className="page-header">
@@ -63,10 +80,22 @@ export default function StatisticsPage({ authUser, onBack }) {
       </div>
 
       <div style={{display:'flex',gap:12,marginBottom:12}}>
-        <div className="card" style={{padding:12}}>
-          <div style={{fontSize:12,color:'#666'}}>Délai moyen de traitement</div>
+        <div className="card" style={{padding:12,flex:1,background:'linear-gradient(135deg,var(--primary-50),white)'}}>
+          <div style={{fontSize:12,color:'var(--text-secondary)'}}>Délai moyen de traitement</div>
           <div style={{fontWeight:700,marginTop:6}}>{stats ? formatDurationDaysHours(stats.average_processing_seconds) : '—'}</div>
-          <div style={{fontSize:12,color:'#666',marginTop:4}}>Rapports traités: {stats ? stats.count_processed : '—'}</div>
+          <div style={{fontSize:12,color:'var(--text-secondary)',marginTop:4}}>Rapports traités: {stats ? stats.count_processed : '—'}</div>
+        </div>
+
+        <div className="card" style={{padding:12,flex:1,background:'var(--success-light)'}}>
+          <div style={{fontSize:12,color:'var(--text-secondary)'}}>Total de rapports</div>
+          <div style={{fontWeight:700,marginTop:6}}>{totalReports}</div>
+          <div style={{fontSize:12,color:'var(--text-secondary)',marginTop:4}}>Nouveaux: {newCount} • En cours: {inProgressCount}</div>
+        </div>
+
+        <div className="card" style={{padding:12,flex:1,background:'var(--warning-light)'}}>
+          <div style={{fontSize:12,color:'var(--text-secondary)'}}>Pourcentage traité</div>
+          <div style={{fontWeight:700,marginTop:6}}>{percentProcessed}%</div>
+          <div style={{fontSize:12,color:'var(--text-secondary)',marginTop:4}}>Terminé: {processedCount}</div>
         </div>
       </div>
 
@@ -83,8 +112,8 @@ export default function StatisticsPage({ authUser, onBack }) {
                   <td>{r.status}</td>
                   <td>
                     <div style={{display:'flex',alignItems:'center',gap:8}}>
-                      <div style={{width:160,height:12,background:'#eee',borderRadius:6,overflow:'hidden'}}>
-                        <div style={{height:'100%',background:'#2196f3',width:`${getProgress(r)}%`}} />
+                      <div style={{width:160,height:12,background:'var(--gray-100)',borderRadius:6,overflow:'hidden'}}>
+                        <div style={{height:'100%',background:progressColor(getProgress(r)),width:`${getProgress(r)}%`}} />
                       </div>
                       <div style={{fontWeight:700}}>{getProgress(r)}%</div>
                     </div>
