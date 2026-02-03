@@ -17,6 +17,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import org.springframework.http.HttpStatus;
 
 @CrossOrigin
 @RestController
@@ -58,4 +61,24 @@ public class ConfigEntryController {
         configEntryService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/status-mapping")
+    public ResponseEntity<?> statusMapping(@RequestParam(required = false) String key) {
+        // If a specific key is requested, return only that config entry (value from DB)
+        if (key != null) {
+            return configEntryService.findByKey(key)
+                .map(e -> Map.<String, String>of(e.getKey(), e.getValue()))
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Unknown status key: " + key)));
+        }
+
+        // Otherwise return the ordered mapping for the standard status keys
+        java.util.List<String> keys = java.util.List.of("nouveau", "en_cours", "termine");
+        Map<String, String> map = new LinkedHashMap<>();
+        for (String k : keys) {
+            configEntryService.findByKey(k).ifPresent(e -> map.put(k, e.getValue()));
+        }
+        return ResponseEntity.ok(map);
+    }
+
 }
