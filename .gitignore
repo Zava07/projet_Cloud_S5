@@ -1,0 +1,21 @@
+# Root gitignore for project
+
+# Node modules for frontend
+/frontend/node_modules/
+
+# Frontend build outputs
+/frontend/dist/
+/frontend/build/
+
+# Environment files
+/frontend/.env
+
+# Mobile app node modules
+/mobile/node_modules/
+
+# Java build directories (backend module)
+/backend/cloud/target/
+
+# OS files
+.DS_Store
+Thumbs.db
