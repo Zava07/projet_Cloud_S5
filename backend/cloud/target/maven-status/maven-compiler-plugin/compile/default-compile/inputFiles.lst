@@ -18,6 +18,7 @@
 /app/src/main/java/com/itu/cloud/dto/UserDTO.java
 /app/src/main/java/com/itu/cloud/entity/ConfigEntry.java
 /app/src/main/java/com/itu/cloud/entity/Entreprise.java
+/app/src/main/java/com/itu/cloud/entity/HistoReport.java
 /app/src/main/java/com/itu/cloud/entity/Report.java
 /app/src/main/java/com/itu/cloud/entity/Session.java
 /app/src/main/java/com/itu/cloud/entity/SyncLog.java
@@ -26,6 +27,7 @@
 /app/src/main/java/com/itu/cloud/mapper/EntityToDtoMapper.java
 /app/src/main/java/com/itu/cloud/repository/ConfigEntryRepository.java
 /app/src/main/java/com/itu/cloud/repository/EntrepriseRepository.java
+/app/src/main/java/com/itu/cloud/repository/HistoReportRepository.java
 /app/src/main/java/com/itu/cloud/repository/ReportRepository.java
 /app/src/main/java/com/itu/cloud/repository/SessionRepository.java
 /app/src/main/java/com/itu/cloud/repository/SyncLogRepository.java
@@ -34,6 +36,7 @@
 /app/src/main/java/com/itu/cloud/service/ConfigEntryService.java
 /app/src/main/java/com/itu/cloud/service/EntrepriseService.java
 /app/src/main/java/com/itu/cloud/service/FirebaseSyncService.java
+/app/src/main/java/com/itu/cloud/service/HistoReportService.java
 /app/src/main/java/com/itu/cloud/service/ReportService.java
 /app/src/main/java/com/itu/cloud/service/SessionService.java
 /app/src/main/java/com/itu/cloud/service/SyncLogService.java

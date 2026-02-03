@@ -268,14 +268,21 @@ public class FirebaseSyncService {
             User user = report.getUser();
             
             // S'assurer que l'utilisateur a un firebaseUid valide avant de push le report
-            if (user.getFirebaseUid() == null || user.getFirebaseUid().startsWith("fb_uid_") || user.getFirebaseUid().startsWith("uid_")) {
+            if (user == null) continue;
+
+            boolean hasValidFirebaseUid = user.getFirebaseUid() != null
+                    && !user.getFirebaseUid().isEmpty()
+                    && !user.getFirebaseUid().startsWith("fb_uid_")
+                    && !user.getFirebaseUid().startsWith("uid_");
+
+            if (!hasValidFirebaseUid) {
                 // Essayer de synchroniser l'utilisateur d'abord
                 continue;
             }
 
             Map<String, Object> reportData = new HashMap<>();
             reportData.put("userId", user.getFirebaseUid());
-            reportData.put("userName", user.getFirstName() + " " + user.getLastName());
+            reportData.put("userName", (user.getFirstName() != null ? user.getFirstName() : "") + " " + (user.getLastName() != null ? user.getLastName() : ""));
             reportData.put("userEmail", user.getEmail());
             reportData.put("latitude", report.getLatitude() != null ? report.getLatitude().doubleValue() : 0);
             reportData.put("longitude", report.getLongitude() != null ? report.getLongitude().doubleValue() : 0);
@@ -292,22 +299,22 @@ public class FirebaseSyncService {
                         .whereEqualTo("latitude", report.getLatitude() != null ? report.getLatitude().doubleValue() : 0)
                         .whereEqualTo("longitude", report.getLongitude() != null ? report.getLongitude().doubleValue() : 0)
                         .get().get();
-                
+
                 if (!similarQuery.isEmpty()) {
                     // Report similaire trouvé - lier et mettre à jour
                     DocumentSnapshot existingDoc = similarQuery.getDocuments().get(0);
                     report.setFirebaseId(existingDoc.getId());
-                    report.setSyncedAt(LocalDateTime.now());
-                    reportRepository.save(report);
-                    
                     firestore.collection("reports").document(existingDoc.getId())
                             .update(reportData).get();
+
+                    report.setSyncedAt(LocalDateTime.now());
+                    reportRepository.save(report);
                 } else {
                     // Créer un nouveau report dans Firebase
                     reportData.put("createdAt", FieldValue.serverTimestamp());
                     DocumentReference docRef = firestore.collection("reports").document();
                     docRef.set(reportData).get();
-                    
+
                     report.setFirebaseId(docRef.getId());
                     report.setSyncedAt(LocalDateTime.now());
                     reportRepository.save(report);
@@ -317,7 +324,7 @@ public class FirebaseSyncService {
                 // Vérifier si le document existe avant de mettre à jour
                 DocumentReference docRef = firestore.collection("reports").document(report.getFirebaseId());
                 DocumentSnapshot snapshot = docRef.get().get();
-                
+
                 if (snapshot.exists()) {
                     docRef.update(reportData).get();
                 } else {
@@ -326,7 +333,7 @@ public class FirebaseSyncService {
                     docRef.set(reportData).get();
                     count++;
                 }
-                }
+
                 report.setSyncedAt(LocalDateTime.now());
                 reportRepository.save(report);
             }
@@ -334,7 +341,6 @@ public class FirebaseSyncService {
         
         return count;
     }
-
     // ==========================================
     // MÉTHODES UTILITAIRES
     // ==========================================
