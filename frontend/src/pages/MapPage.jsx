@@ -313,7 +313,7 @@ export default function MapPage({ authUser, mapOptions = {} }) {
           <div className="legend-item">
             <img src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png" 
                  alt="Traité" className="legend-icon" />
-            <span>Rapports en traitement/résolus</span>
+            <span>Rapports en résolus</span>
           </div>
         </div>
       </div>
