@@ -48,6 +48,22 @@ CREATE TABLE reports (
     synced_at TIMESTAMP
 );
 
+CREATE TABLE histo_reports (
+    id_histo_reports SERIAL PRIMARY KEY,
+    report_id INTEGER NOT NULL REFERENCES reports(id),
+    status VARCHAR(20) CHECK (status IN ('nouveau', 'en_cours', 'termine')),
+    date_changement TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE photo_reports (
+    id SERIAL PRIMARY KEY,
+    report_id INTEGER NOT NULL REFERENCES reports(id) ON DELETE CASCADE,
+    photo_url VARCHAR(500) NOT NULL,
+    description TEXT,
+    uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- 5. TABLE SYNC_LOG
 CREATE TABLE sync_log (
     id SERIAL PRIMARY KEY,

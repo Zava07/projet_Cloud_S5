@@ -15,6 +15,8 @@ import ReportsListPage from './pages/ReportsListPage.jsx';
 import EntrepriseListPage from './pages/EntrepriseListPage.jsx';
 import EntrepriseCreatePage from './pages/EntrepriseCreatePage.jsx';
 import EntrepriseEditPage from './pages/EntrepriseEditPage.jsx';
+import ConfigPage from './pages/ConfigPage.jsx';
+import StatisticsPage from './pages/StatisticsPage.jsx';
 
 export default function App() {
   // Navigation state: 'login' | 'signup' | 'map' | 'reports' | 'users' | 'create' | 'edit' | 'entreprises' | 'entreprise-create' | 'entreprise-edit'
@@ -81,6 +83,8 @@ export default function App() {
     setEditingEntreprise(entreprise);
     window.location.hash = `#/entreprises/edit/${entreprise.id}`; 
   };
+  const navigateToConfig = () => { window.location.hash = '#/config'; };
+  const navigateToStatistics = () => { window.location.hash = '#/statistics'; };
 
   // Page change handler for navigation component
   const handlePageChange = (page, options = {}) => {
@@ -90,6 +94,8 @@ export default function App() {
     else if (page === 'reports') navigateToReports();
     else if (page === 'users') navigateToUsers();
     else if (page === 'entreprises') navigateToEntreprises();
+    else if (page === 'config') navigateToConfig();
+    else if (page === 'statistics') navigateToStatistics();
     else if (page === 'login') navigateToLogin();
     else if (page === 'signup') navigateToSignup();
   };
@@ -124,6 +130,8 @@ export default function App() {
       return { page: 'entreprise-edit', id };
     }
     if (hash.startsWith('/entreprises')) return { page: 'entreprises' };
+    if (hash.startsWith('/config')) return { page: 'config' };
+    if (hash.startsWith('/statistics')) return { page: 'statistics' };
     return { page: 'login' };
   };
 
@@ -156,6 +164,15 @@ export default function App() {
       if (['entreprises', 'entreprise-create', 'entreprise-edit'].includes(page)) {
         if (!authUser || authUser.guest || !isManagerOrAdmin(authUser.role)) {
           alert('Accès refusé. Seuls les managers peuvent accéder à la gestion des entreprises.');
+          setCurrentPage(authUser ? 'map' : 'login');
+          return;
+        }
+      }
+
+      // Protect config route - only managers/admins
+      if (page === 'config') {
+        if (!authUser || authUser.guest || !isManagerOrAdmin(authUser.role)) {
+          alert('Accès refusé. Seuls les managers peuvent accéder à la configuration.');
           setCurrentPage(authUser ? 'map' : 'login');
           return;
         }
@@ -453,6 +470,20 @@ export default function App() {
               alert('Entreprise mise à jour!');
               navigateToEntreprises();
             }}
+          />
+        );
+      case 'config':
+        return (
+          <ConfigPage
+            authUser={authUser}
+            onBack={() => handlePageChange('map')}
+          />
+        );
+      case 'statistics':
+        return (
+          <StatisticsPage
+            authUser={authUser}
+            onBack={() => handlePageChange('map')}
           />
         );
       default:

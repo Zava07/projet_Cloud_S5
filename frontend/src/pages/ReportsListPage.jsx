@@ -8,6 +8,8 @@ export default function ReportsListPage({ authUser, onPageChange, mapOptions = {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState(String(mapOptions.initialTab || 'nouveau').toLowerCase());
+  const [statusMapping, setStatusMapping] = useState({});
+  const [stats, setStats] = useState(null);
 
   const apiBase = () => import.meta.env.VITE_API_BASE || 'http://localhost:8080';
 
@@ -18,6 +20,9 @@ export default function ReportsListPage({ authUser, onPageChange, mapOptions = {
     } else {
       fetchUserReports();
     }
+    // also fetch config mapping and stats (visible to all users)
+    fetchStatusMapping();
+    fetchStats();
   }, [authUser, mapOptions]);
 
   // update active tab if navigation passed an initialTab
@@ -116,13 +121,73 @@ export default function ReportsListPage({ authUser, onPageChange, mapOptions = {
     });
   };
 
+  const normalizeStatus = (s) => {
+    if (!s) return '';
+    return String(s).toLowerCase().replace(/-/g, '_');
+  };
+
+  const fetchStatusMapping = async () => {
+    try {
+      const res = await fetch(`${apiBase()}/api/config/status-mapping`);
+      if (!res.ok) return;
+      const data = await res.json();
+      // convert values to numbers
+      const mapped = {};
+      Object.keys(data || {}).forEach(k => { mapped[k] = Number(data[k]); });
+      setStatusMapping(mapped);
+    } catch (err) {
+      // ignore
+    }
+  };
+
+  const fetchStats = async () => {
+    try {
+      const res = await fetch(`${apiBase()}/api/reports/stats`);
+      if (!res.ok) return;
+      const data = await res.json();
+      setStats(data);
+    } catch (err) {
+      // ignore
+    }
+  };
+
+  const formatDurationDaysHours = (seconds) => {
+    if (!seconds || seconds <= 0) return '0 j 0 h';
+    const days = Math.floor(seconds / 86400);
+    const hours = Math.floor((seconds % 86400) / 3600);
+    return `${days} j ${hours} h`;
+  };
+
+  const getProgressPercent = (report) => {
+    const key = normalizeStatus(report?.status);
+    const val = statusMapping[key];
+    if (typeof val === 'number' && !Number.isNaN(val)) return Math.min(Math.max(val, 0), 100);
+    return 0;
+  };
+
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [assignEntreprises, setAssignEntreprises] = useState([]);
   const [assignSelectedEntreprise, setAssignSelectedEntreprise] = useState('0');
   const [assignBudget, setAssignBudget] = useState('');
+  const [assignDate, setAssignDate] = useState('');
   const [selectedReport, setSelectedReport] = useState(null);
   const [showConfirmFinish, setShowConfirmFinish] = useState(false);
   const [finishTargetReport, setFinishTargetReport] = useState(null);
+  const [finishDate, setFinishDate] = useState('');
+
+  const localDatetimeNow = () => {
+    const d = new Date();
+    const tzOffset = d.getTimezoneOffset();
+    const local = new Date(d.getTime() - tzOffset * 60000);
+    return local.toISOString().slice(0, 16); // YYYY-MM-DDTHH:mm
+  };
+
+  const formatForBackend = (dateStr) => {
+    if (!dateStr) return '';
+    // datetime-local => 'YYYY-MM-DDTHH:mm' ; backend expects seconds, so append ':00' if missing
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(dateStr)) return dateStr + ':00';
+    return dateStr;
+  };
 
   const fetchEntreprises = async () => {
     try {
@@ -139,6 +204,8 @@ export default function ReportsListPage({ authUser, onPageChange, mapOptions = {
   const openAssignModal = async (report) => {
     setSelectedReport(report);
     setAssignBudget(report.budget || '');
+    // default assign date to today
+    setAssignDate(localDatetimeNow());
     await fetchEntreprises();
     setShowAssignModal(true);
   };
@@ -155,7 +222,10 @@ export default function ReportsListPage({ authUser, onPageChange, mapOptions = {
     setError(null);
     try {
       // backend expects request params: id_report, id_entreprise, budget
-      const url = `${apiBase()}/api/reports/do-report?id_report=${encodeURIComponent(selectedReport.id)}&id_entreprise=${encodeURIComponent(entrepriseId)}&budget=${encodeURIComponent(budget)}`;
+      let url = `${apiBase()}/api/reports/do-report?id_report=${encodeURIComponent(selectedReport.id)}&id_entreprise=${encodeURIComponent(entrepriseId)}&budget=${encodeURIComponent(budget)}`;
+      if (assignDate) {
+        url += `&date_changement=${encodeURIComponent(formatForBackend(assignDate))}`;
+      }
       const res = await fetch(url, { method: 'POST' });
       if (!res.ok) throw new Error(`Erreur HTTP: ${res.status}`);
       // refresh
@@ -175,7 +245,10 @@ export default function ReportsListPage({ authUser, onPageChange, mapOptions = {
     setLoading(true);
     setError(null);
     try {
-      const url = `${apiBase()}/api/reports/finish-report?id_report=${encodeURIComponent(reportId)}`;
+      let url = `${apiBase()}/api/reports/finish-report?id_report=${encodeURIComponent(reportId)}`;
+      if (finishDate) {
+        url += `&date_changement=${encodeURIComponent(formatForBackend(finishDate))}`;
+      }
       const res = await fetch(url, { method: 'POST' });
       if (!res.ok) throw new Error(`Erreur HTTP: ${res.status}`);
       if (mapOptions?.adminView) await fetchAdminReportsByStatus(); else await fetchUserReports();
@@ -189,6 +262,8 @@ export default function ReportsListPage({ authUser, onPageChange, mapOptions = {
 
   const openFinishConfirm = (report) => {
     setFinishTargetReport(report);
+    // default finish date to today
+    setFinishDate(localDatetimeNow());
     setShowConfirmFinish(true);
   };
 
@@ -227,6 +302,14 @@ export default function ReportsListPage({ authUser, onPageChange, mapOptions = {
                 : `${userReports.length} rapport(s) trouvés`
               }
             </p>
+          </div>
+          {/* Stats card visible to all users */}
+          <div style={{marginLeft:16, display:'flex',flexDirection:'column',alignItems:'flex-end'}}>
+            <div className="card" style={{padding:8}}>
+              <div style={{fontSize:12,color:'#666'}}>Délai moyen de traitement</div>
+              <div style={{fontWeight:700,marginTop:6}}>{stats ? formatDurationDaysHours(stats.average_processing_seconds) : '—'}</div>
+              <div style={{fontSize:12,color:'#666',marginTop:4}}>Rapports traités: {stats ? stats.count_processed : '—'}</div>
+            </div>
           </div>
           <div style={{display:'flex',gap:12}}>
             {!mapOptions?.adminView && (
@@ -287,6 +370,15 @@ export default function ReportsListPage({ authUser, onPageChange, mapOptions = {
                           <div>
                             <span className={getStatusBadgeClass(report.status)}>{report.status || ''}</span>
                             <div style={{marginTop:8, display: 'flex', gap: 8}}>
+                              <div style={{marginRight:8,fontSize:12,color:'#333'}}>
+                                Avancement:
+                                <div style={{display:'inline-block',verticalAlign:'middle',marginLeft:8}}>
+                                  <div style={{width:120,height:10,background:'#eee',borderRadius:6,overflow:'hidden',display:'inline-block',verticalAlign:'middle'}}>
+                                    <div style={{height:'100%',background:'#4caf50',width:`${getProgressPercent(report)}%`}} />
+                                  </div>
+                                  <span style={{marginLeft:8,fontWeight:700}}>{getProgressPercent(report)}%</span>
+                                </div>
+                              </div>
                               <button className="btn btn-outline btn-sm" onClick={() => onPageChange('map', { centerLat: report.latitude, centerLng: report.longitude })}>Voir</button>
                               {mapOptions?.adminView && isManager && report.status === 'nouveau' && (
                                 <button
@@ -372,6 +464,9 @@ export default function ReportsListPage({ authUser, onPageChange, mapOptions = {
               <label>Budget</label>
               <input type="number" value={assignBudget} onChange={(e) => setAssignBudget(e.target.value)} placeholder="0.00" />
 
+              <label>Date d'intervention</label>
+              <input type="datetime-local" value={assignDate} onChange={(e) => setAssignDate(e.target.value)} />
+
               <div style={{display:'flex',gap:8,marginTop:12}}>
                 <button className="btn btn-primary" onClick={submitAssign} disabled={loading}>Confirmer</button>
                 <button className="btn btn-outline" onClick={() => { setShowAssignModal(false); setSelectedReport(null); }}>Annuler</button>
@@ -385,6 +480,10 @@ export default function ReportsListPage({ authUser, onPageChange, mapOptions = {
           <div className="modal" style={{background:'#fff',padding:20,borderRadius:8,maxWidth:500,width:'90%'}}>
             <h3>Confirmer la clôture</h3>
             <p>Voulez-vous vraiment marquer le rapport #{finishTargetReport?.id} comme terminé ?</p>
+            <div style={{display:'flex',flexDirection:'column',gap:8,marginTop:8}}>
+              <label>Date de fin</label>
+              <input type="datetime-local" value={finishDate} onChange={(e) => setFinishDate(e.target.value)} />
+            </div>
             <div style={{display:'flex',gap:8,marginTop:12,justifyContent:'flex-end'}}>
               <button className="btn btn-primary" onClick={async () => { if (finishTargetReport) await finishReport(finishTargetReport.id); setShowConfirmFinish(false); setFinishTargetReport(null); }} disabled={loading}>Confirmer</button>
               <button className="btn btn-outline" onClick={() => { setShowConfirmFinish(false); setFinishTargetReport(null); }}>Annuler</button>
