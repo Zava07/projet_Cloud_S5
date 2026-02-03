@@ -1,6 +1,8 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage';
+import { getMessaging } from 'firebase/messaging';
 
 // Configuration Firebase depuis les variables d'environnement
 const firebaseConfig = {
@@ -18,5 +20,8 @@ const app = initializeApp(firebaseConfig);
 // Initialiser les services Firebase
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+export const storage = getStorage(app);
+// messaging is only available on web; use getMessaging safely
+export const messaging = typeof window !== 'undefined' ? getMessaging(app) : undefined;
 
 export default app;

@@ -13,7 +13,8 @@
   "lastName": "Doe",
   "role": "utilisateur",
   "createdAt": Timestamp,
-  "updatedAt": Timestamp
+  "updatedAt": Timestamp,
+  "fcmTokens": ["fcm_token_string"] // optional: list of device tokens for push
 }
 
 
@@ -33,6 +34,16 @@
   "surface": 50.5,
   "budget": 1500000,
   "entreprise": "SBTP",
+  "images": [
+    {
+      "url": "https://firebasestorage.googleapis.com/...",
+      "path": "reports/{reportId}/images/img1.jpg",
+      "filename": "img1.jpg",
+      "size": 123456,
+      "contentType": "image/jpeg",
+      "thumbUrl": "https://..."
+    }
+  ],
   "createdAt": Timestamp,
   "updatedAt": Timestamp
 }
@@ -63,9 +74,21 @@ service cloud.firestore {
       allow read: if true;
       allow create: if request.auth != null &&
                        request.resource.data.userId == request.auth.uid;
+      // Allow update by owner or manager. If updating images, ensure path/structure is valid.
       allow update: if request.auth != null && 
-                       (resource.data.userId == request.auth.uid || isManager());
+                       (resource.data.userId == request.auth.uid || isManager()) &&
+                       (request.resource.data.images == undefined ||
+                        (request.resource.data.images is list &&
+                         request.resource.data.images.size() <= 10));
       allow delete: if isManager();
+    }
+
+    // Storage paths: allow writes to reports/{reportId}/images by uploader (validated by customMetadata.uploaderUid)
+    match /b/{bucket}/o {
+      match /reports/{reportId}/images/{allPaths=**} {
+        allow read: if true;
+        allow write: if request.auth != null && request.resource.metadata.uploaderUid == request.auth.uid;
+      }
     }
   }
 }
