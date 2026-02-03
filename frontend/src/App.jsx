@@ -17,6 +17,7 @@ import EntrepriseCreatePage from './pages/EntrepriseCreatePage.jsx';
 import EntrepriseEditPage from './pages/EntrepriseEditPage.jsx';
 import ConfigPage from './pages/ConfigPage.jsx';
 import StatisticsPage from './pages/StatisticsPage.jsx';
+import SyncPage from './pages/SyncPage.jsx';
 
 export default function App() {
   // Navigation state: 'login' | 'signup' | 'map' | 'reports' | 'users' | 'create' | 'edit' | 'entreprises' | 'entreprise-create' | 'entreprise-edit'
@@ -96,6 +97,7 @@ export default function App() {
     else if (page === 'entreprises') navigateToEntreprises();
     else if (page === 'config') navigateToConfig();
     else if (page === 'statistics') navigateToStatistics();
+    else if (page === 'synchronization') { window.location.hash = '#/synchronization'; }
     else if (page === 'login') navigateToLogin();
     else if (page === 'signup') navigateToSignup();
   };
@@ -132,6 +134,8 @@ export default function App() {
     if (hash.startsWith('/entreprises')) return { page: 'entreprises' };
     if (hash.startsWith('/config')) return { page: 'config' };
     if (hash.startsWith('/statistics')) return { page: 'statistics' };
+    if (hash.startsWith('/synchronization')) return { page: 'synchronization' };
+
     return { page: 'login' };
   };
 
@@ -484,6 +488,12 @@ export default function App() {
           <StatisticsPage
             authUser={authUser}
             onBack={() => handlePageChange('map')}
+          />
+        );
+      case 'synchronization':
+        return (
+          <SyncPage
+            authUser={authUser}
           />
         );
       default:
