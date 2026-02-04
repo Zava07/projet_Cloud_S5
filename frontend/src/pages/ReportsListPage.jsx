@@ -171,6 +171,14 @@ export default function ReportsListPage({ authUser, onPageChange, mapOptions = {
   const [assignBudget, setAssignBudget] = useState('');
   const [assignDate, setAssignDate] = useState('');
   const [selectedReport, setSelectedReport] = useState(null);
+  const [photoCache, setPhotoCache] = useState({});
+  const [hoveredReportId, setHoveredReportId] = useState(null);
+  const [imageViewerOpen, setImageViewerOpen] = useState(false);
+  const [imageViewerUrl, setImageViewerUrl] = useState(null);
+  const [imageViewerList, setImageViewerList] = useState([]);
+  const [imageViewerIndex, setImageViewerIndex] = useState(0);
+  const [photosModalOpen, setPhotosModalOpen] = useState(false);
+  const [photosModalReportId, setPhotosModalReportId] = useState(null);
   const [showConfirmFinish, setShowConfirmFinish] = useState(false);
   const [finishTargetReport, setFinishTargetReport] = useState(null);
   const [finishDate, setFinishDate] = useState('');
@@ -208,6 +216,48 @@ export default function ReportsListPage({ authUser, onPageChange, mapOptions = {
     setAssignDate(localDatetimeNow());
     await fetchEntreprises();
     setShowAssignModal(true);
+  };
+
+  const fetchPhotosForReport = async (reportId) => {
+    if (!reportId) return;
+    if (photoCache[reportId]) return; // already loaded
+    try {
+      const res = await fetch(`${apiBase()}/api/photo-reports/report/${reportId}`);
+      if (!res.ok) return;
+      const data = await res.json();
+      setPhotoCache(prev => ({ ...prev, [reportId]: data }));
+    } catch (err) {
+      console.error('Erreur lors du chargement des photos pour report', reportId, err);
+    }
+  };
+
+  const openImageViewerFromReport = (reportId, index) => {
+    const list = (photoCache[reportId] || []).map(p => (p.photoUrl && p.photoUrl.startsWith('http')) ? p.photoUrl : `${apiBase()}${p.photoUrl}`);
+    if (list.length === 0) return;
+    const idx = Math.max(0, Math.min(index, list.length - 1));
+    setImageViewerList(list);
+    setImageViewerIndex(idx);
+    setImageViewerUrl(list[idx]);
+    setImageViewerOpen(true);
+  };
+
+  const closeImageViewer = () => {
+    setImageViewerOpen(false);
+    setImageViewerUrl(null);
+    setImageViewerList([]);
+    setImageViewerIndex(0);
+  };
+
+  const openPhotosModal = async (report) => {
+    if (!report || !report.id) return;
+    await fetchPhotosForReport(report.id);
+    setPhotosModalReportId(report.id);
+    setPhotosModalOpen(true);
+  };
+
+  const closePhotosModal = () => {
+    setPhotosModalOpen(false);
+    setPhotosModalReportId(null);
   };
 
   const submitAssign = async () => {
@@ -360,7 +410,9 @@ export default function ReportsListPage({ authUser, onPageChange, mapOptions = {
               ) : (
                 <ul className="reports-list">
                   {(adminReportsByStatus[activeTab] || []).map((report) => (
-                    <li key={report.id} className="report-list-item card">
+                    <li key={report.id} className="report-list-item card"
+                        onMouseEnter={() => { setHoveredReportId(report.id); fetchPhotosForReport(report.id); }}
+                        onMouseLeave={() => setHoveredReportId(null)}>
                       <div className="card-body">
                         <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
                           <div>
@@ -369,7 +421,7 @@ export default function ReportsListPage({ authUser, onPageChange, mapOptions = {
                           </div>
                           <div>
                             <span className={getStatusBadgeClass(report.status)}>{report.status || ''}</span>
-                            <div style={{marginTop:8, display: 'flex', gap: 8}}>
+                              <div style={{marginTop:8, display: 'flex', gap: 8}}>
                               <div style={{marginRight:8,fontSize:12,color:'#333'}}>
                                 Avancement:
                                 <div style={{display:'inline-block',verticalAlign:'middle',marginLeft:8}}>
@@ -380,6 +432,8 @@ export default function ReportsListPage({ authUser, onPageChange, mapOptions = {
                                 </div>
                               </div>
                               <button className="btn btn-outline btn-sm" onClick={() => onPageChange('map', { centerLat: report.latitude, centerLng: report.longitude })}>Voir</button>
+                              <button className="btn btn-outline btn-sm" onClick={() => openPhotosModal(report)}>Voir les photos</button>
+                              <button className="btn btn-outline btn-sm" onClick={() => openPhotosModal(report)}>Voir les photos</button>
                               {mapOptions?.adminView && isManager && report.status === 'nouveau' && (
                                 <button
                                   className="btn btn-primary btn-sm"
@@ -402,6 +456,18 @@ export default function ReportsListPage({ authUser, onPageChange, mapOptions = {
                           </div>
                         </div>
                       </div>
+                      {/* Thumbnails shown on hover */}
+                      {photoCache[report.id] && photoCache[report.id].length > 0 && hoveredReportId === report.id && (
+                        <div style={{padding:'8px 12px',borderTop:'1px solid #eee'}}>
+                          <div style={{display:'flex',overflowX:'auto',gap:8}}>
+                            {photoCache[report.id].map((p, idx) => (
+                              <img key={p.id} src={(p.photoUrl && p.photoUrl.startsWith('http')) ? p.photoUrl : `${apiBase()}${p.photoUrl}`} alt={p.description || ''}
+                                   style={{height:64,objectFit:'cover',borderRadius:6,cursor:'pointer'}}
+                                   onClick={() => openImageViewerFromReport(report.id, idx)} />
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -415,7 +481,9 @@ export default function ReportsListPage({ authUser, onPageChange, mapOptions = {
               ) : (
                 <ul className="reports-list">
                   {userReports.filter(r => r.status === (activeTab === 'encours' ? 'en_cours' : activeTab)).map((report) => (
-                    <li key={report.id} className="report-list-item card">
+                    <li key={report.id} className="report-list-item card"
+                        onMouseEnter={() => { setHoveredReportId(report.id); fetchPhotosForReport(report.id); }}
+                        onMouseLeave={() => setHoveredReportId(null)}>
                       <div className="card-body">
                         <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
                           <div>
@@ -439,6 +507,17 @@ export default function ReportsListPage({ authUser, onPageChange, mapOptions = {
                           </div>
                         </div>
                       </div>
+                      {photoCache[report.id] && photoCache[report.id].length > 0 && hoveredReportId === report.id && (
+                        <div style={{padding:'8px 12px',borderTop:'1px solid #eee'}}>
+                          <div style={{display:'flex',overflowX:'auto',gap:8}}>
+                            {photoCache[report.id].map((p, idx) => (
+                              <img key={p.id} src={(p.photoUrl && p.photoUrl.startsWith('http')) ? p.photoUrl : `${apiBase()}${p.photoUrl}`} alt={p.description || ''}
+                                   style={{height:64,objectFit:'cover',borderRadius:6,cursor:'pointer'}}
+                                   onClick={() => openImageViewerFromReport(report.id, idx)} />
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -487,6 +566,40 @@ export default function ReportsListPage({ authUser, onPageChange, mapOptions = {
             <div style={{display:'flex',gap:8,marginTop:12,justifyContent:'flex-end'}}>
               <button className="btn btn-primary" onClick={async () => { if (finishTargetReport) await finishReport(finishTargetReport.id); setShowConfirmFinish(false); setFinishTargetReport(null); }} disabled={loading}>Confirmer</button>
               <button className="btn btn-outline" onClick={() => { setShowConfirmFinish(false); setFinishTargetReport(null); }}>Annuler</button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Image viewer modal */}
+      {imageViewerOpen && (
+        <div className="modal-overlay" onClick={closeImageViewer} style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.8)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:1100}}>
+          <div style={{position:'relative',maxWidth:'90%',maxHeight:'90%'}} onClick={(e) => e.stopPropagation()}>
+            <button onClick={closeImageViewer} style={{position:'absolute',right:-10,top:-10,zIndex:1110,background:'#fff',border:'none',borderRadius:20,width:36,height:36,cursor:'pointer'}}>✕</button>
+            <button onClick={(e) => { e.stopPropagation(); const prev = (imageViewerIndex - 1 + imageViewerList.length) % imageViewerList.length; setImageViewerIndex(prev); setImageViewerUrl(imageViewerList[prev]); }} style={{position:'absolute',left:-40,top:'50%',transform:'translateY(-50%)',zIndex:1110,background:'transparent',border:'none',color:'#fff',fontSize:28,cursor:'pointer'}}>{'‹'}</button>
+            <img src={imageViewerUrl} alt="photo" style={{maxWidth:'100%',maxHeight:'90vh',borderRadius:8,display:'block'}} />
+            <button onClick={(e) => { e.stopPropagation(); const next = (imageViewerIndex + 1) % imageViewerList.length; setImageViewerIndex(next); setImageViewerUrl(imageViewerList[next]); }} style={{position:'absolute',right:-40,top:'50%',transform:'translateY(-50%)',zIndex:1110,background:'transparent',border:'none',color:'#fff',fontSize:28,cursor:'pointer'}}>{'›'}</button>
+          </div>
+        </div>
+      )}
+      {/* Photos list modal */}
+      {photosModalOpen && (
+        <div className="modal-overlay" onClick={closePhotosModal} style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.6)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:1100}}>
+          <div style={{background:'#fff',padding:16,borderRadius:8,maxWidth:'90%',maxHeight:'90%',overflow:'auto'}} onClick={(e) => e.stopPropagation()}>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8}}>
+              <h3>Photos du rapport #{photosModalReportId}</h3>
+              <button onClick={closePhotosModal} className="btn btn-outline">Fermer</button>
+            </div>
+            <div style={{display:'flex',flexDirection:'column',gap:12}}>
+              <div style={{display:'flex',flexWrap:'wrap',gap:12}}>
+                {(photoCache[photosModalReportId] || []).map((p, i) => (
+                  <div key={p.id} style={{width:160}}>
+                    <img src={(p.photoUrl && p.photoUrl.startsWith('http')) ? p.photoUrl : `${apiBase()}${p.photoUrl}`} alt={p.description || ''}
+                         style={{width:'100%',height:100,objectFit:'cover',borderRadius:6,cursor:'pointer'}}
+                         onClick={() => openImageViewerFromReport(photosModalReportId, i)} />
+                    {p.description && <div style={{fontSize:12,marginTop:6}}>{p.description}</div>}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>

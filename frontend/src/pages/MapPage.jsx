@@ -64,6 +64,14 @@ export default function MapPage({ authUser, mapOptions = {} }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPosition, setSelectedPosition] = useState(null);
   const [submittingReport, setSubmittingReport] = useState(false);
+  // Photo states: cache by reportId, modal and viewer
+  const [photoCache, setPhotoCache] = useState({});
+  const [photosModalOpen, setPhotosModalOpen] = useState(false);
+  const [photosModalReportId, setPhotosModalReportId] = useState(null);
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [viewerUrl, setViewerUrl] = useState(null);
+  const [viewerList, setViewerList] = useState([]);
+  const [viewerIndex, setViewerIndex] = useState(0);
   const mapRef = useRef(null);
 
   const apiBase = () => import.meta.env.VITE_API_BASE || 'http://localhost:8080';
@@ -112,7 +120,7 @@ export default function MapPage({ authUser, mapOptions = {} }) {
     setIsModalOpen(true);
   };
 
-  const handleSubmitReport = async (reportData) => {
+  const handleSubmitReport = async (reportData, files = []) => {
     setSubmittingReport(true);
     try {
       const response = await fetch(`${apiBase()}/api/reports`, {
@@ -134,7 +142,25 @@ export default function MapPage({ authUser, mapOptions = {} }) {
       setReports(prev => [...prev, newReport]);
       setIsModalOpen(false);
       setSelectedPosition(null);
-      
+      // If files were provided, upload them to backend
+      if (files && files.length > 0) {
+        try {
+          const form = new FormData();
+          form.append('reportId', newReport.id);
+          files.forEach(f => form.append('files', f));
+
+          const up = await fetch(`${apiBase()}/api/photo-reports/upload`, {
+            method: 'POST',
+            body: form,
+          });
+          if (!up.ok) {
+            console.warn('Upload des images échoué', up.status);
+          }
+        } catch (uerr) {
+          console.error('Erreur lors de l\'upload des images', uerr);
+        }
+      }
+
       alert('Rapport créé avec succès ! Merci pour votre signalement.');
     } catch (err) {
       console.error('Erreur lors de la création du rapport:', err);
@@ -162,6 +188,29 @@ export default function MapPage({ authUser, mapOptions = {} }) {
   const formatDate = (dateString) => {
     if (!dateString) return 'Date inconnue';
     return new Date(dateString).toLocaleDateString('fr-FR');
+  };
+
+  const apiImageUrl = (photoUrl) => {
+    if (!photoUrl) return null;
+    if (photoUrl.startsWith('http://') || photoUrl.startsWith('https://')) return photoUrl;
+    return `${apiBase()}${photoUrl}`;
+  };
+
+  const fetchPhotosForReport = async (reportId) => {
+    if (!reportId) return;
+    // use cache
+    if (photoCache[reportId]) return;
+    try {
+      const resp = await fetch(`${apiBase()}/api/photo-reports/report/${reportId}`);
+      if (!resp.ok) {
+        console.warn('Impossible de charger les photos pour le rapport', reportId);
+        return;
+      }
+      const data = await resp.json();
+      setPhotoCache(prev => ({ ...prev, [reportId]: data }));
+    } catch (err) {
+      console.error('Erreur fetch photos', err);
+    }
   };
   return (
     <div className="map-page">
@@ -251,8 +300,11 @@ export default function MapPage({ authUser, mapOptions = {} }) {
                 key={report.id}
                 position={[report.latitude, report.longitude]}
                 icon={report.status === 'nouveau' ? newReportIcon : (report.status === 'en_cours' || report.status === 'en-cours' ? enCoursIcon : reportIcon)}
+                eventHandlers={{
+                  popupopen: () => fetchPhotosForReport(report.id)
+                }}
               >
-                <Popup maxWidth={300}>
+                <Popup maxWidth={400}>
                   <div className="report-popup">
                     <div className="popup-header">
                       <span className="report-id">Rapport #{report.id}</span>
@@ -293,6 +345,36 @@ export default function MapPage({ authUser, mapOptions = {} }) {
                         {report.latitude?.toFixed(6)}, {report.longitude?.toFixed(6)}
                       </div>
                     </div>
+
+                    {/* Thumbnails si disponibles */}
+                    {photoCache[report.id] && photoCache[report.id].length > 0 && (
+                      <div className="popup-photos" style={{ marginTop: 8 }}>
+                        <div style={{ display: 'flex', gap: 6, overflowX: 'auto' }}>
+                          {photoCache[report.id].map((p, idx) => (
+                            <img
+                              key={idx}
+                              src={apiImageUrl(p.photoUrl)}
+                              alt={p.description || `Photo ${idx+1}`}
+                              style={{ width: 70, height: 70, objectFit: 'cover', cursor: 'pointer', borderRadius: 4 }}
+                              onClick={() => { setViewerList(photoCache[report.id]); setViewerIndex(idx); setViewerUrl(apiImageUrl(p.photoUrl)); setViewerOpen(true); }}
+                            />
+                          ))}
+                        </div>
+                        <div style={{ marginTop: 6 }}>
+                          <button className="btn" onClick={() => { setPhotosModalReportId(report.id); setPhotosModalOpen(true); fetchPhotosForReport(report.id); }}>
+                            Voir les photos
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                    {/* Si pas de photos connues, proposer bouton pour charger/voir */}
+                    {(!photoCache[report.id] || photoCache[report.id].length === 0) && (
+                      <div style={{ marginTop: 8 }}>
+                        <button className="btn" onClick={() => { setPhotosModalReportId(report.id); setPhotosModalOpen(true); fetchPhotosForReport(report.id); }}>
+                          Voir les photos
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </Popup>
               </Marker>
@@ -319,6 +401,43 @@ export default function MapPage({ authUser, mapOptions = {} }) {
       </div>
 
       {/* Modal de création de rapport */}
+      {/* Photos modal */}
+      {photosModalOpen && (
+        <div className="photos-modal-overlay" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000 }}>
+          <div className="photos-modal" style={{ background: '#fff', padding: 16, maxWidth: 900, width: '95%', maxHeight: '85%', overflowY: 'auto', borderRadius: 8 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+              <h3>Photos du rapport #{photosModalReportId}</h3>
+              <div>
+                <button className="btn" onClick={() => { setPhotosModalOpen(false); setPhotosModalReportId(null); }}>Fermer</button>
+              </div>
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+              {(photoCache[photosModalReportId] || []).length === 0 && (
+                <div>Aucune photo disponible.</div>
+              )}
+              {(photoCache[photosModalReportId] || []).map((p, i) => (
+                <div key={i} style={{ width: 160, height: 120, cursor: 'pointer' }}>
+                  <img src={apiImageUrl(p.photoUrl)} alt={p.description || `Photo ${i+1}`} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 6 }} onClick={() => { setViewerList(photoCache[photosModalReportId] || []); setViewerIndex(i); setViewerUrl(apiImageUrl(p.photoUrl)); setViewerOpen(true); }} />
+                  {p.description && <div style={{ fontSize: 12, marginTop: 4 }}>{p.description}</div>}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Image viewer */}
+      {viewerOpen && viewerUrl && (
+        <div className="image-viewer-overlay" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 3000 }} onClick={() => { setViewerOpen(false); setViewerUrl(null); setViewerList([]); setViewerIndex(0); }}>
+          <div style={{ maxWidth: '95%', maxHeight: '95%', position: 'relative' }} onClick={(e) => e.stopPropagation()}>
+            <button onClick={() => { const prev = (viewerIndex - 1 + viewerList.length) % viewerList.length; setViewerIndex(prev); setViewerUrl(apiImageUrl((viewerList[prev] || {}).photoUrl)); }} style={{ position: 'absolute', left: -40, top: '50%', transform: 'translateY(-50%)', zIndex: 3100, background: 'transparent', border: 'none', color: '#fff', fontSize: 28, cursor: 'pointer' }}>{'‹'}</button>
+            <div style={{ maxWidth: '100%', maxHeight: '100%' }}>
+              <img src={viewerUrl} alt="Viewer" style={{ maxWidth: '100%', maxHeight: '100%', borderRadius: 8 }} />
+            </div>
+            <button onClick={() => { const next = (viewerIndex + 1) % viewerList.length; setViewerIndex(next); setViewerUrl(apiImageUrl((viewerList[next] || {}).photoUrl)); }} style={{ position: 'absolute', right: -40, top: '50%', transform: 'translateY(-50%)', zIndex: 3100, background: 'transparent', border: 'none', color: '#fff', fontSize: 28, cursor: 'pointer' }}>{'›'}</button>
+          </div>
+        </div>
+      )}
       <ReportModal
         isOpen={isModalOpen}
         onClose={() => {

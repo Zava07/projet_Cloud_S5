@@ -81,4 +81,5 @@ public class ConfigEntryController {
         return ResponseEntity.ok(map);
     }
 
+
 }
