@@ -55,6 +55,14 @@ CREATE TABLE histo_reports (
     date_changement TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE photo_reports (
+    id SERIAL PRIMARY KEY,
+    report_id INTEGER NOT NULL REFERENCES reports(id) ON DELETE CASCADE,
+    photo_url VARCHAR(500) NOT NULL,
+    description TEXT,
+    uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- 5. TABLE SYNC_LOG
 CREATE TABLE sync_log (
     id SERIAL PRIMARY KEY,
