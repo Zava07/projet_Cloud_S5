@@ -26,6 +26,8 @@ services:
     working_dir: /app
     entrypoint: []
     command: ["./mvnw", "spring-boot:run", "-Dspring-boot.run.fork=false"]
+    dns:
+      - 8.8.8.8
     volumes:
       - ./backend/cloud:/app
       - ${M2_CACHE:-${HOME}/.m2}:/root/.m2
