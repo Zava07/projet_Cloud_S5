@@ -13,6 +13,7 @@ export default function ReportModal({
     surface: '',
     budget: ''
   });
+  const [files, setFiles] = useState([]);
   const [errors, setErrors] = useState({});
 
   const handleChange = (e) => {
@@ -62,7 +63,7 @@ export default function ReportModal({
       status: 'nouveau'
     };
 
-    onSubmit(reportData);
+    onSubmit(reportData, files);
   };
 
   const resetForm = () => {
@@ -72,6 +73,7 @@ export default function ReportModal({
       budget: ''
     });
     setErrors({});
+    setFiles([]);
   };
 
   const handleClose = () => {
@@ -165,6 +167,20 @@ export default function ReportModal({
                   <div className="invalid-feedback">{errors.budget}</div>
                 )}
               </div> */}
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Photos (optionnel)</label>
+              <input
+                type="file"
+                name="photos"
+                multiple
+                accept="image/*"
+                onChange={(e) => setFiles(Array.from(e.target.files))}
+                disabled={loading}
+                className="form-control"
+              />
+              <small className="form-text">Vous pouvez joindre plusieurs images (jpg, png...).</small>
             </div>
 
             <div className="modal-actions">
