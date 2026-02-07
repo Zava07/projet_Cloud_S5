@@ -1,90 +1,103 @@
 <template>
   <div class="photo-uploader">
-    <!-- Section label with separator -->
-    <div class="uploader-section">
-      <div class="section-divider">
-        <span class="divider-line"></span>
-        <span class="divider-text">
-          <ion-icon :icon="imagesOutline" />
-          Photos ({{ files.length }}/{{ max }})
-        </span>
-        <span class="divider-line"></span>
+    <!-- Section header -->
+    <div class="section-header">
+      <div class="section-title">
+        <ion-icon :icon="imagesOutline" class="section-icon" />
+        <span>Photos</span>
       </div>
+      <span class="photo-counter" :class="{ 'counter-full': files.length >= max }">
+        {{ files.length }}/{{ max }}
+      </span>
     </div>
 
-    <!-- Action buttons: Camera & Gallery -->
-    <div class="photo-actions" v-if="files.length < max">
-      <!-- Camera button -->
-      <button type="button" class="photo-btn camera-btn" @click="openCamera">
-        <div class="btn-icon">
+    <!-- Upload zone -->
+    <div class="upload-zone" v-if="files.length < max" @click="showSourcePicker">
+      <div class="upload-zone-content">
+        <div class="upload-icon-wrapper">
+          <ion-icon :icon="cloudUploadOutline" />
+        </div>
+        <span class="upload-label">Ajouter une photo</span>
+        <span class="upload-hint">Appuyez pour prendre ou choisir une photo</span>
+      </div>
+      <!-- Invisible quick buttons inside the zone -->
+      <div class="quick-actions">
+        <button type="button" class="quick-btn" @click.stop="openCamera">
           <ion-icon :icon="cameraOutline" />
-        </div>
-        <span class="btn-label">Camera</span>
-        <span class="btn-hint">Take photo</span>
-      </button>
-      
-      <!-- Gallery button -->
-      <button type="button" class="photo-btn gallery-btn" @click="openGallery">
-        <div class="btn-icon">
+          <span>Caméra</span>
+        </button>
+        <div class="quick-divider"></div>
+        <button type="button" class="quick-btn" @click.stop="openGallery">
           <ion-icon :icon="imageOutline" />
-        </div>
-        <span class="btn-label">Gallery</span>
-        <span class="btn-hint">Choose file</span>
-      </button>
+          <span>Galerie</span>
+        </button>
+      </div>
     </div>
 
     <!-- Max reached message -->
-    <div class="max-reached" v-else>
+    <div class="max-reached" v-else-if="files.length > 0">
       <ion-icon :icon="checkmarkCircleOutline" />
-      <span>Maximum photos reached</span>
+      <span>Nombre maximum de photos atteint</span>
     </div>
 
     <!-- Photo thumbnails grid -->
-    <div class="thumbnails" v-if="files.length > 0">
-      <div v-for="(f, idx) in files" :key="idx" class="thumb" :class="{ uploaded: f.url, error: f.error }">
-        <img :src="f.preview" alt="preview" />
-        
-        <!-- Upload progress overlay -->
-        <div class="overlay uploading" v-if="f.uploading">
-          <ion-spinner name="crescent" />
-        </div>
-        
-        <!-- Success indicator -->
-        <div class="overlay success" v-else-if="f.url">
-          <ion-icon :icon="checkmarkCircleOutline" />
-        </div>
-        
-        <!-- Error indicator -->
-        <div class="overlay error-overlay" v-else-if="f.error">
-          <ion-icon :icon="alertCircleOutline" />
+    <div class="thumbnails-grid" v-if="files.length > 0">
+      <div v-for="(f, idx) in files" :key="idx" class="thumb-card" :class="{ uploaded: f.url, error: f.error }">
+        <div class="thumb-image-wrapper">
+          <img :src="f.preview" alt="preview" />
+          
+          <!-- Upload progress overlay -->
+          <div class="thumb-overlay uploading" v-if="f.uploading">
+            <div class="upload-progress-ring">
+              <ion-spinner name="crescent" />
+            </div>
+            <span class="overlay-text">Envoi...</span>
+          </div>
+          
+          <!-- Success indicator -->
+          <div class="thumb-overlay success" v-else-if="f.url">
+            <ion-icon :icon="checkmarkCircleOutline" />
+          </div>
+          
+          <!-- Error indicator with retry -->
+          <div class="thumb-overlay error-state" v-else-if="f.error">
+            <ion-icon :icon="alertCircleOutline" />
+            <span class="overlay-text">Échec</span>
+          </div>
         </div>
         
         <!-- Remove button -->
-        <button class="remove-btn" @click.stop="removeFile(idx)" type="button">
+        <button class="remove-btn" @click.stop="removeFile(idx)" type="button" aria-label="Supprimer">
           <ion-icon :icon="closeOutline" />
         </button>
+
+        <!-- Photo number badge -->
+        <div class="photo-number">{{ idx + 1 }}</div>
       </div>
       
-      <!-- Add more button (compact) -->
+      <!-- Add more (compact card) -->
       <button 
-        v-if="files.length < max" 
+        v-if="files.length < max && files.length > 0" 
         type="button" 
-        class="thumb add-more" 
-        @click="openGallery"
+        class="thumb-card add-card" 
+        @click="showSourcePicker"
       >
         <ion-icon :icon="addOutline" />
+        <span>Ajouter</span>
       </button>
     </div>
 
-    <!-- Status message -->
-    <div class="status-bar" v-if="uploading || errorCount > 0">
-      <span v-if="uploading" class="status uploading">
-        <ion-spinner name="dots" /> Uploading...
-      </span>
-      <span v-else-if="errorCount > 0" class="status error">
-        <ion-icon :icon="alertCircleOutline" /> Failed
-        <button class="retry-btn" @click="retryFailed" type="button">Retry</button>
-      </span>
+    <!-- Status bar -->
+    <div class="upload-status" v-if="uploading || errorCount > 0">
+      <div v-if="uploading" class="status-badge status-uploading">
+        <ion-spinner name="dots" />
+        <span>Envoi en cours...</span>
+      </div>
+      <div v-else-if="errorCount > 0" class="status-badge status-error">
+        <ion-icon :icon="alertCircleOutline" />
+        <span>{{ errorCount }} échec{{ errorCount > 1 ? 's' : '' }}</span>
+        <button class="retry-link" @click="retryFailed" type="button">Réessayer</button>
+      </div>
     </div>
   </div>
 </template>
@@ -98,6 +111,7 @@ import {
   cameraOutline,
   imageOutline,
   imagesOutline,
+  cloudUploadOutline,
   checkmarkCircleOutline, 
   alertCircleOutline, 
   closeOutline,
@@ -121,6 +135,11 @@ const uploading = ref(false);
 
 // Computed properties for status
 const errorCount = computed(() => files.value.filter(f => f.error).length);
+
+// Show native action sheet to pick camera or gallery
+const showSourcePicker = () => {
+  // Do nothing — let the quick-actions inside the zone handle it
+};
 
 // Convert base64 to File object
 const base64ToFile = async (base64: string, filename: string): Promise<File> => {
@@ -250,214 +269,254 @@ onUnmounted(() => {
 
 <style scoped>
 .photo-uploader {
-  margin-top: 16px;
+  margin-top: 20px;
 }
 
-/* Section divider */
-.uploader-section {
-  margin-bottom: 16px;
-}
-
-.section-divider {
+/* ── Section Header ── */
+.section-header {
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding: 0 2px;
 }
 
-.divider-line {
-  flex: 1;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-}
-
-.divider-text {
+.section-title {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.section-icon {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.photo-counter {
   font-size: 12px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.6);
-  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.06);
+  padding: 3px 10px;
+  border-radius: 20px;
   letter-spacing: 0.5px;
-  white-space: nowrap;
 }
 
-.divider-text ion-icon {
-  font-size: 14px;
-  color: #2b70ff;
+.photo-counter.counter-full {
+  color: #34c759;
+  background: rgba(52, 199, 89, 0.12);
 }
 
-/* Photo action buttons */
-.photo-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-bottom: 16px;
+/* ── Upload Zone ── */
+.upload-zone {
+  position: relative;
+  border: 1.5px dashed rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 24px 16px 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  overflow: hidden;
 }
 
-.photo-btn {
+.upload-zone:active {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.upload-zone-content {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   gap: 6px;
-  padding: 18px 14px;
-  border-radius: 16px;
-  border: none;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  pointer-events: none;
 }
 
-.photo-btn:active {
-  transform: scale(0.96);
-}
-
-.btn-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
+.upload-icon-wrapper {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 4px;
 }
 
-.btn-icon ion-icon {
-  font-size: 24px;
+.upload-icon-wrapper ion-icon {
+  font-size: 22px;
+  color: rgba(255, 255, 255, 0.35);
 }
 
-.btn-label {
+.upload-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.upload-hint {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.35);
+  margin-bottom: 12px;
+}
+
+/* Quick action buttons inside zone */
+.quick-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.quick-divider {
+  width: 1px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.quick-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex: 1;
+  padding: 10px 20px;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
   font-size: 13px;
-  font-weight: 700;
-}
-
-.btn-hint {
-  font-size: 10px;
   font-weight: 500;
-  opacity: 0.75;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-/* Camera button style */
-.camera-btn {
-  background: linear-gradient(135deg, #ff6b6b 0%, #ff3b30 100%);
+.quick-btn ion-icon {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.45);
 }
 
-.camera-btn .btn-icon {
-  background: rgba(255, 255, 255, 0.2);
+.quick-btn:active {
+  background: rgba(255, 255, 255, 0.06);
 }
 
-.camera-btn .btn-icon ion-icon {
-  color: #fff;
-}
-
-.camera-btn .btn-label,
-.camera-btn .btn-hint {
-  color: #fff;
-}
-
-.camera-btn:hover,
-.camera-btn:active {
-  background: linear-gradient(135deg, #ff5252 0%, #e02b23 100%);
-  box-shadow: 0 6px 20px rgba(255, 59, 48, 0.4);
-}
-
-/* Gallery button style */
-.gallery-btn {
-  background: linear-gradient(135deg, #5fa8ff 0%, #2b70ff 100%);
-}
-
-.gallery-btn .btn-icon {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-.gallery-btn .btn-icon ion-icon {
-  color: #fff;
-}
-
-.gallery-btn .btn-label,
-.gallery-btn .btn-hint {
-  color: #fff;
-}
-
-.gallery-btn:hover,
-.gallery-btn:active {
-  background: linear-gradient(135deg, #4a9aff 0%, #1a5ee6 100%);
-  box-shadow: 0 6px 20px rgba(43, 112, 255, 0.4);
-}
-
-/* Max reached */
+/* ── Max Reached ── */
 .max-reached {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 14px;
+  padding: 12px 16px;
   border-radius: 12px;
-  background: rgba(52, 199, 89, 0.1);
-  border: 1px solid rgba(52, 199, 89, 0.3);
+  background: rgba(52, 199, 89, 0.06);
+  border: 1px solid rgba(52, 199, 89, 0.15);
 }
 .max-reached ion-icon {
-  font-size: 18px;
+  font-size: 16px;
   color: #34c759;
 }
 .max-reached span {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
-  color: #34c759;
+  color: rgba(52, 199, 89, 0.8);
 }
 
-/* Thumbnails grid */
-.thumbnails {
-  display: flex;
-  flex-wrap: wrap;
+/* ── Thumbnails Grid ── */
+.thumbnails-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 10px;
   margin-top: 14px;
 }
-.thumb {
+
+.thumb-card {
   position: relative;
-  width: 80px;
-  height: 80px;
-  border-radius: 12px;
+  aspect-ratio: 1;
+  border-radius: 14px;
   overflow: hidden;
-  border: 2px solid rgba(255, 255, 255, 0.1);
-  transition: all 0.2s;
-  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  transition: all 0.25s ease;
 }
-.thumb.uploaded {
-  border-color: #34c759;
+
+.thumb-card.uploaded {
+  border-color: rgba(52, 199, 89, 0.3);
 }
-.thumb.error {
-  border-color: #ff3b30;
+
+.thumb-card.error {
+  border-color: rgba(255, 59, 48, 0.4);
 }
-.thumb img {
+
+.thumb-image-wrapper {
+  width: 100%;
+  height: 100%;
+}
+
+.thumb-image-wrapper img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
 }
 
-/* Add more button */
-.thumb.add-more {
+/* Photo number badge */
+.photo-number {
+  position: absolute;
+  bottom: 6px;
+  left: 6px;
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.05);
-  border-style: dashed;
-  cursor: pointer;
-}
-.thumb.add-more:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.3);
-}
-.thumb.add-more ion-icon {
-  font-size: 28px;
-  color: rgba(255, 255, 255, 0.4);
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.8);
+  z-index: 3;
 }
 
-/* Overlays */
-.overlay {
+/* Add card */
+.add-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border-style: dashed;
+  border-color: rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  background: transparent;
+  font-family: inherit;
+}
+.add-card:active {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+.add-card ion-icon {
+  font-size: 24px;
+  color: rgba(255, 255, 255, 0.3);
+}
+.add-card span {
+  font-size: 10px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+/* ── Overlays ── */
+.thumb-overlay {
   position: absolute;
   inset: 0;
   display: flex;
@@ -465,115 +524,132 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   gap: 4px;
-}
-.overlay.uploading {
-  background: rgba(0, 0, 0, 0.6);
-}
-.overlay.uploading ion-spinner {
-  color: #fff;
-  width: 24px;
-  height: 24px;
-}
-.overlay.success {
-  background: rgba(52, 199, 89, 0.25);
-}
-.overlay.success ion-icon {
-  font-size: 26px;
-  color: #34c759;
-}
-.overlay.error-overlay {
-  background: rgba(255, 59, 48, 0.7);
-}
-.overlay.error-overlay ion-icon {
-  font-size: 22px;
-  color: #fff;
+  z-index: 2;
 }
 
-/* Remove button */
+.thumb-overlay.uploading {
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(2px);
+}
+.upload-progress-ring ion-spinner {
+  color: #fff;
+  width: 22px;
+  height: 22px;
+}
+.overlay-text {
+  font-size: 9px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.75);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.thumb-overlay.success {
+  background: rgba(52, 199, 89, 0.15);
+}
+.thumb-overlay.success ion-icon {
+  font-size: 24px;
+  color: #34c759;
+  filter: drop-shadow(0 0 6px rgba(52, 199, 89, 0.4));
+}
+
+.thumb-overlay.error-state {
+  background: rgba(255, 59, 48, 0.2);
+  backdrop-filter: blur(1px);
+}
+.thumb-overlay.error-state ion-icon {
+  font-size: 22px;
+  color: #ff6b6b;
+}
+
+/* ── Remove Button ── */
 .remove-btn {
   position: absolute;
-  top: 4px;
-  right: 4px;
+  top: 5px;
+  right: 5px;
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.7);
-  border: none;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.2s;
   z-index: 5;
 }
-.remove-btn:hover {
+.remove-btn:active {
   background: #ff3b30;
+  border-color: transparent;
 }
 .remove-btn ion-icon {
-  font-size: 12px;
-  color: #fff;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.8);
 }
 
-/* Status bar */
-.status-bar {
-  margin-top: 12px;
-  padding: 10px 14px;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.05);
+/* ── Status Bar ── */
+.upload-status {
+  margin-top: 10px;
 }
-.status {
+
+.status-badge {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 13px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 12px;
   font-weight: 500;
 }
-.status.uploading {
-  color: #2b70ff;
+
+.status-uploading {
+  background: rgba(43, 112, 255, 0.08);
+  color: rgba(43, 112, 255, 0.9);
+  border: 1px solid rgba(43, 112, 255, 0.12);
 }
-.status.uploading ion-spinner {
-  width: 16px;
-  height: 16px;
+.status-uploading ion-spinner {
+  width: 14px;
+  height: 14px;
 }
-.status.error {
-  color: #ff3b30;
+
+.status-error {
+  background: rgba(255, 59, 48, 0.08);
+  color: rgba(255, 100, 100, 0.9);
+  border: 1px solid rgba(255, 59, 48, 0.12);
 }
-.status.error ion-icon {
-  font-size: 16px;
+.status-error ion-icon {
+  font-size: 14px;
 }
-.retry-btn {
+
+.retry-link {
   margin-left: auto;
-  padding: 6px 12px;
+  padding: 4px 10px;
   font-size: 11px;
   font-weight: 600;
   color: #fff;
-  background: #ff3b30;
-  border: none;
+  background: rgba(255, 59, 48, 0.25);
+  border: 1px solid rgba(255, 59, 48, 0.2);
   border-radius: 6px;
   cursor: pointer;
   text-transform: uppercase;
+  letter-spacing: 0.3px;
+  transition: background 0.2s;
 }
-.retry-btn:hover {
-  background: #e02b23;
+.retry-link:active {
+  background: rgba(255, 59, 48, 0.4);
 }
 
-/* Responsive - smaller screens */
-@media (max-width: 380px) {
-  .action-buttons {
+/* ── Responsive ── */
+@media (max-width: 350px) {
+  .thumbnails-grid {
+    grid-template-columns: repeat(3, 1fr);
     gap: 8px;
   }
-  .action-btn {
-    padding: 16px 12px;
-  }
-  .action-btn ion-icon {
-    font-size: 24px;
-  }
-  .action-btn span {
-    font-size: 11px;
-  }
-  .thumb {
-    width: 70px;
-    height: 70px;
+  .quick-btn {
+    padding: 8px 14px;
+    font-size: 12px;
   }
 }
 </style>
