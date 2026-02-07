@@ -245,8 +245,17 @@
           </div>
 
           <!-- Card Body -->
-          <h3 class="card-title">{{ report.title || 'Infrastructure Report' }}</h3>
-          <p class="card-description">{{ truncate(report.description, 100) }}</p>
+          <div class="card-body-row">
+            <div class="card-text">
+              <h3 class="card-title">{{ report.title || 'Infrastructure Report' }}</h3>
+              <p class="card-description">{{ truncate(report.description, 100) }}</p>
+            </div>
+            <!-- Photo thumbnail -->
+            <div class="card-thumbnail" v-if="report.photos && report.photos.length > 0">
+              <img :src="report.photos[0]" alt="Report photo" />
+              <span class="photo-count" v-if="report.photos.length > 1">+{{ report.photos.length - 1 }}</span>
+            </div>
+          </div>
 
           <!-- Card Stats -->
           <div class="card-stats">
@@ -1214,6 +1223,54 @@ onMounted(async () => {
   line-height: 1.5;
   color: rgba(255, 255, 255, 0.5);
   margin: 0 0 14px;
+}
+
+/* Card body with thumbnail */
+.card-body-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.card-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.card-text .card-title {
+  margin-bottom: 6px;
+}
+
+.card-text .card-description {
+  margin-bottom: 0;
+}
+
+.card-thumbnail {
+  position: relative;
+  width: 70px;
+  height: 70px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.card-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.card-thumbnail .photo-count {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  background: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
 }
 
 .card-stats {
