@@ -1,0 +1,68 @@
+{
+  "project_info": {
+    "project_number": "302056517170",
+    "project_id": "iray-lalana",
+    "storage_bucket": "iray-lalana.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:302056517170:android:b0d907a57b7c10a4f8562b",
+        "android_client_info": {
+          "package_name": "com.cloud.p17"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "302056517170-v3hc4ngq97g4ifvicqgt82kkasanf2oo.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAMjT2GbLSccBkMGyRvDJG3cvfNfNqpRDI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "302056517170-v3hc4ngq97g4ifvicqgt82kkasanf2oo.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:302056517170:android:aa8eefab6281a9c8f8562b",
+        "android_client_info": {
+          "package_name": "io.ionic.starter"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "302056517170-v3hc4ngq97g4ifvicqgt82kkasanf2oo.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAMjT2GbLSccBkMGyRvDJG3cvfNfNqpRDI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "302056517170-v3hc4ngq97g4ifvicqgt82kkasanf2oo.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
