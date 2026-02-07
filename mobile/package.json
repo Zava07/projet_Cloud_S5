@@ -10,8 +10,7 @@
     "test:e2e": "cypress run",
     "test:unit": "vitest",
     "lint": "eslint .",
-    "setup:android": "node ./scripts/postinstall.cjs",
-    "postinstall": "node ./scripts/postinstall.cjs"
+    "setup:android": "node ./scripts/postinstall.cjs"
   },
   "dependencies": {
     "@capacitor/android": "8.0.2",

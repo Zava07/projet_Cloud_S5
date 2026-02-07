@@ -7,4 +7,4 @@
 # ra atao am android studio
 - npm run setup:android  (exécute le script postinstall et ouvrira Android Studio automatiquement si il est installé)
 
-- Si Android Studio ne s'ouvre pas automatiquement, lance manuellement : `npx cap open android`
+- Si Android Studio ne s'ouvre pas automatiquement, lance manuellement : `ionic cap open android`
