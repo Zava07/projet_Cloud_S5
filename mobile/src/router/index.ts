@@ -40,6 +40,10 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/problem/:id',
     component: () => import('@/views/ProblemDetailPage.vue')
+  },
+  {
+    path: '/notifications',
+    component: () => import('@/views/NotificationsPage.vue')
   }
 ];
 

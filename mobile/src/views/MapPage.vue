@@ -20,6 +20,11 @@
             <span class="logo-text">IRAY LALANA</span>
           </div>
           <div class="header-actions" v-if="isAuthenticated">
+            <!-- Notifications button -->
+            <button class="notification-btn" @click="$router.push('/notifications')">
+              <ion-icon :icon="notificationsOutline" />
+              <span class="notif-badge" v-if="unreadCount > 0">{{ unreadCount > 9 ? '9+' : unreadCount }}</span>
+            </button>
             <button class="logout-btn" @click="handleLogout">
               <ion-icon :icon="logOutOutline" />
               <span>Logout</span>
@@ -379,9 +384,11 @@ import {
   leafOutline,
   logOutOutline,
   personOutline,
+  notificationsOutline,
 } from 'ionicons/icons';
 import { useAuth } from '@/services/useAuth';
 import { useProblems } from '@/services/useProblems';
+import { usePushNotifications } from '@/services/usePushNotifications';
 import MapView from '@/components/map/MapView.vue';
 import PhotoUploader from '@/components/problem/PhotoUploader.vue';
 import { TILE_URL } from '@/config';
@@ -390,6 +397,7 @@ import { Problem, ProblemStatus } from '@/types';
 const router = useRouter();
 const { isAuthenticated, currentUser, logout } = useAuth();
 const { addProblem, loadProblems, getProblemById, problems, getStatistics } = useProblems();
+const { unreadCount } = usePushNotifications();
 
 const tileUrl = TILE_URL || (import.meta.env.VITE_TILE_URL as string) || 'http://localhost:8080/tiles/{z}/{x}/{y}.png';
 const center = { lat: -18.9145, lng: 47.5281 };
@@ -748,6 +756,60 @@ const handlePhotoError = async (errorMessage: string) => {
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+/* Notification button */
+.notification-btn {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.notification-btn ion-icon {
+  font-size: 20px;
+}
+
+.notification-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #fff;
+}
+
+.notification-btn:active {
+  transform: scale(0.95);
+}
+
+.notif-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #ff6b6b 0%, #e82127 100%);
+  border: 2px solid #0a0a0a;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+  animation: badge-pulse 2s ease-in-out infinite;
+}
+
+@keyframes badge-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
 }
 
 .logout-btn {
