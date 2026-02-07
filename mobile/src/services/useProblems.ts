@@ -55,8 +55,7 @@ const convertFirestoreData = (id: string, data: DocumentData): Problem => {
     status: data.status as ProblemStatus,
     surface: data.surface,
     budget: parseBudgetValue(data.budget),
-    entreprise: data.entreprise,
-    createdAt: data.createdAt?.toDate?.() || new Date(data.createdAt),
+    entreprise: data.entreprise,    photos: data.photos || [],    createdAt: data.createdAt?.toDate?.() || new Date(data.createdAt),
     updatedAt: data.updatedAt?.toDate?.() || new Date(data.updatedAt),
     // UI helpers
     title: data.description.substring(0, 50),
@@ -146,6 +145,7 @@ export function useProblems() {
     longitude: number;
     description: string;
     surface?: number;
+    photos?: string[];
   }): Promise<Problem> => {
     try {
       const now = Timestamp.now();
@@ -160,10 +160,12 @@ export function useProblems() {
         surface: problemData.surface || null,
         budget: null,
         entreprise: null,
+        photos: problemData.photos || [],
         createdAt: now,
         updatedAt: now,
       };
 
+      console.debug('Creating reportData to send to Firestore:', reportData);
       const docRef = await addDoc(collection(db, 'reports'), reportData);
       
       const newProblem = convertFirestoreData(docRef.id, {
