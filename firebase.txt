@@ -22,19 +22,21 @@
 // ==========================================
 // Document ID = auto-généré
 {
-  "id": "auto_generated_id",
-  "userId": "firebase_uid",
-  "userName": "John Doe",
-  "userEmail": "john@example.com",
-  "latitude": -18.8792,
-  "longitude": 47.5079,
-  "description": "Nid de poule important",
-  "status": "nouveau",
-  "surface": 50.5,
-  "budget": 1500000,
-  "entreprise": "SBTP",
-  "createdAt": Timestamp,
-  "updatedAt": Timestamp
+  "id": "string", 
+  "userId": "string",
+  "userName": "string",
+  "userEmail": "string",
+  "latitude": "number",
+  "longitude": "number",
+  "description": "string",
+  "status": "string",
+  "surface": "number",
+  "photos": [
+    "string"
+  ],
+  "entreprise": "string | null",
+  "createdAt": "timestamp",
+  "updatedAt": "timestamp"
 }
 
 
