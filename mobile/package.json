@@ -10,7 +10,7 @@
     "test:e2e": "cypress run",
     "test:unit": "vitest",
     "lint": "eslint .",
-    "setup:android": "node ./scripts/postinstall.cjs"
+    "setup:android": "./scripts/postinstall.cjs"
   },
   "dependencies": {
     "@capacitor/android": "8.0.2",
@@ -20,7 +20,7 @@
     "@capacitor/filesystem": "^7.1.5",
     "@capacitor/haptics": "7.0.2",
     "@capacitor/ios": "^8.0.2",
-    "@capacitor/keyboard": "7.0.3",
+    "@capacitor/keyboard": "^8.0.0",
     "@capacitor/local-notifications": "^8.0.0",
     "@capacitor/preferences": "^7.0.2",
     "@capacitor/push-notifications": "^8.0.0",
@@ -46,6 +46,7 @@
     "eslint": "^8.35.0",
     "eslint-plugin-vue": "^9.9.0",
     "jsdom": "^22.1.0",
+    "patch-package": "^6.4.7",
     "terser": "^5.4.0",
     "typescript": "~5.9.0",
     "vite": "^5.0.0",
