@@ -246,6 +246,7 @@ import {
 } from 'ionicons/icons';
 import { useAuth } from '@/services/useAuth';
 import { useProblems } from '@/services/useProblems';
+import { usePushNotifications } from '@/services/usePushNotifications';
 import { Problem, ProblemStatus } from '@/types';
 import { collection, getDocs, query, orderBy, doc, getDoc } from 'firebase/firestore';
 import { db } from '@/config/firebase';
@@ -253,6 +254,7 @@ import { db } from '@/config/firebase';
 const route = useRoute();
 const { isManager } = useAuth();
 const { getProblemById, updateProblem } = useProblems();
+const { suppressNotificationFor } = usePushNotifications();
 
 const problem = ref<Problem | null>(null);
 
@@ -377,12 +379,19 @@ const showToast = async (message: string, color: string = 'success') => {
 const updateStatus = async (newStatus: ProblemStatus) => {
   if (!problem.value) return;
   
+  // Empêcher la self-notification (le listener onSnapshot ignorerait ce changement)
+  suppressNotificationFor(problem.value.id);
+  
   try {
     await updateProblem(problem.value.id, { status: newStatus });
     problem.value.status = newStatus;
-    await showToast('Status updated');
-  } catch (error) {
-    await showToast('Update failed', 'danger');
+    await showToast('Statut mis à jour ✓');
+  } catch (error: any) {
+    console.error('[updateStatus] Error:', error);
+    await showToast(
+      error?.message || 'Échec de la mise à jour. Vérifiez vos permissions.',
+      'danger'
+    );
   }
 };
 
