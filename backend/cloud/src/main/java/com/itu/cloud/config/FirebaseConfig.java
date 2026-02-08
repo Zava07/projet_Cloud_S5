@@ -9,9 +9,10 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
 import org.springframework.core.io.ClassPathResource;
 
-import java.io.FileInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -21,35 +22,44 @@ public class FirebaseConfig {
     @Value("${firebase.config.path:firebase-service-account.json}")
     private String firebaseConfigPath;
 
+    private boolean initialized = false;
+
     @PostConstruct
-    public void initialize() {
+    public synchronized void initialize() {
+        if (initialized) return;
+        
         try {
             if (FirebaseApp.getApps().isEmpty()) {
-                InputStream serviceAccount;
-                
-                // Essayer de charger depuis les ressources classpath
-                try {
-                    serviceAccount = new ClassPathResource(firebaseConfigPath).getInputStream();
-                } catch (IOException e) {
-                    // Sinon, essayer depuis le système de fichiers
-                    serviceAccount = new FileInputStream(firebaseConfigPath);
+                // Lire le contenu en mémoire pour éviter les problèmes de stream
+                byte[] credentialsBytes;
+                try (InputStream is = new ClassPathResource(firebaseConfigPath).getInputStream()) {
+                    credentialsBytes = is.readAllBytes();
                 }
 
+                GoogleCredentials credentials = GoogleCredentials.fromStream(
+                    new ByteArrayInputStream(credentialsBytes)
+                );
+
                 FirebaseOptions options = FirebaseOptions.builder()
-                        .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+                        .setCredentials(credentials)
                         .build();
 
                 FirebaseApp.initializeApp(options);
                 System.out.println("✅ Firebase initialized successfully");
             }
+            initialized = true;
         } catch (IOException e) {
             System.err.println("⚠️ Firebase initialization failed: " + e.getMessage());
-            System.err.println("   Make sure firebase-service-account.json is in src/main/resources/");
+            throw new RuntimeException("Failed to initialize Firebase", e);
         }
     }
 
-    @Bean
+    @Bean(destroyMethod = "") // Empêcher Spring de fermer le Firestore
+    @Scope("singleton")
     public Firestore firestore() {
+        if (!initialized) {
+            initialize();
+        }
         return FirestoreClient.getFirestore();
     }
 }

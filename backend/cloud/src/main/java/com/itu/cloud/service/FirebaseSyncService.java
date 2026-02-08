@@ -5,9 +5,11 @@ import com.google.cloud.firestore.*;
 import com.itu.cloud.entity.Report;
 import com.itu.cloud.entity.User;
 import com.itu.cloud.entity.SyncLog;
+import com.itu.cloud.entity.PhotoReport;
 import com.itu.cloud.repository.ReportRepository;
 import com.itu.cloud.repository.UserRepository;
 import com.itu.cloud.repository.SyncLogRepository;
+import com.itu.cloud.repository.PhotoReportRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,15 +26,18 @@ public class FirebaseSyncService {
     private final UserRepository userRepository;
     private final ReportRepository reportRepository;
     private final SyncLogRepository syncLogRepository;
+    private final PhotoReportRepository photoReportRepository;
 
     public FirebaseSyncService(Firestore firestore, 
                                UserRepository userRepository,
                                ReportRepository reportRepository,
-                               SyncLogRepository syncLogRepository) {
+                               SyncLogRepository syncLogRepository,
+                               PhotoReportRepository photoReportRepository) {
         this.firestore = firestore;
         this.userRepository = userRepository;
         this.reportRepository = reportRepository;
         this.syncLogRepository = syncLogRepository;
+        this.photoReportRepository = photoReportRepository;
     }
 
     // ==========================================
@@ -142,6 +147,8 @@ public class FirebaseSyncService {
                 Report report = existingReport.get();
                 updateReportFromFirebase(report, doc);
                 reportRepository.save(report);
+                // Synchroniser les photos
+                syncPhotosFromFirebase(report, doc);
             } else {
                 // 2. Vérifier si un report similaire existe (même user, même position, même description)
                 String userFirebaseUid = doc.getString("userId");
@@ -170,6 +177,8 @@ public class FirebaseSyncService {
                         report.setFirebaseId(firebaseId);
                         updateReportFromFirebase(report, doc);
                         reportRepository.save(report);
+                        // Synchroniser les photos
+                        syncPhotosFromFirebase(report, doc);
                     } else {
                         // Créer un nouveau report
                         Report report = new Report();
@@ -183,7 +192,9 @@ public class FirebaseSyncService {
                         report.setBudget(getBigDecimal(doc, "budget"));
                         report.setSyncedAt(LocalDateTime.now());
                         
-                        reportRepository.save(report);
+                        Report savedReport = reportRepository.save(report);
+                        // Synchroniser les photos
+                        syncPhotosFromFirebase(savedReport, doc);
                         count++;
                     }
                 }
@@ -292,6 +303,17 @@ public class FirebaseSyncService {
             reportData.put("budget", report.getBudget() != null ? report.getBudget().doubleValue() : null);
             reportData.put("updatedAt", FieldValue.serverTimestamp());
 
+            // Ajouter les photos au report
+            List<PhotoReport> photoReports = photoReportRepository.findByReport(report);
+            List<Map<String, Object>> photosData = new ArrayList<>();
+            for (PhotoReport photo : photoReports) {
+                Map<String, Object> photoMap = new HashMap<>();
+                photoMap.put("url", photo.getPhotoUrl());
+                photoMap.put("description", photo.getDescription());
+                photosData.add(photoMap);
+            }
+            reportData.put("photos", photosData);
+
             if (report.getFirebaseId() == null || report.getFirebaseId().isEmpty()) {
                 // Chercher si un report similaire existe déjà dans Firebase
                 QuerySnapshot similarQuery = firestore.collection("reports")
@@ -341,6 +363,65 @@ public class FirebaseSyncService {
         
         return count;
     }
+    // ==========================================
+    // SYNCHRONISATION DES PHOTOS
+    // ==========================================
+
+    private void syncPhotosFromFirebase(Report report, QueryDocumentSnapshot doc) {
+        // Récupérer le tableau photos du document Firebase
+        Object photosObj = doc.get("photos");
+        if (photosObj == null) {
+            return;
+        }
+
+        if (!(photosObj instanceof List)) {
+            return;
+        }
+
+        List<?> photosList = (List<?>) photosObj;
+
+        for (Object item : photosList) {
+            String photoUrl = null;
+            String description = null;
+
+            // Cas 1: L'item est une String (URL directe)
+            if (item instanceof String) {
+                photoUrl = (String) item;
+            }
+            // Cas 2: L'item est un Map (objet avec url/photoUrl et description)
+            else if (item instanceof Map) {
+                Map<String, Object> photoData = (Map<String, Object>) item;
+                photoUrl = (String) photoData.get("url");
+                if (photoUrl == null) {
+                    photoUrl = (String) photoData.get("photoUrl");
+                }
+                description = (String) photoData.get("description");
+            }
+
+            if (photoUrl == null || photoUrl.isEmpty()) {
+                continue;
+            }
+
+            // Vérifier si cette photo existe déjà
+            boolean exists = photoReportRepository.findByPhotoUrl(photoUrl).isPresent();
+            if (exists) {
+                continue; // Photo déjà synchronisée
+            }
+
+            // Créer nouvelle photo
+            PhotoReport photo = new PhotoReport();
+            photo.setReport(report);
+            photo.setPhotoUrl(photoUrl);
+            
+            if (description != null) {
+                photo.setDescription(description);
+            }
+
+            photo.setUploadedAt(LocalDateTime.now());
+            photoReportRepository.save(photo);
+        }
+    }
+
     // ==========================================
     // MÉTHODES UTILITAIRES
     // ==========================================

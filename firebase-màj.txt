@@ -1,0 +1,14 @@
+{
+  "users": {
+    "exampleUserId": {
+      "role": null
+    }
+  },
+  "reports": {
+    "exampleReportId": {
+      "userId": null,
+      "createdAt": null,
+      "status": null
+    }
+  }
+}
