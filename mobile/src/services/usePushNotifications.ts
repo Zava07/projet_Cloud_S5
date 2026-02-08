@@ -38,6 +38,9 @@ const unreadCount = computed(() => storedNotifications.value.filter(n => !n.read
 let reportsUnsubscribe: Unsubscribe | null = null;
 const reportStatusCache = ref<Map<string, string>>(new Map());
 
+// IDs des reports modifiés localement (pour ne pas se notifier soi-même)
+const suppressedReportIds = new Set<string>();
+
 export function usePushNotifications() {
   
   /**
@@ -137,6 +140,12 @@ export function usePushNotifications() {
     const q = query(reportsRef, where('userId', '==', user.uid));
 
     reportsUnsubscribe = onSnapshot(q, (snapshot) => {
+      // Ignorer les writes optimistes locaux (pas encore confirmés par le serveur)
+      if (snapshot.metadata.hasPendingWrites) {
+        console.log('[Notifications] Ignoring local optimistic write');
+        return;
+      }
+
       snapshot.docChanges().forEach(async (change) => {
         if (change.type === 'modified') {
           const docData = change.doc.data();
@@ -146,6 +155,14 @@ export function usePushNotifications() {
 
           // Vérifier si le statut a changé
           if (oldStatus && oldStatus !== newStatus) {
+            // Ignorer si c'est un changement fait par l'utilisateur lui-même
+            if (suppressedReportIds.has(reportId)) {
+              console.log(`[Notifications] Skipping self-notification for ${reportId}`);
+              suppressedReportIds.delete(reportId);
+              reportStatusCache.value.set(reportId, newStatus);
+              return;
+            }
+
             console.log(`[Notifications] Status changed for report ${reportId}: ${oldStatus} -> ${newStatus}`);
             
             // Créer et afficher la notification
@@ -460,6 +477,14 @@ export function usePushNotifications() {
     clearAllNotifications,
     loadNotificationsFromStorage,
     startReportsListener,
-    stopReportsListener
+    stopReportsListener,
+    /**
+     * Supprimer la notification pour un report qu'on modifie soi-même
+     */
+    suppressNotificationFor: (reportId: string) => {
+      suppressedReportIds.add(reportId);
+      // Auto-clear après 10 secondes (au cas où le write échoue)
+      setTimeout(() => suppressedReportIds.delete(reportId), 10000);
+    }
   };
 }

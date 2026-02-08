@@ -3,6 +3,7 @@ import {
   collection, 
   addDoc, 
   getDocs, 
+  getDoc,
   doc, 
   updateDoc, 
   query, 
@@ -199,7 +200,20 @@ export function useProblems() {
       delete updateData.reportedAt;
       delete updateData.createdAt;
 
+      console.log(`[updateProblem] Writing to reports/${id}:`, JSON.stringify(updateData));
       await updateDoc(docRef, updateData);
+      console.log(`[updateProblem] ✓ Firestore write succeeded for ${id}`);
+
+      // Vérifier que l'écriture a bien persisté côté serveur
+      const verifySnap = await getDoc(docRef);
+      if (verifySnap.exists()) {
+        const serverData = verifySnap.data();
+        if (updates.status && serverData.status !== updates.status) {
+          console.error(`[updateProblem] ✗ MISMATCH! Envoyé: ${updates.status}, Serveur: ${serverData.status}`);
+          throw new Error(`Le statut n'a pas été sauvegardé. Vérifiez les règles de sécurité Firestore.`);
+        }
+        console.log(`[updateProblem] ✓ Vérifié côté serveur — status: ${serverData.status}`);
+      }
 
       // Mettre à jour localement
       const index = problems.value.findIndex(p => p.id === id);
@@ -210,8 +224,8 @@ export function useProblems() {
           updatedAt: new Date(),
         };
       }
-    } catch (error) {
-      console.error('Erreur lors de la mise à jour:', error);
+    } catch (error: any) {
+      console.error(`[updateProblem] ✗ Erreur pour ${id}:`, error?.code || error?.message || error);
       throw error;
     }
   };
