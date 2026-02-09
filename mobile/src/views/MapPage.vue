@@ -20,6 +20,11 @@
             <span class="logo-text">IRAY LALANA</span>
           </div>
           <div class="header-actions" v-if="isAuthenticated">
+            <!-- Notifications button -->
+            <button class="notification-btn" @click="$router.push('/notifications')">
+              <ion-icon :icon="notificationsOutline" />
+              <span class="notif-badge" v-if="unreadCount > 0">{{ unreadCount > 9 ? '9+' : unreadCount }}</span>
+            </button>
             <button class="logout-btn" @click="handleLogout">
               <ion-icon :icon="logOutOutline" />
               <span>Logout</span>
@@ -60,6 +65,44 @@
 
       <!-- Main Content Area -->
       <div class="main-content">
+        <!-- Quick Actions - PROMINENT POSITION -->
+        <section class="quick-actions-top">
+          <!-- New Report - Only for authenticated users -->
+          <button v-if="isAuthenticated" class="action-card primary featured" @click="openReportModal">
+            <div class="action-icon pulse">
+              <ion-icon :icon="addCircleOutline" />
+            </div>
+            <div class="action-info">
+              <span class="action-label">New Report</span>
+              <span class="action-desc">Report infrastructure issue</span>
+            </div>
+            <ion-icon :icon="chevronForwardOutline" class="action-arrow" />
+          </button>
+
+          <!-- Login prompt for visitors -->
+          <button v-else class="action-card login-prompt" @click="$router.push('/login')">
+            <div class="action-icon">
+              <ion-icon :icon="personOutline" />
+            </div>
+            <div class="action-info">
+              <span class="action-label">Sign In</span>
+              <span class="action-desc">Login to report issues</span>
+            </div>
+            <ion-icon :icon="chevronForwardOutline" class="action-arrow" />
+          </button>
+
+          <button class="action-card stats-card" @click="$router.push('/tabs/problems')">
+            <div class="action-icon blue">
+              <ion-icon :icon="analyticsOutline" />
+            </div>
+            <div class="action-info">
+              <span class="action-label">Statistics</span>
+              <span class="action-desc">View all reports & data</span>
+            </div>
+            <ion-icon :icon="chevronForwardOutline" class="action-arrow" />
+          </button>
+        </section>
+
         <!-- Map Preview Card -->
         <section class="section-block">
           <div class="section-header">
@@ -136,31 +179,6 @@
               <span>Start by reporting an issue on the map</span>
             </div>
           </div>
-        </section>
-
-        <!-- Quick Actions -->
-        <section class="quick-actions">
-          <button class="action-card primary" @click="openReportModal">
-            <div class="action-icon">
-              <ion-icon :icon="addCircleOutline" />
-            </div>
-            <div class="action-info">
-              <span class="action-label">New Report</span>
-              <span class="action-desc">Report infrastructure issue</span>
-            </div>
-            <ion-icon :icon="chevronForwardOutline" class="action-arrow" />
-          </button>
-
-          <button class="action-card" @click="$router.push('/tabs/problems')">
-            <div class="action-icon blue">
-              <ion-icon :icon="analyticsOutline" />
-            </div>
-            <div class="action-info">
-              <span class="action-label">View Statistics</span>
-              <span class="action-desc">Detailed reports & filters</span>
-            </div>
-            <ion-icon :icon="chevronForwardOutline" class="action-arrow" />
-          </button>
         </section>
       </div>
 
@@ -245,8 +263,14 @@
                 </div>
               </div>
 
+              <!-- Photo Uploader -->
+              <PhotoUploader :max="3" 
+                @update:photos="handlePhotosUpdate" 
+                @uploading="handlePhotoUploading" 
+                @error="handlePhotoError" />
+
               <!-- Submit Button -->
-              <button type="submit" class="submit-btn" :disabled="submitting">
+              <button type="submit" class="submit-btn" :disabled="submitting || photoUploading">
                 <ion-spinner v-if="submitting" name="crescent" />
                 <template v-else>
                   <ion-icon :icon="paperPlaneOutline" />
@@ -260,8 +284,8 @@
 
       <!-- Problem Detail Modal -->
       <ion-modal 
-        :is-open="!!selectedProblem" 
-        @did-dismiss="selectedProblem = null"
+        :is-open="detailModalOpen" 
+        @did-dismiss="closeDetailModal"
         class="detail-modal"
         :initial-breakpoint="0.75"
         :breakpoints="[0, 0.5, 0.75, 1]"
@@ -277,6 +301,16 @@
           <div class="sheet-body">
             <h2 class="detail-title">{{ selectedProblem.title || 'Report Details' }}</h2>
             <p class="detail-description">{{ selectedProblem.description }}</p>
+
+            <!-- Photos -->
+            <div class="detail-photos" v-if="selectedProblem.photos && selectedProblem.photos.length">
+              <h3 class="section-label">PHOTOS</h3>
+              <div class="photo-grid">
+                <a v-for="(p, idx) in selectedProblem.photos" :key="idx" :href="p" target="_blank" rel="noopener noreferrer">
+                  <img :src="p" alt="report photo" />
+                </a>
+              </div>
+            </div>
 
             <div class="detail-grid">
               <div class="detail-cell">
@@ -349,16 +383,21 @@ import {
   timeOutline,
   leafOutline,
   logOutOutline,
+  personOutline,
+  notificationsOutline,
 } from 'ionicons/icons';
 import { useAuth } from '@/services/useAuth';
 import { useProblems } from '@/services/useProblems';
+import { usePushNotifications } from '@/services/usePushNotifications';
 import MapView from '@/components/map/MapView.vue';
+import PhotoUploader from '@/components/problem/PhotoUploader.vue';
 import { TILE_URL } from '@/config';
 import { Problem, ProblemStatus } from '@/types';
 
 const router = useRouter();
 const { isAuthenticated, currentUser, logout } = useAuth();
 const { addProblem, loadProblems, getProblemById, problems, getStatistics } = useProblems();
+const { unreadCount } = usePushNotifications();
 
 const tileUrl = TILE_URL || (import.meta.env.VITE_TILE_URL as string) || 'http://localhost:8080/tiles/{z}/{x}/{y}.png';
 const center = { lat: -18.9145, lng: 47.5281 };
@@ -366,7 +405,10 @@ const center = { lat: -18.9145, lng: 47.5281 };
 const expandMap = ref(false);
 const isReportModalOpen = ref(false);
 const selectedProblem = ref<Problem | null>(null);
+const detailModalOpen = ref(false);
 const submitting = ref(false);
+const uploadedPhotos = ref<string[]>([]);
+const photoUploading = ref(false);
 
 const reportForm = ref({
   title: '',
@@ -484,7 +526,14 @@ const handleMarkerClick = (problemId: string) => {
 };
 
 const showProblemDetail = (problem: Problem) => {
+  console.debug('open detail for', problem?.id);
   selectedProblem.value = problem;
+  detailModalOpen.value = true;
+};
+
+const closeDetailModal = () => {
+  detailModalOpen.value = false;
+  selectedProblem.value = null;
 };
 
 const openReportModal = () => {
@@ -501,14 +550,22 @@ const closeReportModal = () => {
     latitude: center.lat,
     longitude: center.lng,
   };
+  uploadedPhotos.value = [];
 };
 
 const submitReport = async () => {
   if (!currentUser.value) return;
 
+  if (photoUploading.value) {
+    const toast = await toastController.create({ message: 'Please wait for photos to finish uploading', duration: 2000, color: 'warning' });
+    await toast.present();
+    return;
+  }
+
   submitting.value = true;
   try {
-    await addProblem({
+    console.log('[MapPage] Submitting report with photos:', uploadedPhotos.value);
+    const problemData = {
       userId: currentUser.value.uid,
       userName: currentUser.value.displayName || `${currentUser.value.firstName} ${currentUser.value.lastName}`,
       userEmail: currentUser.value.email,
@@ -516,7 +573,15 @@ const submitReport = async () => {
       longitude: reportForm.value.longitude,
       description: reportForm.value.description,
       surface: reportForm.value.surface,
-    });
+      photos: [...uploadedPhotos.value], // Create a copy to ensure it's not mutated
+    };
+    console.log('[MapPage] Problem data to submit:', problemData);
+    
+    await addProblem(problemData);
+    console.log('[MapPage] Report submitted successfully!');
+    
+    // clear uploaded photos on success
+    uploadedPhotos.value = [];
 
     const toast = await toastController.create({
       message: '✓ Report submitted successfully',
@@ -550,6 +615,26 @@ onMounted(async () => {
     console.error('Error loading problems:', error);
   }
 });
+
+const handlePhotosUpdate = (v: string[]) => {
+  uploadedPhotos.value = v;
+  console.log('[MapPage] Photos updated:', v);
+};
+
+const handlePhotoUploading = (isUploading: boolean) => {
+  photoUploading.value = isUploading;
+  console.log('[MapPage] Photo uploading status:', isUploading);
+};
+
+const handlePhotoError = async (errorMessage: string) => {
+  console.error('[MapPage] Photo upload error:', errorMessage);
+  const toast = await toastController.create({
+    message: `Photo error: ${errorMessage}`,
+    duration: 3000,
+    color: 'danger'
+  });
+  await toast.present();
+};
 </script>
 
 <style scoped>
@@ -671,6 +756,60 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+/* Notification button */
+.notification-btn {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.notification-btn ion-icon {
+  font-size: 20px;
+}
+
+.notification-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #fff;
+}
+
+.notification-btn:active {
+  transform: scale(0.95);
+}
+
+.notif-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #ff6b6b 0%, #e82127 100%);
+  border: 2px solid #0a0a0a;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+  animation: badge-pulse 2s ease-in-out infinite;
+}
+
+@keyframes badge-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
 }
 
 .logout-btn {
@@ -1114,17 +1253,24 @@ onMounted(async () => {
 }
 
 /* === QUICK ACTIONS === */
-.quick-actions {
+.quick-actions,
+.quick-actions-top {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  padding-bottom: 20px;
+}
+
+/* Top position quick actions - more prominent */
+.quick-actions-top {
+  margin-bottom: 10px;
 }
 
 .action-card {
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 16px;
+  padding: 18px 16px;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 16px;
@@ -1134,36 +1280,73 @@ onMounted(async () => {
 }
 
 .action-card:active {
-  transform: scale(0.98);
+  transform: scale(0.97);
 }
 
-.action-card.primary {
-  background: linear-gradient(135deg, rgba(232, 33, 39, 0.15) 0%, rgba(232, 33, 39, 0.05) 100%);
-  border-color: rgba(232, 33, 39, 0.2);
+/* Featured primary action (New Report) */
+.action-card.primary.featured {
+  background: linear-gradient(135deg, rgba(232, 33, 39, 0.2) 0%, rgba(232, 33, 39, 0.08) 100%);
+  border: 2px solid rgba(232, 33, 39, 0.4);
+  padding: 20px 18px;
+  box-shadow: 0 4px 20px rgba(232, 33, 39, 0.15);
+}
+
+.action-card.primary.featured .action-label {
+  font-size: 16px;
+}
+
+/* Login prompt for visitors */
+.action-card.login-prompt {
+  background: linear-gradient(135deg, rgba(255, 184, 0, 0.15) 0%, rgba(255, 184, 0, 0.05) 100%);
+  border-color: rgba(255, 184, 0, 0.3);
+}
+
+.action-card.login-prompt .action-icon {
+  background: rgba(255, 184, 0, 0.2);
+}
+
+.action-card.login-prompt .action-icon ion-icon {
+  color: #FFB800;
+}
+
+/* Statistics card */
+.action-card.stats-card {
+  background: linear-gradient(135deg, rgba(0, 119, 181, 0.15) 0%, rgba(0, 119, 181, 0.05) 100%);
+  border-color: rgba(0, 119, 181, 0.25);
 }
 
 .action-icon {
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: rgba(232, 33, 39, 0.15);
-  border-radius: 12px;
+  border-radius: 14px;
   flex-shrink: 0;
 }
 
+/* Pulse animation for the featured button */
+.action-icon.pulse {
+  animation: iconPulse 2s ease-in-out infinite;
+}
+
+@keyframes iconPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+
 .action-icon ion-icon {
-  font-size: 22px;
+  font-size: 24px;
   color: #E82127;
 }
 
 .action-icon.blue {
-  background: rgba(0, 119, 181, 0.15);
+  background: rgba(0, 119, 181, 0.2);
 }
 
 .action-icon.blue ion-icon {
-  color: #0077B5;
+  color: #0AA5FF;
 }
 
 .action-info {
@@ -1172,20 +1355,20 @@ onMounted(async () => {
 
 .action-label {
   display: block;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   color: #FFFFFF;
-  margin-bottom: 2px;
+  margin-bottom: 3px;
 }
 
 .action-desc {
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(255, 255, 255, 0.5);
 }
 
 .action-arrow {
-  font-size: 18px;
-  color: rgba(255, 255, 255, 0.3);
+  font-size: 20px;
+  color: rgba(255, 255, 255, 0.4);
 }
 
 /* === MODALS === */
@@ -1241,8 +1424,10 @@ onMounted(async () => {
 }
 
 .sheet-body {
-  padding: 20px;
+  padding: 16px 20px 30px;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  max-height: calc(100vh - 120px);
 }
 
 /* Location Preview */
@@ -1254,7 +1439,7 @@ onMounted(async () => {
   background: rgba(232, 33, 39, 0.08);
   border: 1px solid rgba(232, 33, 39, 0.15);
   border-radius: 14px;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .location-map-mini {
@@ -1265,6 +1450,7 @@ onMounted(async () => {
   justify-content: center;
   background: rgba(232, 33, 39, 0.15);
   border-radius: 10px;
+  flex-shrink: 0;
 }
 
 .pin-marker ion-icon {
@@ -1274,6 +1460,7 @@ onMounted(async () => {
 
 .location-info {
   flex: 1;
+  min-width: 0;
 }
 
 .location-label {
@@ -1287,9 +1474,10 @@ onMounted(async () => {
 }
 
 .location-coords {
-  font-size: 13px;
+  font-size: 12px;
   color: #FFFFFF;
   font-family: 'SF Mono', monospace;
+  word-break: break-all;
 }
 
 .location-status {
@@ -1300,6 +1488,7 @@ onMounted(async () => {
   font-weight: 600;
   letter-spacing: 1px;
   color: #00B140;
+  flex-shrink: 0;
 }
 
 .pulse-dot {
@@ -1319,28 +1508,28 @@ onMounted(async () => {
 .form-stack {
   display: flex;
   flex-direction: column;
-  gap: 18px;
-  margin-bottom: 24px;
+  gap: 16px;
+  margin-bottom: 20px;
 }
 
 .input-group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .input-group label {
   font-size: 11px;
   font-weight: 600;
-  letter-spacing: 1px;
-  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: 0.5px;
+  color: rgba(255, 255, 255, 0.6);
   text-transform: uppercase;
 }
 
 .input-group input,
 .input-group textarea {
   width: 100%;
-  padding: 14px 16px;
+  padding: 14px 14px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
@@ -1350,6 +1539,8 @@ onMounted(async () => {
   outline: none;
   transition: all 0.3s ease;
   resize: none;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 .input-group input::placeholder,
@@ -1365,7 +1556,7 @@ onMounted(async () => {
 
 .input-row {
   display: flex;
-  gap: 12px;
+  gap: 10px;
 }
 
 .input-row .input-group {
@@ -1373,7 +1564,7 @@ onMounted(async () => {
 }
 
 .input-row .input-group.small {
-  flex: 0 0 100px;
+  flex: 0 0 90px;
 }
 
 /* Submit Button */
@@ -1445,7 +1636,47 @@ onMounted(async () => {
   font-size: 14px;
   line-height: 1.6;
   color: rgba(255, 255, 255, 0.6);
-  margin: 0 0 24px;
+  margin: 0 0 20px;
+}
+
+/* Detail Photos Section */
+.detail-photos {
+  margin-bottom: 20px;
+}
+
+.detail-photos .section-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.photo-grid {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.photo-grid a {
+  width: 85px;
+  height: 85px;
+  display: block;
+  overflow: hidden;
+  border-radius: 10px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  transition: transform 0.2s;
+}
+
+.photo-grid a:active {
+  transform: scale(0.95);
+}
+
+.photo-grid img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .detail-grid {

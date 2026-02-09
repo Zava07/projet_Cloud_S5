@@ -9,6 +9,7 @@ import {
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/config/firebase';
 import { User } from '@/types';
+import { usePushNotifications } from '@/services/usePushNotifications';
 
 // État global de l'authentification
 const currentUser = ref<User | null>(null);
@@ -70,18 +71,74 @@ export function useAuth() {
           createdAt: userData.createdAt?.toDate?.() || new Date(userData.createdAt),
           updatedAt: userData.updatedAt?.toDate?.() || new Date(userData.updatedAt),
         };
+        
+        // Enregistrer pour les notifications push après connexion
+        try {
+          const { registerForPushNotifications, isSupported } = usePushNotifications();
+          if (isSupported()) {
+            await registerForPushNotifications();
+          }
+        } catch (pushError) {
+          console.log('[Auth] Push notification registration skipped:', pushError);
+        }
       } else {
         throw new Error('Données utilisateur introuvables');
       }
     } catch (error: any) {
-      console.error('Erreur lors de la connexion:', error);
-      throw new Error(error.message || 'Email ou mot de passe incorrect');
+      console.error('Erreur lors de la connexion:', error?.code || '', error?.message || error);
+
+      // Mapper les codes d'erreur Firebase vers des messages utilisateurs lisibles (FR)
+      const code = error?.code || error?.message || '';
+      let userMessage = 'Erreur lors de la connexion';
+
+      switch (code) {
+        case 'auth/wrong-password':
+          userMessage = 'Mot de passe incorrect';
+          break;
+        case 'auth/user-not-found':
+          userMessage = 'Aucun compte trouvé pour cet e-mail';
+          break;
+        case 'auth/invalid-email':
+          userMessage = 'Adresse e-mail invalide';
+          break;
+        case 'auth/too-many-requests':
+          userMessage = 'Trop de tentatives. Veuillez réessayer plus tard.';
+          break;
+        case 'auth/invalid-credential':
+          userMessage = 'Informations d\'authentification invalides. Réessayez.';
+          break;
+        case 'auth/network-request-failed':
+          userMessage = 'Problème de réseau. Vérifiez votre connexion.';
+          break;
+        default:
+          // Si le message contient le code natif (ex: "auth/wrong-password"), essayer de détecter
+          if (typeof code === 'string' && code.includes('wrong-password')) {
+            userMessage = 'Mot de passe incorrect';
+          } else if (typeof code === 'string' && code.includes('user-not-found')) {
+            userMessage = 'Aucun compte trouvé pour cet e-mail';
+          } else {
+            // Fallback: utiliser le message renvoyé par Firebase (mais plus lisible)
+            userMessage = (error?.message && typeof error.message === 'string') ? error.message : 'Echec de la connexion';
+          }
+      }
+
+      throw new Error(userMessage);
     }
   };
 
   // Déconnexion
   const logout = async (): Promise<void> => {
     try {
+      // Supprimer le token FCM avant déconnexion
+      try {
+        const { removeFcmToken, isSupported } = usePushNotifications();
+        if (isSupported()) {
+          await removeFcmToken();
+        }
+      } catch (pushError) {
+        console.log('[Auth] FCM token removal skipped:', pushError);
+      }
+      
       await signOut(auth);
       currentUser.value = null;
     } catch (error) {
@@ -109,6 +166,16 @@ export function useAuth() {
               createdAt: userData.createdAt?.toDate?.() || new Date(userData.createdAt),
               updatedAt: userData.updatedAt?.toDate?.() || new Date(userData.updatedAt),
             };
+            
+            // Enregistrer pour les notifications push (re-registration on app start)
+            try {
+              const { registerForPushNotifications, isSupported } = usePushNotifications();
+              if (isSupported()) {
+                await registerForPushNotifications();
+              }
+            } catch (pushError) {
+              console.log('[Auth] Push notification registration skipped:', pushError);
+            }
           }
         } catch (error) {
           console.error('Erreur lors de la récupération des données utilisateur:', error);

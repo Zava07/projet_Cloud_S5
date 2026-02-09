@@ -29,6 +29,26 @@
           <p class="report-description">{{ problem.description }}</p>
         </section>
 
+        <!-- Photos -->
+        <section class="photos-section" v-if="problem.photos && problem.photos.length">
+          <h2 class="section-label">PHOTOS ({{ problem.photos.length }})</h2>
+          <div class="photo-gallery">
+            <a 
+              v-for="(p, idx) in problem.photos" 
+              :key="idx" 
+              :href="p" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              class="photo-item"
+            >
+              <img :src="p" alt="report photo" loading="lazy" />
+              <div class="photo-overlay">
+                <ion-icon :icon="expandOutline" />
+              </div>
+            </a>
+          </div>
+        </section>
+
         <!-- Info Cards -->
         <section class="info-section">
           <h2 class="section-label">INFORMATION</h2>
@@ -222,16 +242,19 @@ import {
   alertCircleOutline,
   chevronBackOutline,
   chevronDownOutline,
+  expandOutline,
 } from 'ionicons/icons';
 import { useAuth } from '@/services/useAuth';
 import { useProblems } from '@/services/useProblems';
+import { usePushNotifications } from '@/services/usePushNotifications';
 import { Problem, ProblemStatus } from '@/types';
-import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs, query, orderBy, doc, getDoc } from 'firebase/firestore';
 import { db } from '@/config/firebase';
 
 const route = useRoute();
 const { isManager } = useAuth();
 const { getProblemById, updateProblem } = useProblems();
+const { suppressNotificationFor } = usePushNotifications();
 
 const problem = ref<Problem | null>(null);
 
@@ -284,6 +307,35 @@ onMounted(async () => {
   const foundProblem = getProblemById(problemId);
   if (foundProblem) {
     problem.value = foundProblem;
+  } else {
+    // Fallback: fetch single document from Firestore if not present in local cache
+    try {
+      const docRef = doc(db, 'reports', problemId);
+      const snap = await getDoc(docRef);
+      if (snap.exists()) {
+        const data: any = snap.data();
+        problem.value = {
+          id: snap.id,
+          userId: data.userId,
+          userName: data.userName,
+          userEmail: data.userEmail,
+          latitude: data.latitude,
+          longitude: data.longitude,
+          description: data.description,
+          status: data.status as ProblemStatus,
+          surface: data.surface,
+          budget: data.budget ?? null,
+          entreprise: data.entreprise ?? null,
+          photos: data.photos || [],
+          createdAt: data.createdAt?.toDate?.() || new Date(data.createdAt),
+          updatedAt: data.updatedAt?.toDate?.() || new Date(data.updatedAt),
+        } as Problem;
+      } else {
+        console.warn('Report not found in Firestore:', problemId);
+      }
+    } catch (err) {
+      console.error('Failed to fetch report from Firestore:', err);
+    }
   }
 
   await loadCompanies();
@@ -327,12 +379,19 @@ const showToast = async (message: string, color: string = 'success') => {
 const updateStatus = async (newStatus: ProblemStatus) => {
   if (!problem.value) return;
   
+  // Empêcher la self-notification (le listener onSnapshot ignorerait ce changement)
+  suppressNotificationFor(problem.value.id);
+  
   try {
     await updateProblem(problem.value.id, { status: newStatus });
     problem.value.status = newStatus;
-    await showToast('Status updated');
-  } catch (error) {
-    await showToast('Update failed', 'danger');
+    await showToast('Statut mis à jour ✓');
+  } catch (error: any) {
+    console.error('[updateStatus] Error:', error);
+    await showToast(
+      error?.message || 'Échec de la mise à jour. Vérifiez vos permissions.',
+      'danger'
+    );
   }
 };
 
@@ -833,8 +892,89 @@ const updateEntreprise = async (value: string | number | null | undefined) => {
   transform: translateY(-2px);
 }
 
+/* Photos Section */
+.photos-section {
+  margin-bottom: 24px;
+}
+
+.photo-gallery {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.photo-item {
+  position: relative;
+  width: calc(50% - 5px);
+  max-width: 150px;
+  aspect-ratio: 1;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  display: block;
+}
+
+.photo-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.photo-item:hover img {
+  transform: scale(1.05);
+}
+
+.photo-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.photo-item:hover .photo-overlay {
+  opacity: 1;
+}
+
+.photo-overlay ion-icon {
+  font-size: 28px;
+  color: #fff;
+}
+
+/* Legacy support */
+.photo-grid { 
+  display: flex; 
+  gap: 10px; 
+  flex-wrap: wrap; 
+  margin-top: 10px; 
+}
+.photo-grid a { 
+  width: calc(50% - 5px);
+  max-width: 120px;
+  aspect-ratio: 1; 
+  display: block; 
+  overflow: hidden; 
+  border-radius: 10px; 
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
+.photo-grid img { 
+  width: 100%; 
+  height: 100%; 
+  object-fit: cover; 
+}
+
 /* === Responsive === */
 @media (max-width: 380px) {
+  .photo-item {
+    width: calc(50% - 5px);
+    max-width: 120px;
+  }
+  
   .report-title {
     font-size: 20px;
   }
