@@ -78,8 +78,8 @@
               <span class="demo-label">DEMO ACCOUNT</span>
             </div>
             <div class="demo-credentials">
-              <code>manager@Outlook.com</code>
-              <code>Admin123!</code>
+              <code>natiorajr@gmail.com</code>
+              <code>natiora</code>
             </div>
           </div>
 
