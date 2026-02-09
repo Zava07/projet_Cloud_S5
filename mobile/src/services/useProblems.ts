@@ -43,6 +43,16 @@ const parseBudgetValue = (value: any): number | null => {
   return null;
 };
 
+// Extraire les URLs des photos (gère les objets {url: string} et les strings directes)
+const extractPhotoUrls = (photos: any[]): string[] => {
+  if (!photos || !Array.isArray(photos)) return [];
+  return photos.map(p => {
+    if (typeof p === 'string') return p;
+    if (p && typeof p === 'object' && p.url) return p.url;
+    return null;
+  }).filter((url): url is string => !!url);
+};
+
 // Convertir les données Firestore en Problem
 const convertFirestoreData = (id: string, data: DocumentData): Problem => {
   return {
@@ -56,7 +66,9 @@ const convertFirestoreData = (id: string, data: DocumentData): Problem => {
     status: data.status as ProblemStatus,
     surface: data.surface,
     budget: parseBudgetValue(data.budget),
-    entreprise: data.entreprise,    photos: data.photos || [],    createdAt: data.createdAt?.toDate?.() || new Date(data.createdAt),
+    entreprise: data.entreprise,
+    photos: extractPhotoUrls(data.photos),
+    createdAt: data.createdAt?.toDate?.() || new Date(data.createdAt),
     updatedAt: data.updatedAt?.toDate?.() || new Date(data.updatedAt),
     // UI helpers
     title: data.description.substring(0, 50),

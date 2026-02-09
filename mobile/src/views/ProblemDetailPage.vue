@@ -314,6 +314,11 @@ onMounted(async () => {
       const snap = await getDoc(docRef);
       if (snap.exists()) {
         const data: any = snap.data();
+        // Extract photo URLs (handle both object {url: string} and direct string formats)
+        const extractPhotos = (photos: any[]): string[] => {
+          if (!photos || !Array.isArray(photos)) return [];
+          return photos.map(p => typeof p === 'string' ? p : p?.url).filter(Boolean);
+        };
         problem.value = {
           id: snap.id,
           userId: data.userId,
@@ -326,7 +331,7 @@ onMounted(async () => {
           surface: data.surface,
           budget: data.budget ?? null,
           entreprise: data.entreprise ?? null,
-          photos: data.photos || [],
+          photos: extractPhotos(data.photos),
           createdAt: data.createdAt?.toDate?.() || new Date(data.createdAt),
           updatedAt: data.updatedAt?.toDate?.() || new Date(data.updatedAt),
         } as Problem;
