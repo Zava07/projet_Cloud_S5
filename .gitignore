@@ -19,3 +19,9 @@
 # OS files
 .DS_Store
 Thumbs.db
+
+# Firebase credentials - NE JAMAIS COMMITER
+**/firebase-service-account.json
+**/*firebase-adminsdk*.json
+**/serviceAccountKey.json
+**/*-firebase-*.json
