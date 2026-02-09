@@ -112,6 +112,17 @@
 - [ ] Notifier nouveau signalement (Manager)
 - [ ] Notifier changement statut (Utilisateur)
 
+## ✅ Checklist réalisée — Upload & Notifications
+-- Ajout des variables **Cloudinary** dans `.env` (`VITE_CLOUDINARY_CLOUD_NAME`, `VITE_CLOUDINARY_UPLOAD_PRESET`)
+-- Implémentation du service **Cloudinary** : `src/services/cloudinary.ts` (compression, upload, logs, gestion d'erreurs)
+-- Composant **PhotoUploader.vue** : capture (Camera), conversion base64→File, prévisualisation, upload automatique, gestion d'état (uploading), retry et toasts d'erreur
+-- Intégration dans **MapPage.vue** : réception des URLs émises, protection du submit pendant l'upload, envoi des `photos` à Firestore via `addProblem`
+-- Sauvegarde et lecture robustes : `useProblems.ts` → `extractPhotoUrls()` (gère `{url}` et `string`), correction du fallback dans `ProblemDetailPage.vue`
+-- UI : galerie / vignettes (lazy loading) dans `ProblemDetailPage.vue` & `ProblemsListPage.vue`
+-- Notifications : `usePushNotifications.ts` (gestion des tokens, sauvegarde, suppression/self-suppression), `NotificationsPage.vue` (UI)
+-- Tests manuels effectués : vérification directe d'une URL Cloudinary (OK), inspection Firestore (cas `{url}` détectés) et correctifs appliqués
+-- Actions recommandées : migration/normalisation des anciens `photos` (objet `{url}` → string), tests E2E pour upload + notifications, monitoring/alerting sur erreurs d'upload
+
 ## 🎨 Améliorations UI/UX
 
 ### 10. Composants manquants
