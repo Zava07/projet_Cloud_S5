@@ -19,3 +19,7 @@
 # OS files
 .DS_Store
 Thumbs.db
+
+# Firebase credentials
+**/firebase-service-account.json
+**/*firebase-adminsdk*.json
