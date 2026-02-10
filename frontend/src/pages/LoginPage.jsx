@@ -148,10 +148,22 @@ export default function LoginPage({ onLogin, onBack, onSignup, onGuest }) {
       if (data && data.user && data.session) {
         const u = data.user;
         const s = data.session;
-        if (onLogin) onLogin({ id: u.id, email: u.email, token: s.token, role: u.role  });
+        // Calculer expiresAt côté client pour éviter les problèmes de fuseau horaire
+        const durationMs = (data.sessionDurationMinutes || 60) * 60 * 1000;
+        const expiresAt = new Date(Date.now() + durationMs).toISOString();
+        // Passer les données utilisateur et session (avec expiresAt pour la gestion d'expiration)
+        if (onLogin) onLogin(
+          { id: u.id, email: u.email, token: s.token, role: u.role },
+          { expiresAt: expiresAt, sessionDurationMinutes: data.sessionDurationMinutes }
+        );
       } else {
         const session = data;
-        if (onLogin) onLogin({ email: form.email, token: session.token });
+        // Fallback: utiliser 60 minutes par défaut
+        const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+        if (onLogin) onLogin(
+          { email: form.email, token: session.token },
+          { expiresAt: expiresAt }
+        );
       }
     } catch (err) {
       console.error('Login error', err);

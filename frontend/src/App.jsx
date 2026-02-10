@@ -1,8 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import './styles/modern.css';
 
 // Components
 import Navigation from './components/Navigation';
+import SessionExpirationModal from './components/SessionExpirationModal';
+
+// Services
+import { 
+  saveSession, 
+  getSession, 
+  clearSession, 
+  isSessionExpired, 
+  refreshSession,
+  logout as logoutService,
+  SessionMonitor,
+  getTimeUntilExpiration,
+  getSessionConfig
+} from './services/sessionService';
 
 // Pages
 import UserListPage from './pages/UserListPage.jsx';
@@ -25,6 +39,15 @@ export default function App() {
 
   // Auth state
   const [authUser, setAuthUser] = useState(null);
+
+  // Session expiration modal state
+  const [showSessionModal, setShowSessionModal] = useState(false);
+  const [sessionExpired, setSessionExpired] = useState(false);
+  const [minutesUntilExpiration, setMinutesUntilExpiration] = useState(0);
+  const [refreshingSession, setRefreshingSession] = useState(false);
+
+  // Session monitor ref
+  const sessionMonitorRef = useRef(null);
 
   // Users data (loaded from backend)
   const [users, setUsers] = useState([]);
@@ -64,6 +87,91 @@ export default function App() {
 
   useEffect(() => {
     fetchUsers();
+  }, []);
+
+  // Restaurer la session au chargement de l'application
+  useEffect(() => {
+    const savedSession = getSession();
+    if (savedSession && !isSessionExpired()) {
+      // Session valide trouvée, restaurer l'utilisateur
+      setAuthUser({
+        id: savedSession.userId,
+        email: savedSession.email,
+        token: savedSession.token,
+        role: savedSession.role
+      });
+      navigateToMap();
+    }
+  }, []);
+
+  // Gérer le session monitor
+  useEffect(() => {
+    if (authUser && authUser.token && !authUser.guest) {
+      // Récupérer la config de session depuis le serveur et démarrer le monitoring
+      const initSessionMonitor = async () => {
+        let warningThreshold = 5; // Valeur par défaut
+        try {
+          const config = await getSessionConfig();
+          warningThreshold = config.warningThresholdMinutes || 5;
+          console.log('Config session chargée:', config);
+        } catch (e) {
+          console.warn('Impossible de charger la config session, utilisation des valeurs par défaut');
+        }
+
+        sessionMonitorRef.current = new SessionMonitor({
+          checkInterval: 15000, // Vérifier toutes les 15 secondes pour plus de réactivité
+          warningThresholdMinutes: warningThreshold,
+          onSessionExpired: (reason) => {
+            console.log('Session expirée:', reason);
+            setSessionExpired(true);
+            setShowSessionModal(true);
+          },
+          onSessionNearExpiration: (minutesLeft) => {
+            console.log('Session expire bientôt:', minutesLeft, 'minutes');
+            setMinutesUntilExpiration(minutesLeft);
+            setSessionExpired(false);
+            setShowSessionModal(true);
+          },
+          onSessionValid: () => {
+            // Session toujours valide, rien à faire
+          }
+        });
+        sessionMonitorRef.current.start();
+      };
+
+      initSessionMonitor();
+
+      return () => {
+        if (sessionMonitorRef.current) {
+          sessionMonitorRef.current.stop();
+        }
+      };
+    }
+  }, [authUser]);
+
+  // Gérer l'extension de session
+  const handleExtendSession = useCallback(async () => {
+    setRefreshingSession(true);
+    try {
+      const result = await refreshSession();
+      if (result.success) {
+        setShowSessionModal(false);
+        setSessionExpired(false);
+        if (sessionMonitorRef.current) {
+          sessionMonitorRef.current.resetWarning();
+        }
+        // Notification de succès
+        console.log('Session prolongée avec succès');
+      } else {
+        // Échec du rafraîchissement, forcer la reconnexion
+        setSessionExpired(true);
+      }
+    } catch (error) {
+      console.error('Erreur extension session:', error);
+      setSessionExpired(true);
+    } finally {
+      setRefreshingSession(false);
+    }
   }, []);
 
   // Navigation functions
@@ -182,7 +290,7 @@ export default function App() {
 
 
 
-  const handleLogin = async (user) => {
+  const handleLogin = async (user, sessionData) => {
     // attach role info based on loaded users (if available)
     let found = users.find((u) => u.email === user.email);
     if (!found) {
@@ -193,6 +301,18 @@ export default function App() {
     const role = user.role || (found ? found.role : 'USER');
     const id = user.id ?? (found ? found.id : null);
     const auth = { id, email: user.email, token: user.token, role };
+    
+    // Sauvegarder la session avec expiresAt pour la gestion de l'expiration
+    if (sessionData && sessionData.expiresAt) {
+      saveSession({
+        userId: id,
+        email: user.email,
+        token: user.token,
+        role: role,
+        expiresAt: sessionData.expiresAt
+      });
+    }
+    
     setAuthUser(auth);
     console.log('authUser after login:', auth);
     alert(`Connecté en tant que ${user.email}`);
@@ -243,8 +363,20 @@ export default function App() {
     navigateToMap();
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    // Arrêter le monitoring de session
+    if (sessionMonitorRef.current) {
+      sessionMonitorRef.current.stop();
+    }
+    
+    // Nettoyer la session côté serveur et local
+    await logoutService();
+    
+    // Réinitialiser les états
     setAuthUser(null);
+    setShowSessionModal(false);
+    setSessionExpired(false);
+    
     navigateToLogin();
   }; 
 
@@ -467,6 +599,16 @@ export default function App() {
 
   return (
     <div className="app">
+      {/* Modale d'expiration de session */}
+      <SessionExpirationModal
+        isOpen={showSessionModal}
+        minutesLeft={minutesUntilExpiration}
+        isExpired={sessionExpired}
+        onExtend={handleExtendSession}
+        onLogout={handleLogout}
+        loading={refreshingSession}
+      />
+
       {/* Sidebar Navigation - only show if user is authenticated */}
       {authUser && (
         <Navigation

@@ -1,5 +1,6 @@
 /app/src/main/java/com/itu/cloud/CloudApplication.java
 /app/src/main/java/com/itu/cloud/config/OpenApiConfig.java
+/app/src/main/java/com/itu/cloud/config/SessionConfig.java
 /app/src/main/java/com/itu/cloud/controller/ConfigEntryController.java
 /app/src/main/java/com/itu/cloud/controller/EntrepriseController.java
 /app/src/main/java/com/itu/cloud/controller/ReportController.java

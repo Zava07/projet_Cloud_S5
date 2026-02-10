@@ -34,6 +34,9 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
+    @Column(name = "username", nullable = false)
+    private String username;
+
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
@@ -101,6 +104,14 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getPasswordHash() {
@@ -223,6 +234,14 @@ public class User {
         }
         if (verified == null) {
             verified = Boolean.FALSE;
+        }
+        // Auto-générer username si absent
+        if (username == null || username.isBlank()) {
+            if (firstName != null && lastName != null) {
+                username = (firstName + "." + lastName).toLowerCase().replaceAll("\\s+", "");
+            } else if (email != null) {
+                username = email.split("@")[0];
+            }
         }
     }
 

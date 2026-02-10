@@ -62,7 +62,7 @@ CREATE TABLE sync_log (
 );
 
 -- 6. TABLE CONFIG
-CREATE TABLE config (
+CREATE TABLE config (           
     id SERIAL PRIMARY KEY,
     key VARCHAR(100) UNIQUE NOT NULL,
     value TEXT NOT NULL,
