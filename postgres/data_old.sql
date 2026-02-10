@@ -113,6 +113,18 @@ SELECT setval(pg_get_serial_sequence('entreprises','id'), (SELECT MAX(id) FROM e
 
 -- REPORTS (signalements)
 -- Antananarivo (capital)
+INSERT INTO reports (id, firebase_id, user_id, latitude, longitude, description, status, surface, budget, entreprise_id, created_at, updated_at, synced_at , niveau)
+VALUES
+  (1, 'fb_report_1', 1, -18.87919000, 47.50790500, 'Affaissement du trottoir près du marché', 'nouveau', 2.50, 150.00, 1, now(), now(), NULL, 1),
+  (2, 'fb_report_2', 2, -18.91487400, 47.53160800, 'Poteau électrique tombé', 'en_cours', 0.00, 300.00, 1, now() - interval '2 day', now() - interval '1 day', NULL, 5),
+  -- Toamasina (east coast)
+  (3, 'fb_report_3', 1, -18.14920000, 49.40230000, 'Inondation sur la route principale après la pluie', 'nouveau', 50.00, 1200.00, 2, now() - interval '7 day', now() - interval '6 day', NULL, 7),
+  -- Nosy Be (north)
+  (4, 'fb_report_4', 3, -13.33330000, 48.28330000, 'Érosion du littoral près du port', 'termine', 100.00, 5000.00, NULL, now() - interval '30 day', now() - interval '29 day', now() - interval '28 day', 10),
+  -- Fianarantsoa (south-center)
+  (5, 'fb_report_5', 2, -21.45250000, 47.08500000, 'Affaissement partiel d''un pont rural', 'en_cours', 10.00, 800.00, NULL, now() - interval '3 day', now() - interval '1 day', NULL, 3),
+  -- Toliara (southwest)
+  (6, 'fb_report_6', 1, -23.35000000, 43.66700000, 'Fissures importantes sur la chaussée', 'nouveau', 25.00, 600.00, NULL, now() - interval '1 day', now(), NULL, 1);
 
 SELECT setval(pg_get_serial_sequence('reports','id'), (SELECT MAX(id) FROM reports));
 
