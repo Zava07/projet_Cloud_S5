@@ -368,17 +368,53 @@ public class FirebaseSyncService {
     // ==========================================
 
     private void syncPhotosFromFirebase(Report report, QueryDocumentSnapshot doc) {
-        // Récupérer le tableau photos du document Firebase
-        Object photosObj = doc.get("photos");
+        System.out.println("[PhotoSync] Début synchronisation photos pour report firebaseId=" + doc.getId());
+        
+        // Essayer plusieurs noms de champs possibles pour les photos
+        String[] possibleFieldNames = {"photos", "photoUrls", "photoUrl", "imageUrls", "imageUrl", "images"};
+        Object photosObj = null;
+        String foundField = null;
+        
+        for (String fieldName : possibleFieldNames) {
+            Object obj = doc.get(fieldName);
+            if (obj != null) {
+                photosObj = obj;
+                foundField = fieldName;
+                System.out.println("[PhotoSync] Champ trouvé: " + fieldName + " = " + obj);
+                break;
+            }
+        }
+        
         if (photosObj == null) {
+            System.out.println("[PhotoSync] Aucun champ photos trouvé dans le document Firebase. Champs disponibles: " + doc.getData().keySet());
             return;
         }
 
-        if (!(photosObj instanceof List)) {
+        List<?> photosList = null;
+        
+        // Gérer le cas où c'est une liste
+        if (photosObj instanceof List) {
+            photosList = (List<?>) photosObj;
+        }
+        // Gérer le cas où c'est une seule URL string
+        else if (photosObj instanceof String) {
+            String singleUrl = (String) photosObj;
+            if (!singleUrl.isEmpty()) {
+                photosList = Collections.singletonList(singleUrl);
+            }
+        }
+        // Gérer le cas où c'est un objet Map (une seule photo)
+        else if (photosObj instanceof Map) {
+            photosList = Collections.singletonList(photosObj);
+        }
+        
+        if (photosList == null || photosList.isEmpty()) {
+            System.out.println("[PhotoSync] Liste de photos vide ou format non reconnu: " + photosObj.getClass().getName());
             return;
         }
 
-        List<?> photosList = (List<?>) photosObj;
+        System.out.println("[PhotoSync] Nombre de photos à synchroniser: " + photosList.size());
+        int syncedCount = 0;
 
         for (Object item : photosList) {
             String photoUrl = null;
@@ -391,35 +427,62 @@ public class FirebaseSyncService {
             // Cas 2: L'item est un Map (objet avec url/photoUrl et description)
             else if (item instanceof Map) {
                 Map<String, Object> photoData = (Map<String, Object>) item;
-                photoUrl = (String) photoData.get("url");
-                if (photoUrl == null) {
-                    photoUrl = (String) photoData.get("photoUrl");
+                // Essayer plusieurs clés possibles pour l'URL
+                String[] urlKeys = {"url", "photoUrl", "photoURL", "imageUrl", "imageURL", "src", "uri"};
+                for (String key : urlKeys) {
+                    Object urlObj = photoData.get(key);
+                    if (urlObj instanceof String && !((String) urlObj).isEmpty()) {
+                        photoUrl = (String) urlObj;
+                        break;
+                    }
                 }
-                description = (String) photoData.get("description");
+                // Récupérer la description
+                Object descObj = photoData.get("description");
+                if (descObj instanceof String) {
+                    description = (String) descObj;
+                }
+                
+                if (photoUrl == null) {
+                    System.out.println("[PhotoSync] Clés disponibles dans l'objet photo: " + photoData.keySet());
+                }
+            } else {
+                System.out.println("[PhotoSync] Format de photo non reconnu: " + (item != null ? item.getClass().getName() : "null"));
             }
 
             if (photoUrl == null || photoUrl.isEmpty()) {
+                System.out.println("[PhotoSync] URL de photo vide ou null, ignorée");
                 continue;
             }
+
+            System.out.println("[PhotoSync] Traitement de la photo URL: " + photoUrl);
 
             // Vérifier si cette photo existe déjà
             boolean exists = photoReportRepository.findByPhotoUrl(photoUrl).isPresent();
             if (exists) {
+                System.out.println("[PhotoSync] Photo déjà existante, ignorée: " + photoUrl);
                 continue; // Photo déjà synchronisée
             }
 
             // Créer nouvelle photo
-            PhotoReport photo = new PhotoReport();
-            photo.setReport(report);
-            photo.setPhotoUrl(photoUrl);
-            
-            if (description != null) {
-                photo.setDescription(description);
-            }
+            try {
+                PhotoReport photo = new PhotoReport();
+                photo.setReport(report);
+                photo.setPhotoUrl(photoUrl);
+                
+                if (description != null) {
+                    photo.setDescription(description);
+                }
 
-            photo.setUploadedAt(LocalDateTime.now());
-            photoReportRepository.save(photo);
+                photo.setUploadedAt(LocalDateTime.now());
+                photoReportRepository.save(photo);
+                syncedCount++;
+                System.out.println("[PhotoSync] Photo sauvegardée avec succès: " + photoUrl);
+            } catch (Exception e) {
+                System.err.println("[PhotoSync] Erreur lors de la sauvegarde de la photo: " + photoUrl + " - " + e.getMessage());
+            }
         }
+        
+        System.out.println("[PhotoSync] Synchronisation terminée. Photos synchronisées: " + syncedCount + "/" + photosList.size());
     }
 
     // ==========================================
