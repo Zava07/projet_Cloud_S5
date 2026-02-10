@@ -1,6 +1,8 @@
 package com.itu.cloud.controller;
 
 import com.itu.cloud.entity.SyncLog;
+import com.itu.cloud.dto.SyncLogDTO;
+import com.itu.cloud.mapper.EntityToDtoMapper;
 import com.itu.cloud.entity.User;
 import com.itu.cloud.service.FirebaseSyncService;
 import com.itu.cloud.service.SyncLogService;
@@ -116,8 +118,12 @@ public class SyncController {
      * Historique des synchronisations
      */
     @GetMapping("/logs")
-    public ResponseEntity<List<SyncLog>> getSyncLogs() {
-        return ResponseEntity.ok(syncLogService.findAll());
+    public ResponseEntity<List<SyncLogDTO>> getSyncLogs() {
+        List<SyncLog> logs = syncLogService.findAll();
+        List<SyncLogDTO> dtoList = logs.stream()
+                .map(EntityToDtoMapper::toSyncLogDTO)
+                .collect(java.util.stream.Collectors.toList());
+        return ResponseEntity.ok(dtoList);
     }
 
     /**

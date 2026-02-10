@@ -31,3 +31,7 @@
 
 ---
 Si vous voulez, j'adapte le Dockerfile `backend` pour Gradle, ou j'ajoute un `docker-compose.override.yml` pour le développement front/back (live reload). 🔧
+
+
+Entrer dans la base :
+   docker compose exec db psql -U postgres -d cloud_db

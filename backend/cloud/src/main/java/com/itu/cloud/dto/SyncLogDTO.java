@@ -4,8 +4,13 @@ import java.time.LocalDateTime;
 
 public class SyncLogDTO {
     private Long id;
-    private String action;
-    private LocalDateTime createdAt;
+    private String syncType;
+    private LocalDateTime syncedAt;
+    private Integer recordsPulled;
+    private Integer recordsPushed;
+    private Integer conflicts;
+    private String status;
+    private String errorMessage;
     private Long syncedByUserId;
 
     public SyncLogDTO() {
@@ -19,20 +24,60 @@ public class SyncLogDTO {
         this.id = id;
     }
 
-    public String getAction() {
-        return action;
+    public String getSyncType() {
+        return syncType;
     }
 
-    public void setAction(String action) {
-        this.action = action;
+    public void setSyncType(String syncType) {
+        this.syncType = syncType;
     }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
+    public LocalDateTime getSyncedAt() {
+        return syncedAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
+    public void setSyncedAt(LocalDateTime syncedAt) {
+        this.syncedAt = syncedAt;
+    }
+
+    public Integer getRecordsPulled() {
+        return recordsPulled;
+    }
+
+    public void setRecordsPulled(Integer recordsPulled) {
+        this.recordsPulled = recordsPulled;
+    }
+
+    public Integer getRecordsPushed() {
+        return recordsPushed;
+    }
+
+    public void setRecordsPushed(Integer recordsPushed) {
+        this.recordsPushed = recordsPushed;
+    }
+
+    public Integer getConflicts() {
+        return conflicts;
+    }
+
+    public void setConflicts(Integer conflicts) {
+        this.conflicts = conflicts;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
     }
 
     public Long getSyncedByUserId() {

@@ -93,13 +93,11 @@ CREATE TABLE config (
 INSERT INTO users (id, firebase_uid, email, password_hash, first_name, last_name, role, login_attempts, is_blocked, created_at, updated_at)
 VALUES
   (1, 'fb_uid_user_1', 'alice@example.com', 'hash_alice', 'Alice', 'Rakoto', 'utilisateur', 0, false, now(), now()),
-  (2, 'fb_uid_user_2', 'bob@example.com', 'hash_bob', 'Bob', 'Rabe', 'manager', 0, false, now(), now()),
+  (2, 'fb_uid_user_2', 'admin@gmail.com', 'admin', 'admin', 'admin', 'manager', 0, false, now(), now()),
   (3, 'fb_uid_user_3', 'charlie@example.com', 'hash_charlie', 'Charlie', 'Ranaivo', 'visiteur', 0, false, now(), now());
 
 
-INSERT INTO users (firebase_uid, email, password_hash, first_name, last_name, role, login_attempts, is_blocked, created_at, updated_at)
-VALUES
-  ('fb_uid_user_4', 'admin@gmail.com', 'admin', 'admin', 'admin', 'manager', 0, false, now(), now());
+
 
 -- Ensure sequence is advanced (if using serial sequences)
 SELECT setval(pg_get_serial_sequence('users','id'), (SELECT MAX(id) FROM users));
