@@ -12,7 +12,8 @@ public class ReportSummaryDTO {
     private String status;
     private LocalDateTime createdAt;
     private EntrepriseSummaryDTO entreprise;
-
+    private Integer niveau;
+    
     public ReportSummaryDTO() {}
 
     public Long getId() { return id; }
@@ -38,4 +39,7 @@ public class ReportSummaryDTO {
 
     public EntrepriseSummaryDTO getEntreprise() { return entreprise; }
     public void setEntreprise(EntrepriseSummaryDTO entreprise) { this.entreprise = entreprise; }
+
+    public Integer getNiveau() { return niveau; }
+    public void setNiveau(Integer niveau) { this.niveau = niveau; }
 }

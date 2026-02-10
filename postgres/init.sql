@@ -42,6 +42,7 @@ CREATE TABLE reports (
     status VARCHAR(20) DEFAULT 'nouveau' CHECK (status IN ('nouveau', 'en_cours', 'termine')),
     surface DECIMAL(10, 2),
     budget DECIMAL(15, 2),
+    niveau INTEGER,
     entreprise_id INTEGER REFERENCES entreprises(id),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -93,13 +94,11 @@ CREATE TABLE config (
 INSERT INTO users (id, firebase_uid, email, password_hash, first_name, last_name, role, login_attempts, is_blocked, created_at, updated_at)
 VALUES
   (1, 'fb_uid_user_1', 'alice@example.com', 'hash_alice', 'Alice', 'Rakoto', 'utilisateur', 0, false, now(), now()),
-  (2, 'fb_uid_user_2', 'bob@example.com', 'hash_bob', 'Bob', 'Rabe', 'manager', 0, false, now(), now()),
+  (2, 'fb_uid_user_2', 'admin@gmail.com', 'admin', 'admin', 'admin', 'manager', 0, false, now(), now()),
   (3, 'fb_uid_user_3', 'charlie@example.com', 'hash_charlie', 'Charlie', 'Ranaivo', 'visiteur', 0, false, now(), now());
 
 
-INSERT INTO users (firebase_uid, email, password_hash, first_name, last_name, role, login_attempts, is_blocked, created_at, updated_at)
-VALUES
-  ('fb_uid_user_4', 'admin@gmail.com', 'admin', 'admin', 'admin', 'manager', 0, false, now(), now());
+
 
 -- Ensure sequence is advanced (if using serial sequences)
 SELECT setval(pg_get_serial_sequence('users','id'), (SELECT MAX(id) FROM users));
@@ -114,18 +113,18 @@ SELECT setval(pg_get_serial_sequence('entreprises','id'), (SELECT MAX(id) FROM e
 
 -- REPORTS (signalements)
 -- Antananarivo (capital)
-INSERT INTO reports (id, firebase_id, user_id, latitude, longitude, description, status, surface, budget, entreprise_id, created_at, updated_at, synced_at)
+INSERT INTO reports (id, firebase_id, user_id, latitude, longitude, description, status, surface, budget, entreprise_id, created_at, updated_at, synced_at , niveau)
 VALUES
-  (1, 'fb_report_1', 1, -18.87919000, 47.50790500, 'Affaissement du trottoir près du marché', 'nouveau', 2.50, 150.00, 1, now(), now(), NULL),
-  (2, 'fb_report_2', 2, -18.91487400, 47.53160800, 'Poteau électrique tombé', 'en_cours', 0.00, 300.00, 1, now() - interval '2 day', now() - interval '1 day', NULL),
+  (1, 'fb_report_1', 1, -18.87919000, 47.50790500, 'Affaissement du trottoir près du marché', 'nouveau', 2.50, 150.00, 1, now(), now(), NULL, 1),
+  (2, 'fb_report_2', 2, -18.91487400, 47.53160800, 'Poteau électrique tombé', 'en_cours', 0.00, 300.00, 1, now() - interval '2 day', now() - interval '1 day', NULL, 5),
   -- Toamasina (east coast)
-  (3, 'fb_report_3', 1, -18.14920000, 49.40230000, 'Inondation sur la route principale après la pluie', 'nouveau', 50.00, 1200.00, 2, now() - interval '7 day', now() - interval '6 day', NULL),
+  (3, 'fb_report_3', 1, -18.14920000, 49.40230000, 'Inondation sur la route principale après la pluie', 'nouveau', 50.00, 1200.00, 2, now() - interval '7 day', now() - interval '6 day', NULL, 7),
   -- Nosy Be (north)
-  (4, 'fb_report_4', 3, -13.33330000, 48.28330000, 'Érosion du littoral près du port', 'termine', 100.00, 5000.00, NULL, now() - interval '30 day', now() - interval '29 day', now() - interval '28 day'),
+  (4, 'fb_report_4', 3, -13.33330000, 48.28330000, 'Érosion du littoral près du port', 'termine', 100.00, 5000.00, NULL, now() - interval '30 day', now() - interval '29 day', now() - interval '28 day', 10),
   -- Fianarantsoa (south-center)
-  (5, 'fb_report_5', 2, -21.45250000, 47.08500000, 'Affaissement partiel d''un pont rural', 'en_cours', 10.00, 800.00, NULL, now() - interval '3 day', now() - interval '1 day', NULL),
+  (5, 'fb_report_5', 2, -21.45250000, 47.08500000, 'Affaissement partiel d''un pont rural', 'en_cours', 10.00, 800.00, NULL, now() - interval '3 day', now() - interval '1 day', NULL, 3),
   -- Toliara (southwest)
-  (6, 'fb_report_6', 1, -23.35000000, 43.66700000, 'Fissures importantes sur la chaussée', 'nouveau', 25.00, 600.00, NULL, now() - interval '1 day', now(), NULL);
+  (6, 'fb_report_6', 1, -23.35000000, 43.66700000, 'Fissures importantes sur la chaussée', 'nouveau', 25.00, 600.00, NULL, now() - interval '1 day', now(), NULL, 1);
 
 SELECT setval(pg_get_serial_sequence('reports','id'), (SELECT MAX(id) FROM reports));
 
@@ -146,21 +145,21 @@ VALUES
 SELECT setval(pg_get_serial_sequence('sync_log','id'), (SELECT MAX(id) FROM sync_log));
 
 -- CONFIG
-INSERT INTO config (id, key, value, description, updated_at)
+INSERT INTO config (key, value, description, updated_at)
 VALUES
-  (1, 'app.name', 'projet_cloud_s5', 'Application name', now()),
-  (2, 'reports.default_status', 'nouveau', 'Default status for new reports', now());
-
+  ('app.name','projet_cloud_s5','Application name', now()),
+  ('reports.default_status','nouveau','Default status for new reports', now()),
+  ('nouveau','0','valuer de calcule avancement', now()),
+  ('en_cours','50','valuer de calcule avancement', now()),
+  ('termine','100','valuer de calcule avancement', now()),
+  ('reports.prix.m2','100','Prix moyen par mètre carré pour les calculs de budget', now())
+ON CONFLICT (key) DO UPDATE
+  SET value = EXCLUDED.value,
+      description = EXCLUDED.description,
+      updated_at = EXCLUDED.updated_at;
 
 SELECT setval(pg_get_serial_sequence('config','id'), (SELECT MAX(id) FROM config));
 
-INSERT INTO config (id, key, value, description, updated_at)
-VALUES
-  (3, 'nouveau', '0', 'valuer de calcule avancement', now()),
-  (4, 'en_cours', '50', 'valuer de calcule avancement', now()),
-  (5, 'termine', '100', 'valuer de calcule avancement', now());
-
-  (2, 'reports.default_status', 'nouveau', 'Default status for new reports', now());
 
 -- Optional: map some users to entreprises if a join table exists (created by JPA many-to-many)
 -- Uncomment and adjust if `user_entreprise` table is present in your DB schema

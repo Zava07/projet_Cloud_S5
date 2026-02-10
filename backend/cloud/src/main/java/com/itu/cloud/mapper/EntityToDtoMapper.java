@@ -33,6 +33,7 @@ public class EntityToDtoMapper {
         dto.setStatus(r.getStatus());
         dto.setCreatedAt(r.getCreatedAt());
         dto.setEntreprise(toEntrepriseSummary(r.getEntreprise()));
+        dto.setNiveau(r.getNiveau());
         return dto;
     }
 
@@ -82,8 +83,13 @@ public class EntityToDtoMapper {
         if (s == null) return null;
         SyncLogDTO dto = new SyncLogDTO();
         dto.setId(s.getId());
-        dto.setAction(s.getSyncType());
-        dto.setCreatedAt(s.getSyncedAt());
+        dto.setSyncType(s.getSyncType());
+        dto.setSyncedAt(s.getSyncedAt());
+        dto.setRecordsPulled(s.getRecordsPulled());
+        dto.setRecordsPushed(s.getRecordsPushed());
+        dto.setConflicts(s.getConflicts());
+        dto.setStatus(s.getStatus());
+        dto.setErrorMessage(s.getErrorMessage());
         dto.setSyncedByUserId(s.getSyncedBy() != null ? s.getSyncedBy().getId() : null);
         return dto;
     }

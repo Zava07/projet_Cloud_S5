@@ -60,6 +60,11 @@ public class Report {
     @Column(name = "synced_at")
     private LocalDateTime syncedAt;
 
+    @Column(name = "niveau")
+    private Integer niveau;
+
+
+
     public Report() {
     }
 
@@ -165,6 +170,13 @@ public class Report {
 
     public void setSyncedAt(LocalDateTime syncedAt) {
         this.syncedAt = syncedAt;
+    }
+    public Integer getNiveau() {
+        return niveau;
+    }
+
+    public void setNiveau(Integer niveau) {
+        this.niveau = niveau;
     }
 
     @PrePersist

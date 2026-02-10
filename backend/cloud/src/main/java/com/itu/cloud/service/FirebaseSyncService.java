@@ -2,37 +2,64 @@ package com.itu.cloud.service;
 
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.*;
+import com.itu.cloud.config.FirebaseConfig;
 import com.itu.cloud.entity.Report;
 import com.itu.cloud.entity.User;
 import com.itu.cloud.entity.SyncLog;
 import com.itu.cloud.repository.ReportRepository;
 import com.itu.cloud.repository.UserRepository;
 import com.itu.cloud.repository.SyncLogRepository;
+import com.itu.cloud.entity.PhotoReport;
+import com.itu.cloud.repository.PhotoReportRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 @Service
 public class FirebaseSyncService {
 
-    private final Firestore firestore;
+    private final FirebaseConfig firebaseConfig;
     private final UserRepository userRepository;
     private final ReportRepository reportRepository;
     private final SyncLogRepository syncLogRepository;
+    private final PhotoReportRepository photoReportRepository;
 
-    public FirebaseSyncService(Firestore firestore, 
+    public FirebaseSyncService(FirebaseConfig firebaseConfig, 
                                UserRepository userRepository,
                                ReportRepository reportRepository,
-                               SyncLogRepository syncLogRepository) {
-        this.firestore = firestore;
+                               SyncLogRepository syncLogRepository,
+                               PhotoReportRepository photoReportRepository) {
+        this.firebaseConfig = firebaseConfig;
         this.userRepository = userRepository;
         this.reportRepository = reportRepository;
         this.syncLogRepository = syncLogRepository;
+        this.photoReportRepository = photoReportRepository;
+    }
+
+    /**
+     * Obtient une instance Firestore valide.
+     * Si le client a été fermé, réinitialise Firebase et retourne une nouvelle instance.
+     */
+    private Firestore getFirestore() {
+        try {
+            Firestore fs = firebaseConfig.getFirestore();
+            if (fs == null) {
+                throw new IllegalStateException("Firestore non disponible. Vérifiez la configuration Firebase.");
+            }
+            return fs;
+        } catch (Exception e) {
+            System.out.println("⚠️ Firestore indisponible, tentative de réinitialisation...");
+            firebaseConfig.reinitialize();
+            Firestore fs = firebaseConfig.getFirestore();
+            if (fs == null) {
+                throw new IllegalStateException("Firestore non disponible après réinitialisation. Vérifiez firebase-service-account.json.");
+            }
+            return fs;
+        }
     }
 
     // ==========================================
@@ -69,8 +96,27 @@ public class FirebaseSyncService {
             log.setStatus("success");
             
         } catch (Exception e) {
-            log.setStatus("failed");
-            log.setErrorMessage(e.getMessage());
+            // Si le client Firestore a été fermé, tenter une réinitialisation et réessayer
+            if (e.getMessage() != null && e.getMessage().contains("already been closed")) {
+                System.out.println("🔄 Client Firestore fermé détecté, réinitialisation en cours...");
+                firebaseConfig.reinitialize();
+                try {
+                    pulled += pullUsersFromFirebase();
+                    pushed += pushUsersToFirebase();
+                    pulled += pullReportsFromFirebase();
+                    pushed += pushReportsToFirebase();
+                    log.setRecordsPulled(pulled);
+                    log.setRecordsPushed(pushed);
+                    log.setConflicts(conflicts);
+                    log.setStatus("success");
+                } catch (Exception retryEx) {
+                    log.setStatus("failed");
+                    log.setErrorMessage("Échec après réinitialisation: " + retryEx.getMessage());
+                }
+            } else {
+                log.setStatus("failed");
+                log.setErrorMessage(e.getMessage());
+            }
         }
 
         return syncLogRepository.save(log);
@@ -81,7 +127,7 @@ public class FirebaseSyncService {
     // ==========================================
 
     public int pullUsersFromFirebase() throws ExecutionException, InterruptedException {
-        ApiFuture<QuerySnapshot> future = firestore.collection("users").get();
+        ApiFuture<QuerySnapshot> future = getFirestore().collection("users").get();
         List<QueryDocumentSnapshot> documents = future.get().getDocuments();
         int count = 0;
 
@@ -90,6 +136,7 @@ public class FirebaseSyncService {
             String email = doc.getString("email");
             
             // 1. Vérifier par firebaseUid
+            if (firebaseUid == null || firebaseUid.isEmpty()) continue;
             Optional<User> existingByUid = userRepository.findByFirebaseUid(firebaseUid);
             
             // 2. Vérifier aussi par email pour éviter les doublons
@@ -127,7 +174,7 @@ public class FirebaseSyncService {
     }
 
     public int pullReportsFromFirebase() throws ExecutionException, InterruptedException {
-        ApiFuture<QuerySnapshot> future = firestore.collection("reports").get();
+        ApiFuture<QuerySnapshot> future = getFirestore().collection("reports").get();
         List<QueryDocumentSnapshot> documents = future.get().getDocuments();
         int count = 0;
 
@@ -145,7 +192,9 @@ public class FirebaseSyncService {
             } else {
                 // 2. Vérifier si un report similaire existe (même user, même position, même description)
                 String userFirebaseUid = doc.getString("userId");
-                Optional<User> user = userRepository.findByFirebaseUid(userFirebaseUid);
+                Optional<User> user = (userFirebaseUid != null) 
+                        ? userRepository.findByFirebaseUid(userFirebaseUid) 
+                        : Optional.empty();
                 
                 // Si l'utilisateur n'est pas trouvé par firebaseUid, chercher par email
                 if (user.isEmpty()) {
@@ -217,8 +266,10 @@ public class FirebaseSyncService {
 
             if (!hasValidFirebaseUid) {
                 // Chercher d'abord si un document avec le même email existe dans Firebase
-                QuerySnapshot emailQuery = firestore.collection("users")
-                        .whereEqualTo("email", user.getEmail())
+                String userEmail = user.getEmail();
+                if (userEmail == null || userEmail.isEmpty()) continue;
+                QuerySnapshot emailQuery = getFirestore().collection("users")
+                        .whereEqualTo("email", userEmail)
                         .get().get();
                 
                 if (!emailQuery.isEmpty()) {
@@ -228,12 +279,15 @@ public class FirebaseSyncService {
                     userRepository.save(user);
                     
                     // Mettre à jour le document Firebase
-                    firestore.collection("users").document(existingDoc.getId())
-                            .update(userData).get();
+                    String existingDocId = existingDoc.getId();
+                    if (existingDocId != null) {
+                        getFirestore().collection("users").document(existingDocId)
+                                .update(userData).get();
+                    }
                 } else {
                     // Créer un nouveau document dans Firebase
                     userData.put("createdAt", FieldValue.serverTimestamp());
-                    DocumentReference docRef = firestore.collection("users").document();
+                    DocumentReference docRef = getFirestore().collection("users").document();
                     docRef.set(userData).get();
                     
                     user.setFirebaseUid(docRef.getId());
@@ -242,7 +296,9 @@ public class FirebaseSyncService {
                 }
             } else {
                 // L'utilisateur a un firebaseUid valide
-                DocumentReference docRef = firestore.collection("users").document(user.getFirebaseUid());
+                String uid = user.getFirebaseUid();
+                if (uid == null || uid.isEmpty()) continue;
+                DocumentReference docRef = getFirestore().collection("users").document(uid);
                 DocumentSnapshot snapshot = docRef.get().get();
                 
                 if (snapshot.exists()) {
@@ -294,8 +350,10 @@ public class FirebaseSyncService {
 
             if (report.getFirebaseId() == null || report.getFirebaseId().isEmpty()) {
                 // Chercher si un report similaire existe déjà dans Firebase
-                QuerySnapshot similarQuery = firestore.collection("reports")
-                        .whereEqualTo("userId", user.getFirebaseUid())
+                String userUid = user.getFirebaseUid();
+                if (userUid == null || userUid.isEmpty()) continue;
+                QuerySnapshot similarQuery = getFirestore().collection("reports")
+                        .whereEqualTo("userId", userUid)
                         .whereEqualTo("latitude", report.getLatitude() != null ? report.getLatitude().doubleValue() : 0)
                         .whereEqualTo("longitude", report.getLongitude() != null ? report.getLongitude().doubleValue() : 0)
                         .get().get();
@@ -303,16 +361,19 @@ public class FirebaseSyncService {
                 if (!similarQuery.isEmpty()) {
                     // Report similaire trouvé - lier et mettre à jour
                     DocumentSnapshot existingDoc = similarQuery.getDocuments().get(0);
-                    report.setFirebaseId(existingDoc.getId());
-                    firestore.collection("reports").document(existingDoc.getId())
-                            .update(reportData).get();
+                    String existDocId = existingDoc.getId();
+                    report.setFirebaseId(existDocId);
+                    if (existDocId != null) {
+                        getFirestore().collection("reports").document(existDocId)
+                                .update(reportData).get();
+                    }
 
                     report.setSyncedAt(LocalDateTime.now());
                     reportRepository.save(report);
                 } else {
                     // Créer un nouveau report dans Firebase
                     reportData.put("createdAt", FieldValue.serverTimestamp());
-                    DocumentReference docRef = firestore.collection("reports").document();
+                    DocumentReference docRef = getFirestore().collection("reports").document();
                     docRef.set(reportData).get();
 
                     report.setFirebaseId(docRef.getId());
@@ -322,7 +383,9 @@ public class FirebaseSyncService {
                 }
             } else {
                 // Vérifier si le document existe avant de mettre à jour
-                DocumentReference docRef = firestore.collection("reports").document(report.getFirebaseId());
+                String fbId = report.getFirebaseId();
+                if (fbId == null || fbId.isEmpty()) continue;
+                DocumentReference docRef = getFirestore().collection("reports").document(fbId);
                 DocumentSnapshot snapshot = docRef.get().get();
 
                 if (snapshot.exists()) {
@@ -342,6 +405,129 @@ public class FirebaseSyncService {
         return count;
     }
     // ==========================================
+
+    // SYNCHRONISATION DES PHOTOS
+    // ==========================================
+
+    @SuppressWarnings("unchecked")
+    private void syncPhotosFromFirebase(Report report, QueryDocumentSnapshot doc) {
+        System.out.println("[PhotoSync] Début synchronisation photos pour report firebaseId=" + doc.getId());
+        
+        // Essayer plusieurs noms de champs possibles pour les photos
+        String[] possibleFieldNames = {"photos", "photoUrls", "photoUrl", "imageUrls", "imageUrl", "images"};
+        Object photosObj = null;
+        
+        for (String fieldName : possibleFieldNames) {
+            Object obj = doc.getData().get(fieldName);
+            if (obj != null) {
+                photosObj = obj;
+                System.out.println("[PhotoSync] Champ trouvé: " + fieldName + " = " + obj);
+                break;
+            }
+        }
+        
+        if (photosObj == null) {
+            System.out.println("[PhotoSync] Aucun champ photos trouvé dans le document Firebase. Champs disponibles: " + doc.getData().keySet());
+            return;
+        }
+
+        List<?> photosList = null;
+        
+        // Gérer le cas où c'est une liste
+        if (photosObj instanceof List) {
+            photosList = (List<?>) photosObj;
+        }
+        // Gérer le cas où c'est une seule URL string
+        else if (photosObj instanceof String) {
+            String singleUrl = (String) photosObj;
+            if (!singleUrl.isEmpty()) {
+                photosList = Collections.singletonList(singleUrl);
+            }
+        }
+        // Gérer le cas où c'est un objet Map (une seule photo)
+        else if (photosObj instanceof Map) {
+            photosList = Collections.singletonList(photosObj);
+        }
+        
+        if (photosList == null || photosList.isEmpty()) {
+            System.out.println("[PhotoSync] Liste de photos vide ou format non reconnu: " + photosObj.getClass().getName());
+            return;
+        }
+
+        System.out.println("[PhotoSync] Nombre de photos à synchroniser: " + photosList.size());
+        int syncedCount = 0;
+
+        for (Object item : photosList) {
+            String photoUrl = null;
+            String description = null;
+
+            // Cas 1: L'item est une String (URL directe)
+            if (item instanceof String) {
+                photoUrl = (String) item;
+            }
+            // Cas 2: L'item est un Map (objet avec url/photoUrl et description)
+            else if (item instanceof Map) {
+                Map<String, Object> photoData = (Map<String, Object>) item;
+                // Essayer plusieurs clés possibles pour l'URL
+                String[] urlKeys = {"url", "photoUrl", "photoURL", "imageUrl", "imageURL", "src", "uri"};
+                for (String key : urlKeys) {
+                    Object urlObj = photoData.get(key);
+                    if (urlObj instanceof String && !((String) urlObj).isEmpty()) {
+                        photoUrl = (String) urlObj;
+                        break;
+                    }
+                }
+                // Récupérer la description
+                Object descObj = photoData.get("description");
+                if (descObj instanceof String) {
+                    description = (String) descObj;
+                }
+                
+                if (photoUrl == null) {
+                    System.out.println("[PhotoSync] Clés disponibles dans l'objet photo: " + photoData.keySet());
+                }
+            } else {
+                System.out.println("[PhotoSync] Format de photo non reconnu: " + (item != null ? item.getClass().getName() : "null"));
+            }
+
+            if (photoUrl == null || photoUrl.isEmpty()) {
+                System.out.println("[PhotoSync] URL de photo vide ou null, ignorée");
+                continue;
+            }
+
+            System.out.println("[PhotoSync] Traitement de la photo URL: " + photoUrl);
+
+            // Vérifier si cette photo existe déjà
+            boolean exists = photoReportRepository.findByPhotoUrl(photoUrl).isPresent();
+            if (exists) {
+                System.out.println("[PhotoSync] Photo déjà existante, ignorée: " + photoUrl);
+                continue; // Photo déjà synchronisée
+            }
+
+            // Créer nouvelle photo
+            try {
+                PhotoReport photo = new PhotoReport();
+                photo.setReport(report);
+                photo.setPhotoUrl(photoUrl);
+                
+                if (description != null) {
+                    photo.setDescription(description);
+                }
+
+                photo.setUploadedAt(LocalDateTime.now());
+                photoReportRepository.save(photo);
+                syncedCount++;
+                System.out.println("[PhotoSync] Photo sauvegardée avec succès: " + photoUrl);
+            } catch (Exception e) {
+                System.err.println("[PhotoSync] Erreur lors de la sauvegarde de la photo: " + photoUrl + " - " + e.getMessage());
+            }
+        }
+        
+        System.out.println("[PhotoSync] Synchronisation terminée. Photos synchronisées: " + syncedCount + "/" + photosList.size());
+    }
+
+    // ==========================================
+
     // MÉTHODES UTILITAIRES
     // ==========================================
 
@@ -363,7 +549,7 @@ public class FirebaseSyncService {
     }
 
     private BigDecimal getBigDecimal(QueryDocumentSnapshot doc, String field) {
-        Object value = doc.get(field);
+        Object value = doc.getData().get(field);
         if (value == null) return null;
         if (value instanceof Double) return BigDecimal.valueOf((Double) value);
         if (value instanceof Long) return BigDecimal.valueOf((Long) value);
