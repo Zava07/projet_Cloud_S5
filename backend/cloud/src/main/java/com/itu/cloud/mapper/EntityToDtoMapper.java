@@ -33,6 +33,7 @@ public class EntityToDtoMapper {
         dto.setStatus(r.getStatus());
         dto.setCreatedAt(r.getCreatedAt());
         dto.setEntreprise(toEntrepriseSummary(r.getEntreprise()));
+        dto.setNiveau(r.getNiveau());
         return dto;
     }
 

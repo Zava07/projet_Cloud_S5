@@ -13,6 +13,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -25,6 +26,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.itu.cloud.service.ConfigEntryService;
 import com.itu.cloud.service.EntrepriseService; 
 import com.itu.cloud.service.HistoReportService;
 
@@ -39,10 +42,13 @@ public class ReportController {
 
     private final HistoReportService histoReportService;
 
-    public ReportController(ReportService reportService , EntrepriseService entrepriseService, HistoReportService histoReportService) {
+    private final ConfigEntryService configEntryService;
+
+    public ReportController(ReportService reportService , EntrepriseService entrepriseService, HistoReportService histoReportService, ConfigEntryService configEntryService) {
         this.reportService = reportService;
         this.entrepriseService = entrepriseService;
         this.histoReportService = histoReportService;
+        this.configEntryService = configEntryService;
     }
 
     @GetMapping("/stats")
@@ -144,22 +150,33 @@ public class ReportController {
 
     
     @PostMapping("/do-report")
-    public ReportSummaryDTO doReport(@RequestParam long id_report , @RequestParam long id_entreprise  , @RequestParam BigDecimal  budget , @RequestParam(name = "date_changement", required = false) String dateString) {
+    public ReportSummaryDTO doReport(@RequestParam long id_report, @RequestParam long id_entreprise, @RequestParam(name = "niveau") int niveau, @RequestParam(name = "date_changement", required = false) String dateString) {
 
         LocalDateTime dateChangement = parseDateString(dateString);
 
-        if(id_report == 0){
+        if (niveau < 1 || niveau > 10) {
+            throw new IllegalArgumentException("Le niveau doit être compris entre 1 et 10.");
+        }
+
+        if (id_report == 0) {
             throw new IllegalArgumentException("L'identifiant du rapport ne peut pas être nul ou zéro.");
         }
-        if(dateChangement == null){
+        if (dateChangement == null) {
             throw new IllegalArgumentException("La date de changement ne peut pas être nulle.");
         }
-        Report report  = reportService.findById(id_report)
+        Report report = reportService.findById(id_report)
                 .orElseThrow(() -> new IllegalArgumentException("Rapport avec l'identifiant " + id_report + " non trouvée."));
 
         report.setStatus("en_cours");
+
+        // Calcul automatique du budget: prix_par_m2 * niveau * surface_m2
+        Optional<String> prixM2Opt = configEntryService.findByKey("reports.prix.m2").map(e -> e.getValue());
+        BigDecimal prixM2 = prixM2Opt.map(BigDecimal::new).orElse(BigDecimal.valueOf(100)); // default to 100 if not configured
+        BigDecimal surface = report.getSurface() != null ? report.getSurface() : BigDecimal.ZERO;
+        BigDecimal budget = prixM2.multiply(BigDecimal.valueOf(niveau)).multiply(surface);
         report.setBudget(budget);
-        if(id_entreprise == 0){
+
+        if (id_entreprise == 0) {
             throw new IllegalArgumentException("L'identifiant de l'entreprise ne peut pas être nul ou zéro.");
         }
 
