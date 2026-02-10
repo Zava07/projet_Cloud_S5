@@ -26,6 +26,18 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: 'problems',
         component: () => import('@/views/ProblemsListPage.vue')
+      },
+      {
+        path: 'activity',
+        component: () => import('@/views/ProblemsListPage.vue')
+      },
+      {
+        path: 'profile',
+        component: () => import('@/views/MapPage.vue')
+      },
+      {
+        path: 'add',
+        redirect: '/tabs/map'
       }
     ]
   },

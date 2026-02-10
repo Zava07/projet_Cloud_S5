@@ -25,13 +25,15 @@
         </ion-tab-button>
 
         <!-- Center Action Button -->
-        <div class="center-action-wrapper">
-          <button class="action-button" @click="quickAction">
-            <ion-icon :icon="add" />
-          </button>
-        </div>
+        <ion-tab-button tab="add" class="nav-item center-action-tab" @click.prevent="quickAction">
+          <div class="center-action-wrapper">
+            <div class="action-button">
+              <ion-icon :icon="add" />
+            </div>
+          </div>
+        </ion-tab-button>
 
-        <ion-tab-button tab="activity" href="/tabs/problems" class="nav-item">
+        <ion-tab-button tab="activity" href="/tabs/activity" class="nav-item">
           <div class="nav-icon-wrapper">
             <ion-icon :icon="timeOutline" class="nav-icon" />
             <ion-icon :icon="time" class="nav-icon-active" />
@@ -40,7 +42,7 @@
           <div class="nav-indicator"></div>
         </ion-tab-button>
 
-        <ion-tab-button tab="profile" href="/tabs/map" class="nav-item">
+        <ion-tab-button tab="profile" href="/tabs/profile" class="nav-item">
           <div class="nav-icon-wrapper">
             <ion-icon :icon="personOutline" class="nav-icon" />
             <ion-icon :icon="person" class="nav-icon-active" />
@@ -75,14 +77,11 @@ const quickAction = () => {
 
 .floating-nav {
   --background: transparent;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
   height: auto;
-  padding: 0 12px 16px;
+  padding: 0 16px 12px;
   border-top: none;
   z-index: 1000;
+  contain: initial;
 }
 
 .floating-nav::before {
@@ -91,47 +90,47 @@ const quickAction = () => {
   bottom: 0;
   left: 0;
   right: 0;
-  height: 120px;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.98) 40%, transparent);
+  height: 100px;
+  background: linear-gradient(to top, rgba(10, 10, 10, 0.95) 30%, transparent);
   pointer-events: none;
   z-index: -1;
 }
 
 ion-tab-bar {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-around;
-  background: rgba(20, 20, 20, 0.98);
-  backdrop-filter: blur(30px);
-  -webkit-backdrop-filter: blur(30px);
-  border-radius: 28px;
-  padding: 10px 8px;
-  margin: 0 8px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(18, 18, 18, 0.95);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border-radius: 24px;
+  padding: 8px 6px 10px;
+  margin: 0;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 
-    0 -10px 50px rgba(0, 0, 0, 0.6),
-    0 0 0 1px rgba(255, 255, 255, 0.05) inset,
-    0 4px 20px rgba(232, 33, 39, 0.1);
+    0 -4px 30px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 /* Nav Items */
 .nav-item {
-  --color: #6B6B6B;
+  --color: #555;
   --color-selected: #FFFFFF;
-  --padding-top: 6px;
+  --padding-top: 8px;
   --padding-bottom: 6px;
   position: relative;
   flex: 1;
   min-width: 0;
-  max-width: 64px;
+  max-width: 72px;
   background: transparent !important;
+  transition: all 0.3s ease;
 }
 
 .nav-icon-wrapper {
   position: relative;
-  width: 26px;
-  height: 26px;
-  margin: 0 auto 4px;
+  width: 24px;
+  height: 24px;
+  margin: 0 auto 3px;
 }
 
 .nav-icon,
@@ -140,58 +139,58 @@ ion-tab-bar {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 22px;
-  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 21px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .nav-icon {
-  opacity: 1;
+  opacity: 0.6;
 }
 
 .nav-icon-active {
   opacity: 0;
-  transform: translate(-50%, -50%) scale(0.7);
+  transform: translate(-50%, -50%) scale(0.8);
 }
 
 .nav-item.tab-selected .nav-icon {
   opacity: 0;
-  transform: translate(-50%, -50%) scale(0.7);
+  transform: translate(-50%, -50%) scale(0.8);
 }
 
 .nav-item.tab-selected .nav-icon-active {
   opacity: 1;
   transform: translate(-50%, -50%) scale(1);
   color: #E82127;
-  filter: drop-shadow(0 0 10px rgba(232, 33, 39, 0.6));
+  filter: drop-shadow(0 0 8px rgba(232, 33, 39, 0.5));
 }
 
 .nav-label {
   display: block;
-  font-size: 9px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  opacity: 0.5;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  opacity: 0.4;
   transition: all 0.3s ease;
-  text-transform: uppercase;
 }
 
 .nav-item.tab-selected .nav-label {
   opacity: 1;
   color: #FFFFFF;
+  font-weight: 600;
 }
 
 /* Indicator */
 .nav-indicator {
   position: absolute;
-  top: -10px;
+  top: 0;
   left: 50%;
   transform: translateX(-50%) scaleX(0);
-  width: 24px;
-  height: 3px;
-  background: linear-gradient(90deg, #E82127, #FF5555);
+  width: 20px;
+  height: 2.5px;
+  background: #E82127;
   border-radius: 2px;
-  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 0 12px rgba(232, 33, 39, 0.6);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 10px rgba(232, 33, 39, 0.5);
 }
 
 .nav-item.tab-selected .nav-indicator {
@@ -201,70 +200,82 @@ ion-tab-bar {
 /* Notification Dot */
 .notification-dot {
   position: absolute;
-  top: 2px;
-  right: calc(50% - 16px);
-  width: 8px;
-  height: 8px;
+  top: 4px;
+  right: calc(50% - 15px);
+  width: 6px;
+  height: 6px;
   background: #E82127;
   border-radius: 50%;
-  border: 2px solid #141414;
+  border: 1.5px solid #121212;
   animation: pulse-dot 2s ease-in-out infinite;
-  box-shadow: 0 0 8px rgba(232, 33, 39, 0.8);
+  box-shadow: 0 0 6px rgba(232, 33, 39, 0.7);
 }
 
 @keyframes pulse-dot {
-  0%, 100% { transform: scale(1); box-shadow: 0 0 8px rgba(232, 33, 39, 0.8); }
-  50% { transform: scale(1.3); box-shadow: 0 0 16px rgba(232, 33, 39, 1); }
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); box-shadow: 0 0 12px rgba(232, 33, 39, 1); }
 }
 
-/* Center Action Button */
+/* ═══ Center Action Button ═══ */
+.center-action-tab {
+  --color: transparent;
+  --color-selected: transparent;
+  --padding-top: 0;
+  --padding-bottom: 0;
+  flex: 0 0 auto !important;
+  width: 52px !important;
+  max-width: 52px !important;
+  overflow: visible !important;
+  background: transparent !important;
+  margin: 0 4px;
+}
+
 .center-action-wrapper {
-  flex: 0 0 auto;
-  width: 56px;
+  width: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: -28px 8px 0;
+  margin-top: -20px;
 }
 
 .action-button {
-  width: 54px;
-  height: 54px;
+  width: 46px;
+  height: 46px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(145deg, #E82127 0%, #B81C21 100%);
+  background: linear-gradient(135deg, #FF3B3B 0%, #E82127 50%, #C41A1F 100%);
   border: none;
-  border-radius: 18px;
-  cursor: pointer;
+  border-radius: 16px;
+  pointer-events: none;
   box-shadow: 
-    0 8px 28px rgba(232, 33, 39, 0.5),
-    0 0 0 3px rgba(232, 33, 39, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    0 6px 20px rgba(232, 33, 39, 0.45),
+    0 0 0 2px rgba(232, 33, 39, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.action-button:active {
-  transform: scale(0.9);
+.center-action-tab:active .action-button {
+  transform: scale(0.92);
   box-shadow: 
-    0 4px 16px rgba(232, 33, 39, 0.4),
-    0 0 0 3px rgba(232, 33, 39, 0.15);
+    0 3px 12px rgba(232, 33, 39, 0.4),
+    0 0 0 2px rgba(232, 33, 39, 0.1);
 }
 
 .action-button ion-icon {
-  font-size: 28px;
+  font-size: 24px;
   color: #FFFFFF;
 }
 
 /* Tap feedback */
 .nav-item:active {
-  transform: scale(0.92);
+  transform: scale(0.93);
 }
 
 /* Safe Area */
 @supports (padding-bottom: env(safe-area-inset-bottom)) {
   .floating-nav {
-    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+    padding-bottom: calc(10px + env(safe-area-inset-bottom));
   }
 }
 </style>

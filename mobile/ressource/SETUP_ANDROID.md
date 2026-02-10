@@ -1,6 +1,9 @@
 # commande volohany 
 - npm install
 
+# decommentena ilay :
+  .env copy 
+
 # ra testena sur web
 - ionic serve
 

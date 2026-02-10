@@ -526,6 +526,7 @@ onMounted(async () => {
 
 .reports-content {
   --background: #0A0A0A;
+  --padding-bottom: 100px;
 }
 
 /* === PAGE HEADER === */
