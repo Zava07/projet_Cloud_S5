@@ -189,6 +189,12 @@ public class FirebaseSyncService {
                 Report report = existingReport.get();
                 updateReportFromFirebase(report, doc);
                 reportRepository.save(report);
+                // Synchroniser les photos si présentes
+                try {
+                    syncPhotosFromFirebase(report, doc);
+                } catch (Exception e) {
+                    System.err.println("[PhotoSync] Erreur lors de la synchronisation des photos pour report id=" + report.getId() + ": " + e.getMessage());
+                }
             } else {
                 // 2. Vérifier si un report similaire existe (même user, même position, même description)
                 String userFirebaseUid = doc.getString("userId");
@@ -219,6 +225,12 @@ public class FirebaseSyncService {
                         report.setFirebaseId(firebaseId);
                         updateReportFromFirebase(report, doc);
                         reportRepository.save(report);
+                        // Synchroniser photos
+                        try {
+                            syncPhotosFromFirebase(report, doc);
+                        } catch (Exception e) {
+                            System.err.println("[PhotoSync] Erreur lors de la synchronisation des photos pour report id=" + report.getId() + ": " + e.getMessage());
+                        }
                     } else {
                         // Créer un nouveau report
                         Report report = new Report();
@@ -234,6 +246,12 @@ public class FirebaseSyncService {
                         
                         reportRepository.save(report);
                         count++;
+                        // Synchroniser photos pour le nouveau report
+                        try {
+                            syncPhotosFromFirebase(report, doc);
+                        } catch (Exception e) {
+                            System.err.println("[PhotoSync] Erreur lors de la synchronisation des photos pour report id=" + report.getId() + ": " + e.getMessage());
+                        }
                     }
                 }
             }
