@@ -168,7 +168,7 @@ export default function ReportsListPage({ authUser, onPageChange, mapOptions = {
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [assignEntreprises, setAssignEntreprises] = useState([]);
   const [assignSelectedEntreprise, setAssignSelectedEntreprise] = useState('0');
-  const [assignBudget, setAssignBudget] = useState('');
+  const [assignNiveau, setAssignNiveau] = useState(1);
   const [assignDate, setAssignDate] = useState('');
   const [selectedReport, setSelectedReport] = useState(null);
   const [photoCache, setPhotoCache] = useState({});
@@ -211,7 +211,7 @@ export default function ReportsListPage({ authUser, onPageChange, mapOptions = {
 
   const openAssignModal = async (report) => {
     setSelectedReport(report);
-    setAssignBudget(report.budget || '');
+    setAssignNiveau(report.niveau || 1);
     // default assign date to today
     setAssignDate(localDatetimeNow());
     await fetchEntreprises();
@@ -263,16 +263,20 @@ export default function ReportsListPage({ authUser, onPageChange, mapOptions = {
   const submitAssign = async () => {
     if (!selectedReport) return;
     const entrepriseId = assignSelectedEntreprise || 0;
-    const budget = assignBudget;
+    const niveau = assignNiveau || 1;
     if (!entrepriseId || entrepriseId === '0') {
       setError("Veuillez sélectionner une entreprise");
+      return;
+    }
+    if (!Number.isInteger(Number(niveau)) || niveau < 1 || niveau > 10) {
+      setError("Le niveau doit être un entier entre 1 et 10");
       return;
     }
     setLoading(true);
     setError(null);
     try {
-      // backend expects request params: id_report, id_entreprise, budget
-      let url = `${apiBase()}/api/reports/do-report?id_report=${encodeURIComponent(selectedReport.id)}&id_entreprise=${encodeURIComponent(entrepriseId)}&budget=${encodeURIComponent(budget)}`;
+      // backend expects request params: id_report, id_entreprise, niveau
+      let url = `${apiBase()}/api/reports/do-report?id_report=${encodeURIComponent(selectedReport.id)}&id_entreprise=${encodeURIComponent(entrepriseId)}&niveau=${encodeURIComponent(niveau)}`;
       if (assignDate) {
         url += `&date_changement=${encodeURIComponent(formatForBackend(assignDate))}`;
       }
@@ -540,8 +544,8 @@ export default function ReportsListPage({ authUser, onPageChange, mapOptions = {
                 ))}
               </select>
 
-              <label>Budget</label>
-              <input type="number" value={assignBudget} onChange={(e) => setAssignBudget(e.target.value)} placeholder="0.00" />
+              <label>Niveau (1–10)</label>
+              <input type="number" min="1" max="10" value={assignNiveau} onChange={(e) => setAssignNiveau(Number(e.target.value))} placeholder="1" />
 
               <label>Date d'intervention</label>
               <input type="datetime-local" value={assignDate} onChange={(e) => setAssignDate(e.target.value)} />
