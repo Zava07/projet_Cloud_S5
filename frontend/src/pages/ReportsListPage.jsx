@@ -437,7 +437,6 @@ export default function ReportsListPage({ authUser, onPageChange, mapOptions = {
                               </div>
                               <button className="btn btn-outline btn-sm" onClick={() => onPageChange('map', { centerLat: report.latitude, centerLng: report.longitude })}>Voir</button>
                               <button className="btn btn-outline btn-sm" onClick={() => openPhotosModal(report)}>Voir les photos</button>
-                              <button className="btn btn-outline btn-sm" onClick={() => openPhotosModal(report)}>Voir les photos</button>
                               {mapOptions?.adminView && isManager && report.status === 'nouveau' && (
                                 <button
                                   className="btn btn-primary btn-sm"
